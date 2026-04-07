@@ -1,0 +1,2532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 1: Introduction to Electric Drives — ELE421</title>
+
+    <!-- MathJax CDN -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script>
+        (function() {
+            var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+            var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js';
+            var s = document.createElement('script');
+            s.async = true; s.src = primary;
+            s.onerror = function() {
+                var s2 = document.createElement('script');
+                s2.async = true; s2.src = fallback;
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        })();
+    </script>
+
+    <style>
+        /* ========================================
+           CSS CUSTOM PROPERTIES (LIGHT MODE)
+           ======================================== */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-sidebar: #f1f3f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: #495057;
+            --text-muted: #868e96;
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --accent-hover: #1d4ed8;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+
+            /* Section colors - Light mode */
+            --motivation-bg: #fffbeb;
+            --motivation-border: #f59e0b;
+            --motivation-accent: #d97706;
+            --motivation-text: #78350f;
+            --motivation-light: #fef3c7;
+
+            --intuition-bg: #eff6ff;
+            --intuition-border: #3b82f6;
+            --intuition-accent: #2563eb;
+            --intuition-text: #1e3a5f;
+            --intuition-light: #dbeafe;
+
+            --deepdive-bg: #f0fdf4;
+            --deepdive-border: #22c55e;
+            --deepdive-accent: #16a34a;
+            --deepdive-text: #14532d;
+            --deepdive-light: #dcfce7;
+
+            --takeaway-bg: #faf5ff;
+            --takeaway-border: #a855f7;
+            --takeaway-accent: #9333ea;
+            --takeaway-text: #3b0764;
+            --takeaway-light: #f3e8ff;
+
+            --sidebar-width: 300px;
+            --header-height: 60px;
+            --progress-height: 4px;
+        }
+
+        /* ========================================
+           DARK MODE
+           ======================================== */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-sidebar: #1a2332;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --border-light: #1e293b;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #93bbfc;
+            --accent-hover: #93c5fd;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+            --motivation-bg: #1c1a0e;
+            --motivation-border: #b45309;
+            --motivation-accent: #f59e0b;
+            --motivation-text: #fcd34d;
+            --motivation-light: #292415;
+
+            --intuition-bg: #0c1929;
+            --intuition-border: #1d4ed8;
+            --intuition-accent: #60a5fa;
+            --intuition-text: #93c5fd;
+            --intuition-light: #172554;
+
+            --deepdive-bg: #071a0e;
+            --deepdive-border: #15803d;
+            --deepdive-accent: #4ade80;
+            --deepdive-text: #86efac;
+            --deepdive-light: #14532d;
+
+            --takeaway-bg: #1a0a2e;
+            --takeaway-border: #7c3aed;
+            --takeaway-accent: #c084fc;
+            --takeaway-text: #e9d5ff;
+            --takeaway-light: #2e1065;
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+            scroll-padding-top: calc(var(--header-height) + var(--progress-height) + 20px);
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ========================================
+           PROGRESS BAR
+           ======================================== */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: var(--progress-height);
+            background: linear-gradient(90deg, #f59e0b, #3b82f6, #22c55e, #a855f7);
+            z-index: 10000;
+            transition: width 0.15s ease-out;
+        }
+
+        /* ========================================
+           HEADER
+           ======================================== */
+        .header {
+            position: fixed;
+            top: var(--progress-height);
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.9);
+            transition: background 0.3s;
+        }
+
+        [data-theme="dark"] .header {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .header-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            color: #fff;
+            border-color: var(--accent-primary);
+        }
+
+        .lecture-badge {
+            background: var(--accent-primary);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* ========================================
+           SIDEBAR
+           ======================================== */
+        .sidebar {
+            position: fixed;
+            top: calc(var(--header-height) + var(--progress-height));
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height) - var(--progress-height));
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            z-index: 900;
+            padding: 20px 0;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 16px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+
+        .sidebar-header h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc-list li {
+            margin: 0;
+        }
+
+        .toc-list a {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .toc-list a:hover {
+            color: var(--accent-primary);
+            background: rgba(37, 99, 235, 0.06);
+            border-left-color: var(--accent-primary);
+        }
+
+        .toc-list a.active {
+            color: var(--accent-primary);
+            background: rgba(37, 99, 235, 0.08);
+            border-left-color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .toc-list .toc-sub {
+            padding-left: 36px;
+            font-size: 0.82rem;
+        }
+
+        .toc-section-number {
+            display: inline-block;
+            width: 24px;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        /* Sidebar scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        /* ========================================
+           MAIN CONTENT
+           ======================================== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: calc(var(--header-height) + var(--progress-height));
+            padding: 40px 60px 100px;
+            max-width: 960px;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* ========================================
+           HERO SECTION
+           ======================================== */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 50px;
+            margin: -40px -60px 40px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%);
+            color: #fff;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-overline {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero-description {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ========================================
+           SECTIONS
+           ======================================== */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 18px 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+            user-select: none;
+            position: relative;
+        }
+
+        .section-header:hover {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-number {
+            background: var(--accent-primary);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .section-title-text {
+            flex: 1;
+        }
+
+        .section-title-text h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .section-title-text .section-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .collapse-icon {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .section-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .section-body {
+            padding: 0 8px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            max-height: 8000px;
+            opacity: 1;
+        }
+
+        .section-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+        }
+
+        /* ========================================
+           TEACHING BLOCKS
+           ======================================== */
+        .teaching-block {
+            margin: 20px 0;
+            padding: 24px 28px;
+            border-radius: var(--radius-md);
+            border-left: 5px solid;
+            position: relative;
+        }
+
+        .teaching-block .block-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            padding: 3px 10px;
+            border-radius: 50px;
+        }
+
+        .teaching-block h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .teaching-block p {
+            margin-bottom: 12px;
+            line-height: 1.8;
+        }
+
+        .teaching-block ul, .teaching-block ol {
+            margin: 10px 0;
+            padding-left: 24px;
+        }
+
+        .teaching-block li {
+            margin-bottom: 8px;
+            line-height: 1.7;
+        }
+
+        /* Motivation block - Yellow */
+        .block-motivation {
+            background: var(--motivation-bg);
+            border-left-color: var(--motivation-border);
+            color: var(--motivation-text);
+        }
+        .block-motivation .block-label {
+            background: var(--motivation-light);
+            color: var(--motivation-accent);
+        }
+        .block-motivation h3 { color: var(--motivation-accent); }
+
+        /* Intuition block - Blue */
+        .block-intuition {
+            background: var(--intuition-bg);
+            border-left-color: var(--intuition-border);
+            color: var(--intuition-text);
+        }
+        .block-intuition .block-label {
+            background: var(--intuition-light);
+            color: var(--intuition-accent);
+        }
+        .block-intuition h3 { color: var(--intuition-accent); }
+
+        /* Deep Dive block - Green */
+        .block-deepdive {
+            background: var(--deepdive-bg);
+            border-left-color: var(--deepdive-border);
+            color: var(--deepdive-text);
+        }
+        .block-deepdive .block-label {
+            background: var(--deepdive-light);
+            color: var(--deepdive-accent);
+        }
+        .block-deepdive h3 { color: var(--deepdive-accent); }
+
+        /* Takeaway block - Purple */
+        .block-takeaway {
+            background: var(--takeaway-bg);
+            border-left-color: var(--takeaway-border);
+            color: var(--takeaway-text);
+        }
+        .block-takeaway .block-label {
+            background: var(--takeaway-light);
+            color: var(--takeaway-accent);
+        }
+        .block-takeaway h3 { color: var(--takeaway-accent); }
+
+        /* ========================================
+           INFO BOXES & CALLOUTS
+           ======================================== */
+        .callout {
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .callout-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .callout-info {
+            background: var(--intuition-light);
+            border: 1px solid var(--intuition-border);
+            color: var(--intuition-text);
+        }
+
+        .callout-challenge {
+            background: var(--motivation-light);
+            border: 1px solid var(--motivation-border);
+            color: var(--motivation-text);
+        }
+
+        .callout-example {
+            background: var(--deepdive-light);
+            border: 1px solid var(--deepdive-border);
+            color: var(--deepdive-text);
+        }
+
+        .callout-warning {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        [data-theme="dark"] .callout-warning {
+            background: #1a0505;
+            border-color: #991b1b;
+            color: #fca5a5;
+        }
+
+        /* ========================================
+           SVG DIAGRAMS
+           ======================================== */
+        .diagram-container {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .diagram-caption {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ========================================
+           TABLES
+           ======================================== */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: var(--bg-secondary);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* ========================================
+           COMPARISON GRID
+           ======================================== */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .comparison-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-card .pros { color: var(--deepdive-accent); }
+        .comparison-card .cons { color: #ef4444; }
+
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-card li {
+            padding: 4px 0;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .comparison-card li::before {
+            margin-right: 6px;
+        }
+
+        .comparison-card .pros li::before { content: "+" ; color: var(--deepdive-accent); font-weight: 700; }
+        .comparison-card .cons li::before { content: "-" ; color: #ef4444; font-weight: 700; }
+
+        /* ========================================
+           QUADRANT DIAGRAM STYLES
+           ======================================== */
+        .quadrant-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        /* ========================================
+           EQUATION BOX
+           ======================================== */
+        .equation-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 16px 24px;
+            margin: 16px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .equation-box .eq-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        /* ========================================
+           KEY TERM
+           ======================================== */
+        .key-term {
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .highlight {
+            background: linear-gradient(transparent 60%, var(--motivation-light) 60%);
+            padding: 0 2px;
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 60px;
+        }
+
+        .footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 30px 30px 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 20px 16px 80px;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .hero-meta {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            .teaching-block {
+                padding: 18px 16px;
+            }
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            .header-subtitle { display: none; }
+        }
+
+        /* ========================================
+           PRINT
+           ======================================== */
+        @media print {
+            .sidebar, .header, #progress-bar, .theme-toggle, .menu-toggle { display: none !important; }
+            .main-content { margin-left: 0; padding: 0; }
+            .section-body.collapsed { max-height: none; opacity: 1; }
+            .teaching-block { break-inside: avoid; }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            animation: fadeInUp 0.4s ease-out both;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.05s; }
+        .section:nth-child(3) { animation-delay: 0.1s; }
+        .section:nth-child(4) { animation-delay: 0.15s; }
+        .section:nth-child(5) { animation-delay: 0.2s; }
+
+        /* Smooth transition for code/math */
+        mjx-container {
+            overflow-x: auto;
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 44px;
+            height: 44px;
+            background: var(--accent-primary);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 800;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Sidebar overlay for mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 850;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
+            <div>
+                <div class="header-title">ELE421 &mdash; Electric Drives <span class="header-subtitle">| Lecture 1</span></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="lecture-badge">LECTURE 1</span>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light mode">
+                <span id="theme-icon">&#9790;</span>
+                <span id="theme-text">Dark</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Table of Contents</h3>
+        </div>
+        <ul class="toc-list" id="toc-list">
+            <li><a href="#sec-overview"><span class="toc-section-number">1</span>Course Overview</a></li>
+            <li><a href="#sec-definition"><span class="toc-section-number">2</span>What is an Electric Drive?</a></li>
+            <li><a href="#sec-block-diagram"><span class="toc-section-number">3</span>Parts of the Drive System</a></li>
+            <li><a href="#sec-motor-types"><span class="toc-section-number">4</span>Types of Electric Motors</a></li>
+            <li><a href="#sec-torque-speed"><span class="toc-section-number">5</span>Torque-Speed Characteristics</a></li>
+            <li><a href="#sec-power-converters"><span class="toc-section-number">6</span>Power Converters</a></li>
+            <li><a href="#sec-choice-factors"><span class="toc-section-number">7</span>Choosing an Electric Drive</a></li>
+            <li><a href="#sec-advantages"><span class="toc-section-number">8</span>Advantages of Electric Drives</a></li>
+            <li><a href="#sec-braking"><span class="toc-section-number">9</span>Motor Braking</a></li>
+            <li><a href="#sec-four-quadrant"><span class="toc-section-number">10</span>Four-Quadrant Operation</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-content">
+                <div class="hero-overline">ELE421 &mdash; Lecture 1</div>
+                <h1>Introduction to<br>Electric Drives</h1>
+                <p class="hero-description">
+                    Everything around you moves because something drives it. Let's discover what happens when that "something" is an electric motor &mdash; and how we tame its power.
+                </p>
+                <div class="hero-meta">
+                    <span>&#128218; 10 Sections</span>
+                    <span>&#9201; ~90 min lecture</span>
+                    <span>&#9889; Presentation 1A</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 1: COURSE OVERVIEW
+             ====================================================== -->
+        <div class="section" id="sec-overview">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">1</div>
+                <div class="section-title-text">
+                    <h2>Course Overview</h2>
+                    <div class="section-subtitle">What we'll cover this semester &mdash; and why it matters</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Why Should You Care About Electric Drives?</h3>
+                    <p>
+                        Right now, as you read this, electric drives are spinning the fan above your head, pumping water to your tap, compressing refrigerant in your fridge, and accelerating trains carrying thousands of people. <strong>Over 60% of all electricity generated worldwide is consumed by electric motors.</strong>
+                    </p>
+                    <p>
+                        So here's the question: If you're an electrical engineer and you don't understand electric drives &mdash; what <em>do</em> you understand? This course isn't an option. It's the core of what makes our modern world work.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>What Will We Actually Learn?</h3>
+                    <p>
+                        Think of this course as learning to be a "conductor" &mdash; not of an orchestra, but of electric motors. We'll learn how to make motors spin at exactly the speed we want, deliver exactly the torque we need, and stop exactly when we tell them to.
+                    </p>
+                    <p>We'll journey through these major topics:</p>
+                    <ul>
+                        <li><strong>Dynamics of Electrical Drives</strong> &mdash; The physics of spinning things (torque, inertia, speed)</li>
+                        <li><strong>Thermal Modeling</strong> &mdash; How hot is too hot? Protecting motors from themselves</li>
+                        <li><strong>DC Motor Drives</strong> &mdash; The classic workhorses, and how to control them</li>
+                        <li><strong>AC Motor Drives</strong> &mdash; Induction motors with sophisticated control</li>
+                        <li><strong>Synchronous Motor Drives</strong> &mdash; Precision machines for precision tasks</li>
+                        <li><strong>Electric Traction</strong> &mdash; From electric trains to electric cars</li>
+                    </ul>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Course Structure</h3>
+                    <p>
+                        <strong>Course Code:</strong> ELE421 &mdash; Electric Drives<br>
+                        <strong>Schedule:</strong> 4 lectures + 2 tutorials per week<br>
+                    </p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Topic</th>
+                                    <th>Key Concepts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>Introduction &amp; Dynamics</td>
+                                    <td>Drive components, torque equation, load types</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>Thermal Model</td>
+                                    <td>Heating curves, duty cycles, motor ratings</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>DC Motor Drives</td>
+                                    <td>Rectifier-fed drives, chopper-fed drives, control</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>AC Motor Drives</td>
+                                    <td>V/f control, vector control, inverter-fed drives</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>Synchronous Motor Drives</td>
+                                    <td>Self-controlled sync motors, load-commutated inverters</td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td>Electric Traction</td>
+                                    <td>Tractive effort, braking, energy recovery</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        <strong>By the end of this course</strong>, you won't just know what an electric drive <em>is</em> &mdash; you'll know how to <em>design</em> one, <em>analyze</em> its performance, and <em>choose</em> the right drive for any application. Let's start with the very first question: What exactly is an "electric drive"?
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 2: DEFINITION OF ELECTRIC DRIVES
+             ====================================================== -->
+        <div class="section" id="sec-definition">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">2</div>
+                <div class="section-title-text">
+                    <h2>What is an Electric Drive?</h2>
+                    <div class="section-subtitle">Defining the core concept behind controlled motion</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>What Would Happen If We Couldn't Control Motion?</h3>
+                    <p>
+                        Imagine a factory where a conveyor belt runs at full speed all the time &mdash; no slowing down, no speeding up, no stopping gracefully. Products crash into each other, workers can't keep up, energy is wasted constantly. Or imagine an elevator that only knows "full speed up" and "full speed down." Would you ride that elevator?
+                    </p>
+                    <p>
+                        The key word isn't "electric" and it isn't "motor." It's <span class="key-term">"controlled."</span> We need <em>controlled motion</em> &mdash; and that's what a drive system gives us.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Simple Definition</h3>
+                    <p>
+                        A <span class="key-term">"drive"</span> is any system that produces <strong>controlled motion</strong>. That's it. Any time you see something moving in a controlled way &mdash; a robot arm positioning precisely, a pump adjusting its flow, a car accelerating smoothly &mdash; there's a drive behind it.
+                    </p>
+                    <p>Now, what provides the muscle? The <strong>prime mover</strong> &mdash; the thing that actually creates the motion. It could be:</p>
+                    <ul>
+                        <li><strong>An electric motor</strong> (what we care about!)</li>
+                        <li>A fuel-burning engine (gasoline, diesel)</li>
+                        <li>A hydraulic system (oil pressure)</li>
+                        <li>A turbine (steam, gas, or water)</li>
+                    </ul>
+                    <p>
+                        When the prime mover is an <strong>electric motor</strong>, we call the whole system an <span class="key-term">electrical drive</span>. Simple, right?
+                    </p>
+                    <div class="callout callout-challenge">
+                        <span class="callout-icon">&#129300;</span>
+                        <div>
+                            <strong>Can you guess?</strong> Look around you right now. How many electric drives can you count in your environment? (Hint: your phone has at least one &mdash; the vibration motor!)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Where Do We Find Electric Drives?</h3>
+                    <p>Electric drives are <em>everywhere</em>. Let's categorize them:</p>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>&#127981; Industrial</h4>
+                            <ul class="pros">
+                                <li>Conveyor belts</li>
+                                <li>CNC machines</li>
+                                <li>Pumps and compressors</li>
+                                <li>Robotic arms</li>
+                                <li>Rolling mills</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>&#128646; Transport</h4>
+                            <ul class="pros">
+                                <li>Electric trains &amp; metros</li>
+                                <li>Electric vehicles</li>
+                                <li>Elevators &amp; escalators</li>
+                                <li>Electric ships</li>
+                                <li>Airport baggage systems</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>&#127968; Home Appliances</h4>
+                            <ul class="pros">
+                                <li>Washing machines</li>
+                                <li>Refrigerators</li>
+                                <li>Air conditioners</li>
+                                <li>Ceiling fans</li>
+                                <li>Vacuum cleaners</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        <strong>An electrical drive = electric motor + controlled motion.</strong> The motor provides the force, and the control system tells it exactly how much, how fast, and in which direction. Next, let's look at what parts make up this system.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 3: MAIN PARTS (BLOCK DIAGRAM)
+             ====================================================== -->
+        <div class="section" id="sec-block-diagram">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">3</div>
+                <div class="section-title-text">
+                    <h2>Main Parts of an Electrical Drive System</h2>
+                    <div class="section-subtitle">The building blocks: source, converter, motor, load, and feedback</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Why Can't We Just Plug a Motor Directly Into the Wall?</h3>
+                    <p>
+                        Here's a thought experiment: You have a DC motor that runs beautifully at 48V. Your wall outlet gives you 220V AC. Can you just... connect them? Of course not &mdash; you'd destroy the motor instantly! And even if the voltages matched, how would you control the speed? How would you know the motor is doing what you want?
+                    </p>
+                    <p>
+                        We need a <em>system</em> &mdash; a chain of components that takes raw electrical power, shapes it, feeds it to the motor, and monitors everything in a feedback loop. Let's see what that system looks like.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>Think of It Like a Kitchen</h3>
+                    <p>
+                        Imagine cooking a meal. You have:
+                    </p>
+                    <ul>
+                        <li>The <strong>grocery store</strong> (Source) &mdash; raw ingredients (raw electrical power)</li>
+                        <li>The <strong>kitchen &amp; stove</strong> (Power Converter) &mdash; transforms ingredients into something usable</li>
+                        <li>The <strong>chef</strong> (Motor) &mdash; does the actual work</li>
+                        <li>The <strong>hungry guests</strong> (Load) &mdash; what we're doing all this for</li>
+                        <li>The <strong>recipe &amp; taste-tester</strong> (Control + Sensing) &mdash; feedback loop to make sure everything turns out right</li>
+                    </ul>
+                    <p>Without any of these, the whole operation falls apart. An electric drive system works the same way.</p>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>The Electric Drive System Block Diagram</h3>
+
+                    <!-- SVG: Electric Drive Block Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 820 360" xmlns="http://www.w3.org/2000/svg" style="max-width:820px;">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+                                </marker>
+                                <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+                                </marker>
+                                <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+                                    <feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+                                </filter>
+                            </defs>
+
+                            <!-- Main flow boxes -->
+                            <!-- Source -->
+                            <rect x="20" y="100" width="140" height="70" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="90" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a5f">Source</text>
+                            <text x="90" y="150" text-anchor="middle" font-size="10" fill="#3b82f6">1-ph / 3-ph / Battery</text>
+
+                            <!-- Power Converter -->
+                            <rect x="220" y="100" width="160" height="70" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="300" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#78350f">Power Converter</text>
+                            <text x="300" y="150" text-anchor="middle" font-size="10" fill="#d97706">Rectifier / Inverter / Chopper</text>
+
+                            <!-- Motor -->
+                            <rect x="440" y="100" width="140" height="70" rx="10" fill="#dcfce7" stroke="#22c55e" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="510" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#14532d">Motor</text>
+                            <text x="510" y="150" text-anchor="middle" font-size="10" fill="#16a34a">DC / AC / Special</text>
+
+                            <!-- Load -->
+                            <rect x="640" y="100" width="140" height="70" rx="10" fill="#f3e8ff" stroke="#a855f7" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="710" y="130" text-anchor="middle" font-size="14" font-weight="700" fill="#3b0764">Load</text>
+                            <text x="710" y="150" text-anchor="middle" font-size="10" fill="#9333ea">Pump / Fan / Vehicle</text>
+
+                            <!-- Arrows between main boxes -->
+                            <line x1="160" y1="135" x2="218" y2="135" stroke="#475569" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="380" y1="135" x2="438" y2="135" stroke="#475569" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="580" y1="135" x2="638" y2="135" stroke="#475569" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                            <!-- Labels on arrows -->
+                            <text x="189" y="125" text-anchor="middle" font-size="9" fill="#64748b">AC/DC</text>
+                            <text x="409" y="125" text-anchor="middle" font-size="9" fill="#64748b">Controlled</text>
+                            <text x="609" y="125" text-anchor="middle" font-size="9" fill="#64748b">Mech.</text>
+
+                            <!-- Control Unit -->
+                            <rect x="260" y="250" width="160" height="60" rx="10" fill="#fee2e2" stroke="#ef4444" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="340" y="277" text-anchor="middle" font-size="14" font-weight="700" fill="#7f1d1d">Control Unit</text>
+                            <text x="340" y="293" text-anchor="middle" font-size="10" fill="#ef4444">MCU / DSP / PLC</text>
+
+                            <!-- Sensing Unit -->
+                            <rect x="500" y="250" width="160" height="60" rx="10" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" filter="url(#shadow)"/>
+                            <text x="580" y="277" text-anchor="middle" font-size="14" font-weight="700" fill="#0c4a6e">Sensing Unit</text>
+                            <text x="580" y="293" text-anchor="middle" font-size="10" fill="#0284c7">Speed / Current / Voltage</text>
+
+                            <!-- Feedback arrows -->
+                            <!-- Sensing to Motor (up) -->
+                            <line x1="560" y1="250" x2="530" y2="172" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowhead)"/>
+
+                            <!-- Sensing to Control -->
+                            <line x1="500" y1="280" x2="422" y2="280" stroke="#0284c7" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                            <text x="461" y="273" text-anchor="middle" font-size="9" fill="#0284c7">Feedback</text>
+
+                            <!-- Control to Converter (up) -->
+                            <line x1="310" y1="250" x2="300" y2="172" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                            <text x="290" y="215" text-anchor="middle" font-size="9" fill="#ef4444">Firing Pulses</text>
+
+                            <!-- Reference input arrow -->
+                            <line x1="260" y1="280" x2="180" y2="280" stroke="#475569" stroke-width="1.5" marker-start="url(#arrowhead)"/>
+                            <text x="175" y="275" text-anchor="end" font-size="11" font-weight="600" fill="#475569">Reference</text>
+                            <text x="175" y="290" text-anchor="end" font-size="9" fill="#64748b">(speed, torque)</text>
+
+                            <!-- Title -->
+                            <text x="410" y="40" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">Electric Drive System &mdash; Block Diagram</text>
+
+                            <!-- Power flow label -->
+                            <text x="410" y="80" text-anchor="middle" font-size="11" fill="#64748b">&#8594; Power Flow &#8594;</text>
+
+                            <!-- Feedback loop label -->
+                            <text x="480" y="340" text-anchor="middle" font-size="11" fill="#0284c7">&#8592; Feedback Loop &#8592;</text>
+                        </svg>
+                        <div class="diagram-caption">Figure 3.1 &mdash; Complete electric drive system with power flow (top) and feedback loop (bottom)</div>
+                    </div>
+
+                    <p>Let's break down each component:</p>
+
+                    <h3>3.1 Source</h3>
+                    <p>The electrical power source can be:</p>
+                    <ul>
+                        <li><strong>Single-phase AC</strong> &mdash; Household supply (220V, 50Hz)</li>
+                        <li><strong>Three-phase AC</strong> &mdash; Industrial supply (380/415V, 50Hz)</li>
+                        <li><strong>Batteries</strong> &mdash; 6V, 12V, 24V, 48V, 110V for electric vehicles and portable applications</li>
+                    </ul>
+
+                    <h3>3.2 Power Converter</h3>
+                    <p>This is the "translator" between what the source provides and what the motor needs. Types include:</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr><th>Conversion</th><th>Device</th><th>Subtypes</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>AC &rarr; DC</td><td>Rectifier</td><td>Uncontrolled, Half-controlled, Fully-controlled</td></tr>
+                                <tr><td>AC &rarr; AC</td><td>AC Controller / Cycloconverter</td><td>Voltage controllers, Frequency changers</td></tr>
+                                <tr><td>DC &rarr; DC</td><td>Chopper</td><td>Step-up, Step-down, Buck-boost</td></tr>
+                                <tr><td>DC &rarr; AC</td><td>Inverter</td><td>VSI, CSI, Multi-level</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>3.3 Motor</h3>
+                    <p>The electromechanical energy converter. We'll cover DC motors, AC motors (induction and synchronous), and special motors in detail shortly.</p>
+
+                    <h3>3.4 Control Unit</h3>
+                    <p>The "brain" that decides what the power converter should do. It compares the desired reference (e.g., "I want 1500 rpm") with the actual measured value and adjusts the converter's firing pulses accordingly. Implemented using:</p>
+                    <ul>
+                        <li>Firing pulse circuits (analog or digital)</li>
+                        <li>Microcontrollers (MCU)</li>
+                        <li>Digital Signal Processors (DSP)</li>
+                        <li>Programmable Logic Controllers (PLC)</li>
+                    </ul>
+
+                    <h3>3.5 Sensing Unit</h3>
+                    <p>The "eyes and ears" of the system &mdash; sensors that measure actual performance:</p>
+                    <ul>
+                        <li><strong>Speed sensors</strong> (tachogenerators, encoders)</li>
+                        <li><strong>Current sensors</strong> (Hall effect, shunt resistors)</li>
+                        <li><strong>Voltage sensors</strong> (voltage dividers, transformers)</li>
+                    </ul>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        An electrical drive is a <strong>closed-loop system</strong>: Source feeds the converter, the converter feeds the motor, the motor drives the load, sensors measure the result, and the controller corrects any errors. It's elegant teamwork between power electronics, machines, and control theory.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 4: TYPES OF ELECTRIC MOTORS
+             ====================================================== -->
+        <div class="section" id="sec-motor-types">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">4</div>
+                <div class="section-title-text">
+                    <h2>Types of Electric Motors</h2>
+                    <div class="section-subtitle">The full family tree of motors used in drives</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>One Motor Doesn't Fit All</h3>
+                    <p>
+                        Imagine you need a motor for a steel rolling mill that must produce enormous torque at startup. Now imagine you need a motor for a precision watch-making robot that must position to 0.001mm accuracy. Do you think the same motor handles both? Not a chance.
+                    </p>
+                    <p>
+                        Different applications demand different characteristics: torque, speed, efficiency, maintenance, cost. That's why we have so many types of motors &mdash; each is optimized for a different job.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Motor Family Tree</h3>
+                    <p>
+                        Think of electric motors like vehicles. You have trucks (DC series motors &mdash; raw power for heavy loads), sedans (induction motors &mdash; reliable everyday workhorses), sports cars (synchronous motors &mdash; precise and fast), and specialty vehicles like forklifts (special motors for niche jobs).
+                    </p>
+
+                    <!-- SVG: Motor Classification Tree -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg" style="max-width:800px;">
+                            <!-- Root -->
+                            <rect x="300" y="10" width="200" height="44" rx="22" fill="#2563eb" stroke="none"/>
+                            <text x="400" y="37" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Electric Motors</text>
+
+                            <!-- Level 1 branches -->
+                            <line x1="350" y1="54" x2="130" y2="100" stroke="#94a3b8" stroke-width="2"/>
+                            <line x1="400" y1="54" x2="400" y2="100" stroke="#94a3b8" stroke-width="2"/>
+                            <line x1="450" y1="54" x2="670" y2="100" stroke="#94a3b8" stroke-width="2"/>
+
+                            <!-- DC Motors -->
+                            <rect x="40" y="100" width="180" height="40" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+                            <text x="130" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">DC Motors</text>
+
+                            <!-- AC Motors -->
+                            <rect x="310" y="100" width="180" height="40" rx="8" fill="#dcfce7" stroke="#22c55e" stroke-width="1.5"/>
+                            <text x="400" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#14532d">AC Motors</text>
+
+                            <!-- Special Motors -->
+                            <rect x="580" y="100" width="180" height="40" rx="8" fill="#f3e8ff" stroke="#a855f7" stroke-width="1.5"/>
+                            <text x="670" y="125" text-anchor="middle" font-size="13" font-weight="700" fill="#3b0764">Special Motors</text>
+
+                            <!-- DC Motor sub-branches -->
+                            <line x1="90" y1="140" x2="70" y2="180" stroke="#93c5fd" stroke-width="1.5"/>
+                            <line x1="170" y1="140" x2="190" y2="180" stroke="#93c5fd" stroke-width="1.5"/>
+
+                            <rect x="10" y="180" width="120" height="34" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+                            <text x="70" y="201" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">Separately Excited</text>
+
+                            <rect x="140" y="180" width="100" height="34" rx="6" fill="#eff6ff" stroke="#93c5fd" stroke-width="1"/>
+                            <text x="190" y="201" text-anchor="middle" font-size="11" font-weight="600" fill="#1e3a5f">Self-Excited</text>
+
+                            <!-- Self-excited sub-branches -->
+                            <line x1="160" y1="214" x2="50" y2="260" stroke="#bfdbfe" stroke-width="1"/>
+                            <line x1="180" y1="214" x2="130" y2="260" stroke="#bfdbfe" stroke-width="1"/>
+                            <line x1="200" y1="214" x2="210" y2="260" stroke="#bfdbfe" stroke-width="1"/>
+                            <line x1="220" y1="214" x2="290" y2="260" stroke="#bfdbfe" stroke-width="1"/>
+
+                            <rect x="10" y="260" width="80" height="30" rx="5" fill="#f0f7ff" stroke="#bfdbfe" stroke-width="1"/>
+                            <text x="50" y="279" text-anchor="middle" font-size="10" fill="#1e3a5f">Shunt</text>
+
+                            <rect x="100" y="260" width="80" height="30" rx="5" fill="#f0f7ff" stroke="#bfdbfe" stroke-width="1"/>
+                            <text x="140" y="279" text-anchor="middle" font-size="10" fill="#1e3a5f">Series</text>
+
+                            <rect x="190" y="260" width="80" height="30" rx="5" fill="#f0f7ff" stroke="#bfdbfe" stroke-width="1"/>
+                            <text x="230" y="279" text-anchor="middle" font-size="10" fill="#1e3a5f">Compound</text>
+
+                            <rect x="280" y="260" width="80" height="30" rx="5" fill="#f0f7ff" stroke="#bfdbfe" stroke-width="1"/>
+                            <text x="320" y="279" text-anchor="middle" font-size="10" fill="#1e3a5f">PM DC</text>
+
+                            <!-- AC Motor sub-branches -->
+                            <line x1="360" y1="140" x2="340" y2="180" stroke="#86efac" stroke-width="1.5"/>
+                            <line x1="440" y1="140" x2="460" y2="180" stroke="#86efac" stroke-width="1.5"/>
+
+                            <rect x="270" y="180" width="140" height="34" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+                            <text x="340" y="201" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">Induction Motors</text>
+
+                            <rect x="420" y="180" width="140" height="34" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1"/>
+                            <text x="490" y="201" text-anchor="middle" font-size="11" font-weight="600" fill="#14532d">Synchronous</text>
+
+                            <!-- Induction sub-branches -->
+                            <line x1="310" y1="214" x2="300" y2="260" stroke="#bbf7d0" stroke-width="1"/>
+                            <line x1="370" y1="214" x2="400" y2="260" stroke="#bbf7d0" stroke-width="1"/>
+
+                            <rect x="255" y="260" width="90" height="30" rx="5" fill="#f0fff5" stroke="#bbf7d0" stroke-width="1"/>
+                            <text x="300" y="279" text-anchor="middle" font-size="10" fill="#14532d">3-Phase</text>
+
+                            <rect x="355" y="260" width="90" height="30" rx="5" fill="#f0fff5" stroke="#bbf7d0" stroke-width="1"/>
+                            <text x="400" y="279" text-anchor="middle" font-size="10" fill="#14532d">1-Phase</text>
+
+                            <!-- Special Motors sub-branches -->
+                            <line x1="630" y1="140" x2="590" y2="180" stroke="#d8b4fe" stroke-width="1.5"/>
+                            <line x1="670" y1="140" x2="670" y2="180" stroke="#d8b4fe" stroke-width="1.5"/>
+                            <line x1="710" y1="140" x2="750" y2="180" stroke="#d8b4fe" stroke-width="1.5"/>
+
+                            <rect x="540" y="180" width="90" height="34" rx="6" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+                            <text x="585" y="201" text-anchor="middle" font-size="10" font-weight="600" fill="#3b0764">SRM</text>
+
+                            <rect x="640" y="180" width="90" height="34" rx="6" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+                            <text x="685" y="201" text-anchor="middle" font-size="10" font-weight="600" fill="#3b0764">BLDC</text>
+
+                            <rect x="700" y="180" width="90" height="34" rx="6" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+                            <text x="745" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#3b0764">Stepper /</text>
+                            <text x="745" y="208" text-anchor="middle" font-size="10" font-weight="600" fill="#3b0764">Servo</text>
+
+                            <!-- Universal Motor (standalone) -->
+                            <rect x="540" y="240" width="90" height="34" rx="6" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1"/>
+                            <text x="585" y="261" text-anchor="middle" font-size="10" font-weight="600" fill="#3b0764">Universal</text>
+
+                            <line x1="585" y1="214" x2="585" y2="240" stroke="#d8b4fe" stroke-width="1"/>
+
+                            <!-- Legend -->
+                            <text x="400" y="340" text-anchor="middle" font-size="14" font-weight="700" fill="#475569">Motor Family Tree</text>
+
+                            <!-- Advantage notes -->
+                            <rect x="40" y="320" width="220" height="70" rx="6" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+                            <text x="50" y="340" font-size="10" font-weight="700" fill="#1e3a5f">DC Motors:</text>
+                            <text x="50" y="355" font-size="9" fill="#334155">+ High starting torque (up to 5x)</text>
+                            <text x="50" y="368" font-size="9" fill="#334155">+ Precise speed control</text>
+                            <text x="50" y="381" font-size="9" fill="#991b1b">- Expensive, needs maintenance</text>
+
+                            <rect x="290" y="320" width="220" height="70" rx="6" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+                            <text x="300" y="340" font-size="10" font-weight="700" fill="#14532d">3-Ph Induction Motors:</text>
+                            <text x="300" y="355" font-size="9" fill="#334155">+ Cheapest, least maintenance</text>
+                            <text x="300" y="368" font-size="9" fill="#334155">+ Starting torque up to 250%</text>
+                            <text x="300" y="381" font-size="9" fill="#991b1b">- Controller costs 4x motor</text>
+
+                            <rect x="540" y="320" width="220" height="70" rx="6" fill="#f3e8ff" stroke="#d8b4fe" stroke-width="1"/>
+                            <text x="550" y="340" font-size="10" font-weight="700" fill="#3b0764">Synchronous Motors:</text>
+                            <text x="550" y="355" font-size="9" fill="#334155">+ Constant speed under load</text>
+                            <text x="550" y="368" font-size="9" fill="#334155">+ Leading power factor</text>
+                            <text x="550" y="381" font-size="9" fill="#991b1b">- Lowest starting torque (~20%)</text>
+                        </svg>
+                        <div class="diagram-caption">Figure 4.1 &mdash; Classification of electric motors used in drive systems</div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Motor-by-Motor Comparison</h3>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>&#9889; DC Motors</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Separately excited, Shunt, Series, Compound, PM</p>
+                            <ul class="pros">
+                                <li>High starting torque (up to 5&times; full load)</li>
+                                <li>Precise speed control with high accuracy</li>
+                                <li>Simple control circuitry</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Expensive initial cost</li>
+                                <li>Brush/commutator needs continuous maintenance</li>
+                                <li>Not suitable for hazardous environments (sparking)</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>&#127760; Synchronous Motors</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Constant speed, leading power factor</p>
+                            <ul class="pros">
+                                <li>Constant speed regardless of load changes</li>
+                                <li>Can operate at leading power factor</li>
+                                <li>High efficiency at rated load</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Lowest starting torque (~20% of full load)</li>
+                                <li>Needs DC excitation supply</li>
+                                <li>More complex starting mechanism</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>&#128296; 3-Phase Induction Motors</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">The industrial workhorse</p>
+                            <ul class="pros">
+                                <li>Cheapest motor available</li>
+                                <li>Least maintenance required</li>
+                                <li>High starting torque (up to 250% FL)</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Speed controller can cost 4&times; the motor</li>
+                                <li>Needs power factor correction</li>
+                                <li>Speed drops slightly with load</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>&#128268; Single-Phase Induction</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Home and light commercial use</p>
+                            <ul class="pros">
+                                <li>Works with household single-phase supply</li>
+                                <li>Available in small ratings</li>
+                                <li>Simple construction</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Higher current than 3-phase equivalent</li>
+                                <li>Lower efficiency and power factor</li>
+                                <li>Only used when 3-phase not available</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>&#9881; Special Motors</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">SRM, BLDC, Servo, Stepper, Syn. Reluctance</p>
+                            <ul class="pros">
+                                <li>Optimized for specific applications</li>
+                                <li>High precision (stepper, servo)</li>
+                                <li>Brushless designs (BLDC)</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Still under development</li>
+                                <li>Available only in small ratings</li>
+                                <li>More expensive per kW</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-card">
+                            <h4>&#128260; Universal Motors</h4>
+                            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:8px;">Works on both AC and DC</p>
+                            <ul class="pros">
+                                <li>Very high speed (up to 10,000 rpm)</li>
+                                <li>High starting torque</li>
+                                <li>Works on AC or DC supply</li>
+                            </ul>
+                            <ul class="cons">
+                                <li>Needs brush/commutator maintenance</li>
+                                <li>Large speed variation with torque change</li>
+                                <li>Noisy at high speeds</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-challenge">
+                        <span class="callout-icon">&#129300;</span>
+                        <div>
+                            <strong>Challenge:</strong> A factory needs a motor for a crane that lifts heavy steel beams from rest. Which motor type would you choose and why? Think about which characteristic matters most: starting torque, speed control, or cost.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        There is no "best" motor &mdash; only the <strong>best motor for the job</strong>. DC motors give you controllability, induction motors give you reliability and low cost, synchronous motors give you constant speed, and special motors give you precision. Choosing the right motor is an engineering decision, not a preference.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 5: TORQUE-SPEED CHARACTERISTICS
+             ====================================================== -->
+        <div class="section" id="sec-torque-speed">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">5</div>
+                <div class="section-title-text">
+                    <h2>Torque-Speed Characteristics</h2>
+                    <div class="section-subtitle">How different motors behave under load</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Why Does Speed Change When You Add Load?</h3>
+                    <p>
+                        You're riding a bicycle on flat ground at a comfortable speed. Suddenly, you hit a steep hill. What happens? You slow down &mdash; unless you pedal harder. Motors behave exactly the same way. When you increase the mechanical load (torque), the speed changes. But <em>how much</em> it changes depends entirely on the motor type.
+                    </p>
+                    <p>
+                        Understanding this relationship is absolutely critical. If you pick a motor whose speed drops dramatically under load for an application that needs constant speed, you'll have a disaster on your hands.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Personality of Each Motor</h3>
+                    <p>
+                        Each motor type has a unique "personality" that shows up in its torque-speed curve:
+                    </p>
+                    <ul>
+                        <li><strong>DC Shunt / Compound:</strong> Like a steady jogger &mdash; barely slows down even when carrying a backpack. Nearly constant speed.</li>
+                        <li><strong>DC Series:</strong> Like a sprinter &mdash; incredibly fast when unloaded, but slows down dramatically under heavy load. Never run it without a load!</li>
+                        <li><strong>Induction Motor:</strong> Like a reliable worker &mdash; slight speed drop under load, but generally predictable.</li>
+                        <li><strong>Synchronous Motor:</strong> Like a metronome &mdash; perfectly constant speed regardless of load (until it reaches its limit and stalls).</li>
+                    </ul>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Torque-Speed Curves Compared</h3>
+
+                    <!-- SVG: Torque-Speed Curves -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="max-width:700px;">
+                            <!-- Axes -->
+                            <line x1="80" y1="350" x2="650" y2="350" stroke="#475569" stroke-width="2"/>
+                            <line x1="80" y1="350" x2="80" y2="40" stroke="#475569" stroke-width="2"/>
+
+                            <!-- Axis arrows -->
+                            <polygon points="650,345 650,355 665,350" fill="#475569"/>
+                            <polygon points="75,40 85,40 80,25" fill="#475569"/>
+
+                            <!-- Axis labels -->
+                            <text x="370" y="390" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">Torque (T)</text>
+                            <text x="30" y="195" text-anchor="middle" font-size="14" font-weight="600" fill="#475569" transform="rotate(-90,30,195)">Speed (n)</text>
+
+                            <!-- Grid lines (light) -->
+                            <line x1="80" y1="100" x2="640" y2="100" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4,4"/>
+                            <line x1="80" y1="170" x2="640" y2="170" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4,4"/>
+                            <line x1="80" y1="240" x2="640" y2="240" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+                            <!-- DC Shunt motor curve (nearly flat, slight droop) -->
+                            <path d="M100,105 C200,108 400,118 550,135" stroke="#2563eb" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <text x="560" y="130" font-size="12" font-weight="600" fill="#2563eb">DC Shunt</text>
+
+                            <!-- DC Compound motor curve (moderate droop) -->
+                            <path d="M100,100 C200,110 400,145 550,180" stroke="#7c3aed" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <text x="560" y="175" font-size="12" font-weight="600" fill="#7c3aed">DC Compound</text>
+
+                            <!-- DC Series motor curve (steep hyperbolic drop) -->
+                            <path d="M100,55 C150,70 200,120 280,200 C360,260 450,295 580,310" stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <text x="560" y="325" font-size="12" font-weight="600" fill="#ef4444">DC Series</text>
+
+                            <!-- Induction motor curve (flat then steep drop) -->
+                            <path d="M100,120 C200,122 350,128 430,140 C470,155 500,200 530,350" stroke="#22c55e" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <text x="540" y="280" font-size="12" font-weight="600" fill="#22c55e">Induction</text>
+
+                            <!-- Synchronous motor (perfectly horizontal line) -->
+                            <line x1="100" y1="170" x2="480" y2="170" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+                            <line x1="480" y1="170" x2="490" y2="350" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,3" stroke-linecap="round"/>
+                            <text x="440" y="163" font-size="12" font-weight="600" fill="#f59e0b">Synchronous</text>
+                            <text x="500" y="270" font-size="10" fill="#f59e0b" font-style="italic">stall</text>
+
+                            <!-- Rated torque line -->
+                            <line x1="350" y1="345" x2="350" y2="355" stroke="#475569" stroke-width="1"/>
+                            <text x="350" y="370" text-anchor="middle" font-size="11" fill="#64748b">T_rated</text>
+
+                            <!-- Rated speed marker -->
+                            <line x1="75" y1="120" x2="85" y2="120" stroke="#475569" stroke-width="1"/>
+                            <text x="70" y="124" text-anchor="end" font-size="10" fill="#64748b">n_rated</text>
+
+                            <!-- No-load speed marker -->
+                            <text x="70" y="60" text-anchor="end" font-size="10" fill="#ef4444">n_0</text>
+
+                            <!-- Danger zone for DC series -->
+                            <rect x="90" y="45" width="50" height="25" rx="4" fill="#fef2f2" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,2"/>
+                            <text x="115" y="61" text-anchor="middle" font-size="8" fill="#ef4444" font-weight="600">DANGER!</text>
+
+                            <!-- Title -->
+                            <text x="370" y="20" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a5f">Torque-Speed Characteristics of Different Motors</text>
+                        </svg>
+                        <div class="diagram-caption">Figure 5.1 &mdash; Torque-speed curves showing the unique "personality" of each motor type</div>
+                    </div>
+
+                    <div class="callout callout-warning">
+                        <span class="callout-icon">&#9888;</span>
+                        <div>
+                            <strong>Safety Warning:</strong> A DC series motor must <strong>never</strong> run unloaded! As torque approaches zero, speed shoots up toward infinity (theoretically), which will mechanically destroy the motor. Always ensure a DC series motor has a minimum load connected.
+                        </div>
+                    </div>
+
+                    <h3>Key Equations</h3>
+                    <div class="equation-box">
+                        <div class="eq-label">Output Mechanical Power</div>
+                        $$ P_{out} = T \times \omega = T \times \frac{2\pi n}{60} $$
+                    </div>
+                    <p>where $T$ is torque in N&middot;m, $\omega$ is angular speed in rad/s, and $n$ is speed in rpm.</p>
+
+                    <div class="equation-box">
+                        <div class="eq-label">Example Comparison</div>
+                        $$ \text{At } P_{out} = 5\text{ hp}: \quad T_{5hp} = \frac{5 \times 746}{\omega} \quad \text{N}\cdot\text{m}$$
+                    </div>
+                    <p>
+                        The same output power can be achieved with high torque at low speed, or low torque at high speed. This is the fundamental trade-off that governs drive design.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        The torque-speed curve is the <strong>fingerprint of a motor</strong>. It tells you everything about how the motor will behave in your application. Match the curve to the load requirement, and you have a well-designed drive.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 6: POWER CONVERTERS
+             ====================================================== -->
+        <div class="section" id="sec-power-converters">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">6</div>
+                <div class="section-title-text">
+                    <h2>Power Converters</h2>
+                    <div class="section-subtitle">The electronic muscle between source and motor</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>The Mismatch Problem</h3>
+                    <p>
+                        Here's the fundamental problem: The electrical source gives us one thing (say, 380V AC at 50Hz), but the motor might need something completely different (say, variable DC voltage from 0-200V, or AC at 30Hz). How do we bridge this gap?
+                    </p>
+                    <p>
+                        You can't just use a transformer for everything &mdash; transformers only change voltage magnitude, not frequency, and they certainly don't convert AC to DC. We need smarter devices. Enter <span class="key-term">power electronic converters</span>.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>Four Types of "Translators"</h3>
+                    <p>
+                        Think of power converters as language translators. Each one specializes in a specific translation:
+                    </p>
+                    <ul>
+                        <li><strong>Rectifier (AC &rarr; DC):</strong> Like translating English to Arabic &mdash; a fundamental change of form</li>
+                        <li><strong>Inverter (DC &rarr; AC):</strong> The reverse translation &mdash; Arabic back to English</li>
+                        <li><strong>Chopper (DC &rarr; DC):</strong> Like changing the volume of a speaker &mdash; same language, different intensity</li>
+                        <li><strong>AC Controller (AC &rarr; AC):</strong> Like adjusting the accent or speed of speech &mdash; same language, modified delivery</li>
+                    </ul>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Power Converter Classification</h3>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Converter</th>
+                                    <th>Input &rarr; Output</th>
+                                    <th>Subtypes</th>
+                                    <th>Typical Application</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Rectifier</strong></td>
+                                    <td>AC &rarr; DC</td>
+                                    <td>
+                                        <strong>Uncontrolled</strong> (diode bridge &mdash; fixed DC)<br>
+                                        <strong>Half-controlled</strong> (mix of diodes &amp; thyristors)<br>
+                                        <strong>Fully-controlled</strong> (all thyristors &mdash; variable DC)
+                                    </td>
+                                    <td>DC motor speed control, battery charging</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AC Voltage Controller</strong></td>
+                                    <td>AC &rarr; AC (same freq.)</td>
+                                    <td>Phase-angle control, on-off control</td>
+                                    <td>Soft starters, light dimmers, heating</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cycloconverter</strong></td>
+                                    <td>AC &rarr; AC (diff. freq.)</td>
+                                    <td>Single-phase, three-phase</td>
+                                    <td>Low-speed, high-power AC drives</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Chopper</strong></td>
+                                    <td>DC &rarr; DC</td>
+                                    <td>Step-down (buck), Step-up (boost), Buck-boost</td>
+                                    <td>EV motor control, DC traction drives</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Inverter</strong></td>
+                                    <td>DC &rarr; AC</td>
+                                    <td>Voltage Source (VSI), Current Source (CSI), Multi-level</td>
+                                    <td>Variable-frequency AC motor drives</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="callout callout-info">
+                        <span class="callout-icon">&#128161;</span>
+                        <div>
+                            <strong>Key Insight:</strong> The fully-controlled rectifier and the inverter are the two most important converters in modern electric drives. The rectifier lets us control DC motor speed precisely, and the inverter lets us create variable-frequency AC to control induction motor speed.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        Power converters are the <strong>bridge between the source and the motor</strong>. Without them, we'd be stuck with whatever the source provides. With them, we can create any voltage, current, or frequency the motor needs. We'll study each converter type in great detail in later lectures.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 7: FACTORS OF CHOICE
+             ====================================================== -->
+        <div class="section" id="sec-choice-factors">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">7</div>
+                <div class="section-title-text">
+                    <h2>Choosing the Right Electric Drive</h2>
+                    <div class="section-subtitle">Seven factors that guide your engineering decision</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>The Engineer's Dilemma</h3>
+                    <p>
+                        Imagine you're the lead engineer at a cement factory. Management asks you to select a drive for the main kiln motor &mdash; it's a 500 kW application. There are DC drives, AC drives with variable frequency, direct-on-line starters... How do you choose? The wrong choice could cost the company millions in wasted energy, maintenance, and downtime.
+                    </p>
+                    <p>
+                        This isn't about picking the "best" technology. It's about picking the <strong>right</strong> technology for <strong>your specific situation</strong>.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Seven Questions You Must Answer</h3>
+                    <p>Think of choosing an electric drive like buying a car. You wouldn't just look at top speed &mdash; you'd consider fuel economy, maintenance costs, road conditions, passenger capacity, and your budget. Similarly:</p>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>The Seven Selection Factors</h3>
+
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>1. Steady-State Requirements</h4>
+                            <p style="font-size:0.88rem;">What speed range is needed? What torque at each speed? Is the load constant, variable, or pulsating?</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>2. Dynamic Requirements</h4>
+                            <p style="font-size:0.88rem;">How fast must it accelerate/decelerate? What about speed regulation during load changes? Response time needed?</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>3. Source Requirements</h4>
+                            <p style="font-size:0.88rem;">What supply is available? (1-phase, 3-phase, battery?) Voltage level? Frequency? Power quality constraints?</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>4. Cost Analysis</h4>
+                            <p style="font-size:0.88rem;">Capital cost, running cost (energy), maintenance cost, and expected lifetime. Total cost of ownership matters most.</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>5. Space &amp; Volume</h4>
+                            <p style="font-size:0.88rem;">Physical size constraints? Weight limits? Cooling requirements? Installation accessibility?</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>6. Environment &amp; Location</h4>
+                            <p style="font-size:0.88rem;">Temperature extremes? Humidity? Dust? Explosive atmosphere? Underwater? Outdoor weather exposure?</p>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>7. Reliability</h4>
+                            <p style="font-size:0.88rem;">How critical is uptime? Mean time between failures? Availability of spare parts? Can the process tolerate a motor failure?</p>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-challenge">
+                        <span class="callout-icon">&#129300;</span>
+                        <div>
+                            <strong>Think about this:</strong> For an electric vehicle, which of these seven factors would you rank as the top three? The answer might surprise you &mdash; it's not always about performance. Range (energy cost), weight (space), and reliability are often the top priorities.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        Choosing an electric drive is a <strong>multi-criteria engineering decision</strong>. No single factor dominates &mdash; it's always a balance. Keep these seven factors as a mental checklist every time you design or select a drive system.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 8: ADVANTAGES OF ELECTRIC DRIVES
+             ====================================================== -->
+        <div class="section" id="sec-advantages">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">8</div>
+                <div class="section-title-text">
+                    <h2>Advantages of Electric Drives</h2>
+                    <div class="section-subtitle">Why electric drives dominate modern industry</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Why Not Just Use Diesel Engines Everywhere?</h3>
+                    <p>
+                        For decades, diesel engines, steam turbines, and hydraulic systems drove industrial machines. They're powerful and well-understood. So why has the world overwhelmingly switched to electric drives? There must be something fundamentally superior about them.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Electric Advantage</h3>
+                    <p>
+                        Think of it this way: A diesel engine is like a powerful but stubborn ox &mdash; hard to start, hard to stop, hard to change speed, needs constant feeding and cleaning. An electric motor is like a well-trained horse &mdash; starts instantly, stops on command, changes speed gracefully, and barely needs grooming.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>The Eight Key Advantages</h3>
+                    <ol>
+                        <li><strong>Easy characteristic matching:</strong> We can easily shape motor characteristics (torque, speed, power) to match any load requirement using power converters and control systems.</li>
+                        <li><strong>Wide motor variety:</strong> A huge selection of motor types and sizes is available, from fractional-watt to megawatt ratings.</li>
+                        <li><strong>High efficiency:</strong> Electric motors achieve 85-97% efficiency. Energy losses are minimal compared to combustion engines (25-40% efficiency).</li>
+                        <li><strong>Low noise, low maintenance:</strong> No combustion = no exhaust, no vibration, no frequent oil changes. Especially true for brushless motors.</li>
+                        <li><strong>Zero local pollution:</strong> Electric motors produce no emissions at point of use &mdash; critical for indoor, underground, and urban applications.</li>
+                        <li><strong>Simple operation:</strong> Just connect to electricity and press a button. No fuel supply, no warm-up time, no cooling-down period.</li>
+                        <li><strong>Four-quadrant operation:</strong> Electric drives can motor and brake in both forward and reverse directions &mdash; a feat that's extremely difficult for combustion engines.</li>
+                        <li><strong>Regenerative braking:</strong> During braking, the motor becomes a generator and returns energy to the supply, saving energy and reducing wear on mechanical brakes.</li>
+                    </ol>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        Electric drives aren't just "another option" &mdash; they're <strong>fundamentally superior</strong> for most applications. The combination of controllability, efficiency, cleanliness, and the ability to regenerate energy makes them the default choice in modern engineering. The last two advantages &mdash; four-quadrant operation and regenerative braking &mdash; deserve their own deep dive. Let's explore braking first.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 9: MOTOR BRAKING
+             ====================================================== -->
+        <div class="section" id="sec-braking">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">9</div>
+                <div class="section-title-text">
+                    <h2>Motor Braking</h2>
+                    <div class="section-subtitle">Three ways to stop a motor &mdash; one of them saves energy</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Stopping a Spinning Mass is Not Free</h3>
+                    <p>
+                        A 1000 kg flywheel spinning at 3000 rpm contains an enormous amount of kinetic energy. When we need to stop it, that energy has to go <em>somewhere</em>. It doesn't just disappear &mdash; that would violate the laws of physics. So where does it go?
+                    </p>
+                    <p>
+                        The answer to that question determines which braking method we use &mdash; and can mean the difference between wasting energy as heat versus recovering it.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>Three Braking Philosophies</h3>
+                    <p>Think of braking like three ways to stop a car rolling downhill:</p>
+                    <ul>
+                        <li><strong>Friction Braking:</strong> Slam the brake pads. Energy turns into heat. Brake pads wear out. Energy is <em>completely wasted</em>.</li>
+                        <li><strong>Dynamic Braking:</strong> Use the engine as a generator to slow down, but dump the electricity into a big resistor (heat). Better control, but energy is <em>still wasted</em>.</li>
+                        <li><strong>Regenerative Braking:</strong> Use the engine as a generator AND send the electricity back to the battery or power grid. Energy is <em>recovered</em>! This is how Tesla and other EVs extend their range.</li>
+                    </ul>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Braking Methods Compared</h3>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Method</th>
+                                    <th>Mechanism</th>
+                                    <th>Energy Destination</th>
+                                    <th>Efficiency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Friction Braking</strong></td>
+                                    <td>Brake pads press against rotor/disc</td>
+                                    <td>Kinetic energy &rarr; <strong>heat</strong> (lost forever)</td>
+                                    <td>0% recovery</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dynamic Braking</strong></td>
+                                    <td>Motor operates as generator; energy dissipated in external resistance</td>
+                                    <td>Kinetic energy &rarr; electrical &rarr; <strong>heat in resistor</strong> (lost)</td>
+                                    <td>0% recovery (but smoother control)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Regenerative Braking</strong></td>
+                                    <td>Motor operates as generator; energy returned to supply/battery</td>
+                                    <td>Kinetic energy &rarr; electrical &rarr; <strong>back to source</strong> (saved!)</td>
+                                    <td>Up to 70% recovery</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="equation-box">
+                        <div class="eq-label">Kinetic Energy Stored in Rotating Mass</div>
+                        $$ E_k = \frac{1}{2} J \omega^2 $$
+                    </div>
+                    <p>where $J$ is the moment of inertia (kg&middot;m&sup2;) and $\omega$ is the angular velocity (rad/s). This is the energy that must be dealt with during braking.</p>
+
+                    <div class="callout callout-example">
+                        <span class="callout-icon">&#128200;</span>
+                        <div>
+                            <strong>Real-world example:</strong> An electric train traveling at 200 km/h stores about 150 MJ of kinetic energy. With regenerative braking, up to 100 MJ can be recovered and sent back to the grid or stored in batteries &mdash; enough to power about 30 homes for an hour!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        <strong>Regenerative braking is the crown jewel</strong> of electric drive systems. No combustion engine can do this. It's one of the main reasons electric vehicles and electric trains are more energy-efficient than their fossil-fuel counterparts. And it connects directly to our next topic: four-quadrant operation.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             SECTION 10: FOUR-QUADRANT OPERATION
+             ====================================================== -->
+        <div class="section" id="sec-four-quadrant">
+            <div class="section-header" onclick="toggleSection(this)">
+                <div class="section-number">10</div>
+                <div class="section-title-text">
+                    <h2>Four-Quadrant Operation</h2>
+                    <div class="section-subtitle">The complete picture of motor-load interaction</div>
+                </div>
+                <span class="collapse-icon">&#9660;</span>
+            </div>
+            <div class="section-body">
+
+                <div class="teaching-block block-motivation">
+                    <div class="block-label">&#127793; The Problem / The Why</div>
+                    <h3>Imagine You're Controlling an Elevator</h3>
+                    <p>
+                        An elevator must go up with passengers (forward motoring), slow down as it approaches a floor (forward braking), go down with passengers (reverse motoring), and slow down again before reaching the bottom floor (reverse braking). That's <strong>four</strong> distinct modes of operation. Can your drive handle all of them?
+                    </p>
+                    <p>
+                        A drive that can only operate in one or two quadrants is severely limited. Understanding four-quadrant operation is essential for any serious drive application.
+                    </p>
+                </div>
+
+                <div class="teaching-block block-intuition">
+                    <div class="block-label">&#128161; The Intuition</div>
+                    <h3>The Torque-Speed Plane</h3>
+                    <p>
+                        Let's draw two axes: horizontal for torque ($T$) and vertical for speed ($\omega$). This creates four quadrants, just like in math class. But here, each quadrant has a physical meaning:
+                    </p>
+                    <ul>
+                        <li><strong>Quadrant I</strong> (top-right): Motor spins forward and pushes forward &rarr; <em>Forward Motoring</em></li>
+                        <li><strong>Quadrant II</strong> (top-left): Motor spins forward but torque opposes &rarr; <em>Forward Braking</em></li>
+                        <li><strong>Quadrant III</strong> (bottom-left): Motor spins backward and pushes backward &rarr; <em>Reverse Motoring</em></li>
+                        <li><strong>Quadrant IV</strong> (bottom-right): Motor spins backward but torque opposes &rarr; <em>Reverse Braking</em></li>
+                    </ul>
+                    <p>The golden rule: <strong>Power = Torque x Speed.</strong> If $P > 0$, the motor is <em>motoring</em> (consuming energy). If $P < 0$, the motor is <em>braking</em> (generating energy).</p>
+                </div>
+
+                <div class="teaching-block block-deepdive">
+                    <div class="block-label">&#128214; The Deep Dive</div>
+                    <h3>Four-Quadrant Diagram</h3>
+
+                    <!-- SVG: Four-Quadrant Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 580" xmlns="http://www.w3.org/2000/svg" style="max-width:700px;">
+                            <defs>
+                                <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Title -->
+                            <text x="350" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">Four-Quadrant Operation of Electric Drives</text>
+
+                            <!-- Axes -->
+                            <!-- Vertical axis (speed) -->
+                            <line x1="350" y1="520" x2="350" y2="50" stroke="#475569" stroke-width="2.5" marker-end="url(#arr)"/>
+                            <!-- Horizontal axis (torque) -->
+                            <line x1="50" y1="290" x2="650" y2="290" stroke="#475569" stroke-width="2.5" marker-end="url(#arr)"/>
+
+                            <!-- Axis labels -->
+                            <text x="355" y="48" font-size="14" font-weight="700" fill="#475569">+&#969; (speed)</text>
+                            <text x="655" y="295" font-size="14" font-weight="700" fill="#475569">+T</text>
+                            <text x="355" y="540" font-size="13" fill="#64748b">-&#969;</text>
+                            <text x="25" y="295" font-size="13" fill="#64748b" text-anchor="end">-T</text>
+
+                            <!-- Quadrant I - Forward Motoring (top right) -->
+                            <rect x="360" y="60" width="270" height="220" rx="12" fill="#dcfce7" stroke="#22c55e" stroke-width="2" opacity="0.6"/>
+                            <text x="495" y="130" text-anchor="middle" font-size="20" font-weight="800" fill="#15803d">I</text>
+                            <text x="495" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#15803d">Forward Motoring</text>
+                            <text x="495" y="178" text-anchor="middle" font-size="12" fill="#166534">+&#969;, +T</text>
+                            <text x="495" y="198" text-anchor="middle" font-size="12" fill="#166534">P = T&#969; &gt; 0</text>
+                            <text x="495" y="225" text-anchor="middle" font-size="11" fill="#166534" font-style="italic">Motor consumes power</text>
+                            <text x="495" y="245" text-anchor="middle" font-size="11" fill="#166534" font-style="italic">to drive load forward</text>
+
+                            <!-- Arrow showing rotation in Q1 -->
+                            <text x="420" y="100" font-size="24" fill="#22c55e">&#8635;</text>
+
+                            <!-- Quadrant II - Forward Braking (top left) -->
+                            <rect x="70" y="60" width="270" height="220" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" opacity="0.6"/>
+                            <text x="205" y="130" text-anchor="middle" font-size="20" font-weight="800" fill="#b45309">II</text>
+                            <text x="205" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#b45309">Forward Braking</text>
+                            <text x="205" y="178" text-anchor="middle" font-size="12" fill="#92400e">+&#969;, -T</text>
+                            <text x="205" y="198" text-anchor="middle" font-size="12" fill="#92400e">P = T&#969; &lt; 0</text>
+                            <text x="205" y="225" text-anchor="middle" font-size="11" fill="#92400e" font-style="italic">Motor generates power</text>
+                            <text x="205" y="245" text-anchor="middle" font-size="11" fill="#92400e" font-style="italic">while slowing forward motion</text>
+
+                            <!-- Quadrant III - Reverse Motoring (bottom left) -->
+                            <rect x="70" y="300" width="270" height="220" rx="12" fill="#dbeafe" stroke="#2563eb" stroke-width="2" opacity="0.6"/>
+                            <text x="205" y="370" text-anchor="middle" font-size="20" font-weight="800" fill="#1d4ed8">III</text>
+                            <text x="205" y="395" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8">Reverse Motoring</text>
+                            <text x="205" y="418" text-anchor="middle" font-size="12" fill="#1e40af">-&#969;, -T</text>
+                            <text x="205" y="438" text-anchor="middle" font-size="12" fill="#1e40af">P = T&#969; &gt; 0</text>
+                            <text x="205" y="465" text-anchor="middle" font-size="11" fill="#1e40af" font-style="italic">Motor consumes power</text>
+                            <text x="205" y="485" text-anchor="middle" font-size="11" fill="#1e40af" font-style="italic">to drive load in reverse</text>
+
+                            <!-- Quadrant IV - Reverse Braking (bottom right) -->
+                            <rect x="360" y="300" width="270" height="220" rx="12" fill="#f3e8ff" stroke="#a855f7" stroke-width="2" opacity="0.6"/>
+                            <text x="495" y="370" text-anchor="middle" font-size="20" font-weight="800" fill="#7c3aed">IV</text>
+                            <text x="495" y="395" text-anchor="middle" font-size="13" font-weight="700" fill="#7c3aed">Reverse Braking</text>
+                            <text x="495" y="418" text-anchor="middle" font-size="12" fill="#6d28d9">-&#969;, +T</text>
+                            <text x="495" y="438" text-anchor="middle" font-size="12" fill="#6d28d9">P = T&#969; &lt; 0</text>
+                            <text x="495" y="465" text-anchor="middle" font-size="11" fill="#6d28d9" font-style="italic">Motor generates power</text>
+                            <text x="495" y="485" text-anchor="middle" font-size="11" fill="#6d28d9" font-style="italic">while slowing reverse motion</text>
+
+                            <!-- Origin label -->
+                            <text x="340" y="305" text-anchor="end" font-size="12" fill="#475569">O</text>
+
+                            <!-- Power equation -->
+                            <rect x="200" y="545" width="300" height="30" rx="6" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+                            <text x="350" y="565" text-anchor="middle" font-size="13" font-weight="700" fill="#334155">P = T &times; &#969; &nbsp;&nbsp;|&nbsp;&nbsp; +P = motoring &nbsp;&nbsp;|&nbsp;&nbsp; -P = braking</text>
+                        </svg>
+                        <div class="diagram-caption">Figure 10.1 &mdash; Four-quadrant diagram showing all possible operating modes of an electric drive</div>
+                    </div>
+
+                    <h3>The Mathematics</h3>
+                    <div class="equation-box">
+                        <div class="eq-label">Mechanical Power</div>
+                        $$ P = T \times \omega $$
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Quadrant</th>
+                                    <th>Speed ($\omega$)</th>
+                                    <th>Torque ($T$)</th>
+                                    <th>Power ($P$)</th>
+                                    <th>Mode</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>I</strong></td>
+                                    <td>+ (forward)</td>
+                                    <td>+ (forward)</td>
+                                    <td>+ (consuming)</td>
+                                    <td>Forward Motoring</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>II</strong></td>
+                                    <td>+ (forward)</td>
+                                    <td>- (opposing)</td>
+                                    <td>- (generating)</td>
+                                    <td>Forward Braking</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>III</strong></td>
+                                    <td>- (reverse)</td>
+                                    <td>- (reverse)</td>
+                                    <td>+ (consuming)</td>
+                                    <td>Reverse Motoring</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>IV</strong></td>
+                                    <td>- (reverse)</td>
+                                    <td>+ (opposing)</td>
+                                    <td>- (generating)</td>
+                                    <td>Reverse Braking</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="callout callout-info">
+                        <span class="callout-icon">&#128161;</span>
+                        <div>
+                            <strong>Key Pattern:</strong> When torque and speed have the <strong>same sign</strong>, the motor is <em>motoring</em> (consuming power from the supply). When they have <strong>opposite signs</strong>, the motor is <em>braking</em> (generating power that can potentially be recovered).
+                        </div>
+                    </div>
+
+                    <h3>Real-World Example: The Elevator</h3>
+                    <p>Let's trace an elevator through all four quadrants:</p>
+                    <ol>
+                        <li><strong>Quadrant I</strong>: Elevator goes <em>up</em> with passengers &mdash; motor drives the load upward (forward motoring)</li>
+                        <li><strong>Quadrant II</strong>: Elevator slows down approaching the top floor &mdash; motor brakes the upward motion (forward braking, can regenerate!)</li>
+                        <li><strong>Quadrant III</strong>: Elevator goes <em>down</em> with passengers &mdash; motor drives the load downward (reverse motoring)</li>
+                        <li><strong>Quadrant IV</strong>: Elevator slows down approaching the ground floor &mdash; motor brakes the downward motion (reverse braking, can regenerate!)</li>
+                    </ol>
+
+                    <div class="callout callout-challenge">
+                        <span class="callout-icon">&#129300;</span>
+                        <div>
+                            <strong>Challenge:</strong> What about an elevator going <em>down</em> with a heavy load that's heavier than the counterweight? Is the motor motoring or braking? (Hint: Think about which direction the torque needs to act to control the descent.)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="teaching-block block-takeaway">
+                    <div class="block-label">&#127775; Takeaway</div>
+                    <p>
+                        <strong>Four-quadrant operation is what makes electric drives truly versatile.</strong> The ability to smoothly transition between motoring and braking, in both forward and reverse directions, with the possibility of recovering energy during braking &mdash; this is something no combustion engine can match. It's the reason electric drives dominate elevators, trains, cranes, and increasingly, automobiles.
+                    </p>
+                    <p style="margin-top:12px;">
+                        And with that, we've completed our introduction to electric drives! In the next lecture, we'll dive into the <strong>dynamics of electric drive systems</strong> &mdash; the equations that govern how torque, speed, and inertia interact during acceleration, deceleration, and steady state.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ======================================================
+             FINAL SUMMARY
+             ====================================================== -->
+        <div class="section" id="sec-summary">
+            <div class="section-header" style="background: linear-gradient(135deg, var(--accent-primary), #7c3aed); border:none; cursor:default;">
+                <div class="section-number" style="background: rgba(255,255,255,0.3);">&#9733;</div>
+                <div class="section-title-text">
+                    <h2 style="color:#fff;">Lecture 1 &mdash; Complete Summary</h2>
+                    <div class="section-subtitle" style="color:rgba(255,255,255,0.8);">Everything you need to remember from today</div>
+                </div>
+            </div>
+            <div class="section-body">
+                <div class="teaching-block block-takeaway">
+                    <h3>The Big Picture</h3>
+                    <ol>
+                        <li><strong>An electric drive</strong> = electric motor + power converter + control system working together to produce controlled motion.</li>
+                        <li><strong>The system</strong> has five parts: Source, Power Converter, Motor, Control Unit, and Sensing Unit arranged in a closed feedback loop.</li>
+                        <li><strong>Motor choice</strong> depends on the application: DC for controllability, induction for reliability, synchronous for constant speed, special motors for precision.</li>
+                        <li><strong>Power converters</strong> bridge the gap between source and motor: Rectifiers, Inverters, Choppers, and AC Controllers.</li>
+                        <li><strong>Seven factors</strong> guide drive selection: steady-state, dynamic, source, cost, space, environment, and reliability.</li>
+                        <li><strong>Electric drives</strong> offer eight major advantages over other prime movers, with regenerative braking being particularly significant.</li>
+                        <li><strong>Braking</strong> can be friction, dynamic, or regenerative &mdash; only regenerative recovers energy.</li>
+                        <li><strong>Four-quadrant operation</strong> gives electric drives unmatched versatility: motoring and braking in both directions, governed by $P = T \times \omega$.</li>
+                    </ol>
+                    <p style="margin-top:16px; font-weight:600; font-size:1.05rem;">
+                        Next lecture: We dive into the dynamics &mdash; the torque equation, moment of inertia, and how motors accelerate and decelerate real mechanical loads.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>ELE421 &mdash; Electric Drives | Lecture 1: Introduction to Electric Drives</p>
+            <p style="margin-top:4px;">Content based on Presentation 1A</p>
+        </div>
+
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#8593;</button>
+
+    <!-- ======================================================
+         JAVASCRIPT
+         ====================================================== -->
+    <script>
+        // =============================================
+        // THEME TOGGLE
+        // =============================================
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('lecture-theme', next);
+            updateThemeButton(next);
+        }
+
+        function updateThemeButton(theme) {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if (theme === 'dark') {
+                icon.innerHTML = '&#9788;';
+                text.textContent = 'Light';
+            } else {
+                icon.innerHTML = '&#9790;';
+                text.textContent = 'Dark';
+            }
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('lecture-theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+                updateThemeButton(saved);
+            }
+        })();
+
+        // =============================================
+        // SIDEBAR TOGGLE (Mobile)
+        // =============================================
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        // Close sidebar when clicking a link (mobile)
+        document.querySelectorAll('.toc-list a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // =============================================
+        // COLLAPSIBLE SECTIONS
+        // =============================================
+        function toggleSection(header) {
+            const body = header.nextElementSibling;
+            header.classList.toggle('collapsed');
+            body.classList.toggle('collapsed');
+        }
+
+        // =============================================
+        // PROGRESS BAR
+        // =============================================
+        function updateProgressBar() {
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrolled = window.scrollY;
+            const progress = docHeight > 0 ? (scrolled / docHeight) * 100 : 0;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // =============================================
+        // BACK TO TOP BUTTON
+        // =============================================
+        function updateBackToTop() {
+            const btn = document.getElementById('back-to-top');
+            if (window.scrollY > 400) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        }
+
+        // =============================================
+        // ACTIVE TOC TRACKING
+        // =============================================
+        function updateActiveToc() {
+            const sections = document.querySelectorAll('.section[id]');
+            const tocLinks = document.querySelectorAll('.toc-list a');
+            const headerOffset = 80;
+
+            let currentId = '';
+
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= headerOffset + 50) {
+                    currentId = section.id;
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // =============================================
+        // SCROLL EVENT HANDLER (Throttled)
+        // =============================================
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateProgressBar();
+                    updateBackToTop();
+                    updateActiveToc();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Initial calls
+        updateProgressBar();
+        updateActiveToc();
+    </script>
+
+</body>
+</html>

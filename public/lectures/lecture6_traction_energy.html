@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 6 — Electric Traction: Specific Energy Consumption</title>
+
+<!-- MathJax CDN -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      unit: ['{\\,\\text{#1}}', 1]
+    }
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script>
+    (function() {
+        var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+        var s = document.createElement('script');
+        s.async = true; s.src = primary;
+        s.onerror = function() {
+            var s2 = document.createElement('script');
+            s2.async = true; s2.src = fallback;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    })();
+</script>
+
+<style>
+/* ========================================
+   CSS CUSTOM PROPERTIES & THEMING
+   ======================================== */
+:root {
+  /* Light theme */
+  --bg-primary: #fafafa;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: #f5f5f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #444;
+  --text-muted: #777;
+  --border-color: #e0e0e0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Accent colors */
+  --accent-primary: #4361ee;
+  --accent-secondary: #3a0ca3;
+  --accent-gradient: linear-gradient(135deg, #4361ee, #3a0ca3);
+
+  /* Motivation-first colors */
+  --motivation-bg: #fff8e1;
+  --motivation-border: #ffb300;
+  --motivation-text: #e65100;
+  --motivation-icon: #ff8f00;
+
+  --intuition-bg: #e3f2fd;
+  --intuition-border: #42a5f5;
+  --intuition-text: #0d47a1;
+  --intuition-icon: #1976d2;
+
+  --deepdive-bg: #e8f5e9;
+  --deepdive-border: #66bb6a;
+  --deepdive-text: #1b5e20;
+  --deepdive-icon: #388e3c;
+
+  --takeaway-bg: #f3e5f5;
+  --takeaway-border: #ab47bc;
+  --takeaway-text: #4a148c;
+  --takeaway-icon: #7b1fa2;
+
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-active: #4361ee;
+
+  /* Progress bar */
+  --progress-color: #4361ee;
+
+  /* Transitions */
+  --transition-speed: 0.3s;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f0f1a;
+  --bg-secondary: #1a1a2e;
+  --bg-sidebar: #16162a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888;
+  --border-color: #2a2a4a;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+  --accent-primary: #7c8cf8;
+  --accent-secondary: #9d6dff;
+
+  --motivation-bg: #2a2200;
+  --motivation-border: #ff8f00;
+  --motivation-text: #ffcc02;
+  --motivation-icon: #ffb300;
+
+  --intuition-bg: #0a1929;
+  --intuition-border: #42a5f5;
+  --intuition-text: #90caf9;
+  --intuition-icon: #64b5f6;
+
+  --deepdive-bg: #0a1f0a;
+  --deepdive-border: #4caf50;
+  --deepdive-text: #a5d6a7;
+  --deepdive-icon: #66bb6a;
+
+  --takeaway-bg: #1a0a1f;
+  --takeaway-border: #ab47bc;
+  --takeaway-text: #ce93d8;
+  --takeaway-icon: #ba68c8;
+
+  --progress-color: #7c8cf8;
+}
+
+/* ========================================
+   RESET & BASE
+   ======================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 17px;
+  transition: background var(--transition-speed), color var(--transition-speed);
+}
+
+/* ========================================
+   PROGRESS BAR
+   ======================================== */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 4px;
+  background: var(--accent-gradient);
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ========================================
+   BACK TO TOP BUTTON
+   ======================================== */
+#back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  z-index: 9000;
+  transition: transform 0.3s, opacity 0.3s;
+}
+#back-to-top:hover {
+  transform: translateY(-3px);
+}
+
+/* ========================================
+   TOP HEADER
+   ======================================== */
+.top-header {
+  position: fixed;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 9000;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-speed);
+}
+
+.top-header .lecture-tag {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+.top-header .lecture-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.3s;
+  color: var(--text-primary);
+}
+.theme-toggle:hover {
+  border-color: var(--accent-primary);
+  transform: rotate(30deg);
+}
+
+/* Sidebar Toggle (mobile) */
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--text-primary);
+}
+
+/* ========================================
+   SIDEBAR
+   ======================================== */
+.sidebar {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - 64px);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 8000;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background var(--transition-speed);
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.sidebar-section {
+  padding: 8px 20px;
+  margin-bottom: 4px;
+}
+
+.sidebar-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.sidebar a {
+  display: block;
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: 6px 20px 6px 28px;
+  font-size: 14px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+
+.sidebar a:hover {
+  color: var(--accent-primary);
+  background: rgba(67,97,238,0.06);
+}
+
+.sidebar a.active {
+  color: var(--sidebar-active);
+  border-left-color: var(--sidebar-active);
+  background: rgba(67,97,238,0.08);
+  font-weight: 600;
+}
+
+.sidebar a.sub-link {
+  padding-left: 44px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sidebar a.sub-link:hover,
+.sidebar a.sub-link.active {
+  color: var(--accent-primary);
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 90px 40px 80px 40px;
+  max-width: 920px;
+  transition: margin var(--transition-speed);
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+.hero {
+  text-align: center;
+  padding: 60px 20px 50px;
+  margin-bottom: 50px;
+  background: var(--accent-gradient);
+  border-radius: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero .lecture-number {
+  font-size: 14px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero h1 {
+  font-size: 2.8em;
+  font-weight: 800;
+  margin-bottom: 16px;
+  position: relative;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+.hero .subtitle {
+  font-size: 1.15em;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  line-height: 1.6;
+}
+.hero .hero-meta {
+  margin-top: 24px;
+  font-size: 13px;
+  opacity: 0.75;
+  position: relative;
+}
+
+/* ========================================
+   SECTION STRUCTURE
+   ======================================== */
+.section {
+  margin-bottom: 48px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 16px 0;
+  user-select: none;
+}
+
+.section-header h2 {
+  font-size: 1.6em;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.section-header .collapse-icon {
+  font-size: 20px;
+  color: var(--text-muted);
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.section-header:hover .collapse-icon {
+  color: var(--accent-primary);
+}
+
+.section.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.section-body {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  max-height: 12000px;
+  opacity: 1;
+}
+
+.section.collapsed .section-body {
+  max-height: 0;
+  opacity: 0;
+}
+
+.subsection {
+  margin: 30px 0;
+}
+
+.subsection h3 {
+  font-size: 1.25em;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.subsection h4 {
+  font-size: 1.05em;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 20px 0 10px;
+}
+
+/* ========================================
+   MOTIVATION-FIRST BLOCKS
+   ======================================== */
+.block-motivation,
+.block-intuition,
+.block-deepdive,
+.block-takeaway {
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 20px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+
+.block-motivation {
+  background: var(--motivation-bg);
+  border-left-color: var(--motivation-border);
+}
+
+.block-intuition {
+  background: var(--intuition-bg);
+  border-left-color: var(--intuition-border);
+}
+
+.block-deepdive {
+  background: var(--deepdive-bg);
+  border-left-color: var(--deepdive-border);
+}
+
+.block-takeaway {
+  background: var(--takeaway-bg);
+  border-left-color: var(--takeaway-border);
+}
+
+.block-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.block-motivation .block-label {
+  background: rgba(255,179,0,0.2);
+  color: var(--motivation-text);
+}
+
+.block-intuition .block-label {
+  background: rgba(66,165,245,0.2);
+  color: var(--intuition-text);
+}
+
+.block-deepdive .block-label {
+  background: rgba(102,187,106,0.2);
+  color: var(--deepdive-text);
+}
+
+.block-takeaway .block-label {
+  background: rgba(171,71,188,0.2);
+  color: var(--takeaway-text);
+}
+
+.block-motivation p,
+.block-intuition p,
+.block-deepdive p,
+.block-takeaway p {
+  margin: 10px 0;
+}
+
+/* ========================================
+   DIAGRAMS & SVG
+   ======================================== */
+.diagram-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  font-style: italic;
+}
+
+/* ========================================
+   EQUATION BOX
+   ======================================== */
+.equation-box {
+  background: var(--bg-secondary);
+  border: 2px solid var(--deepdive-border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 16px 0;
+  text-align: center;
+  font-size: 1.05em;
+  box-shadow: var(--shadow-sm);
+}
+
+.equation-box .eq-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--deepdive-text);
+  margin-bottom: 8px;
+}
+
+/* ========================================
+   INFO CARDS & LISTS
+   ======================================== */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.info-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.info-card .card-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.info-card h4 {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.info-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+ul, ol {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+li {
+  margin: 6px 0;
+}
+
+/* ========================================
+   TABLE
+   ======================================== */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 15px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table thead {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.data-table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tr:hover td {
+  background: rgba(67,97,238,0.04);
+}
+
+/* ========================================
+   EXAMPLE / PROBLEM BOX
+   ======================================== */
+.example-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin: 24px 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.example-header {
+  background: var(--accent-gradient);
+  color: white;
+  padding: 14px 24px;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.example-body {
+  padding: 24px;
+  overflow: hidden;
+  max-height: 5000px;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+}
+
+.example-box.collapsed .example-body {
+  max-height: 0;
+  padding: 0 24px;
+}
+
+.step {
+  margin: 16px 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent-primary);
+}
+
+.step .step-label {
+  font-weight: 700;
+  color: var(--accent-primary);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   HIGHLIGHT & UTILITY
+   ======================================== */
+.highlight {
+  background: rgba(67,97,238,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin: 16px 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.callout-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.callout-body {
+  flex: 1;
+}
+
+.callout-body strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+strong {
+  color: var(--text-primary);
+}
+
+hr.section-divider {
+  border: none;
+  height: 2px;
+  background: var(--border-color);
+  margin: 40px 0;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar-toggle {
+    display: flex;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 90px 20px 60px;
+  }
+  .hero h1 { font-size: 2em; }
+  .info-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  body { font-size: 15px; }
+  .hero { padding: 40px 16px 36px; }
+  .hero h1 { font-size: 1.6em; }
+  .block-motivation, .block-intuition, .block-deepdive, .block-takeaway {
+    padding: 18px 16px;
+  }
+}
+
+/* SVG styling helpers */
+.svg-text { font-family: 'Segoe UI', system-ui, sans-serif; }
+.svg-title { font-weight: 700; font-size: 16px; }
+.svg-label { font-size: 13px; font-weight: 600; }
+.svg-small { font-size: 11px; }
+.svg-tiny  { font-size: 10px; }
+
+/* Sign convention highlight boxes */
+.sign-positive {
+  background: rgba(76, 175, 80, 0.12);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+}
+.sign-negative {
+  background: rgba(244, 67, 54, 0.10);
+  border: 1px solid rgba(244, 67, 54, 0.35);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+}
+
+/* Phase table highlight */
+.phase-motoring { background: rgba(76,175,80,0.08); }
+.phase-regen { background: rgba(33,150,243,0.08); }
+.phase-coast { background: rgba(255,152,0,0.08); }
+
+/* Print */
+@media print {
+  .sidebar, .top-header, #progress-bar, .theme-toggle, .sidebar-toggle, #back-to-top { display: none !important; }
+  .main-content { margin-left: 0; padding: 20px; }
+  .section.collapsed .section-body { max-height: none; opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============== PROGRESS BAR ============== -->
+<div id="progress-bar"></div>
+
+<!-- ============== BACK TO TOP ============== -->
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">&#8593;</button>
+
+<!-- ============== TOP HEADER ============== -->
+<header class="top-header">
+  <div>
+    <div class="lecture-tag">Lecture 6</div>
+    <div class="lecture-title">Specific Energy Consumption</div>
+  </div>
+  <div class="header-controls">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">&#9776;</button>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark/light mode">&#9790;</button>
+  </div>
+</header>
+
+<!-- ============== SIDEBAR ============== -->
+<nav class="sidebar" id="sidebar" role="navigation" aria-label="Table of Contents">
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Overview</div>
+    <a href="#hero">Introduction</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Core Concepts</div>
+    <a href="#sec-definition">SEC Definition</a>
+    <a href="#energy-flow" class="sub-link">Energy Flow in the System</a>
+    <a href="#sec-force-energy">Force &amp; Energy Components</a>
+    <a href="#sec-sign-convention" class="sub-link">Sign Convention</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Analysis</div>
+    <a href="#sec-duty-cycle">Duty Cycle Analysis</a>
+    <a href="#sec-phase-breakdown" class="sub-link">Phase-by-Phase Breakdown</a>
+    <a href="#sec-regen">Regenerative Braking</a>
+    <a href="#sec-calculation">SEC Calculation Method</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Modern Traction</div>
+    <a href="#sec-im-inverter">IM with Inverter</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Practice Problems</div>
+    <a href="#prob7">Problem 7 &mdash; Uphill SEC</a>
+    <a href="#prob9">Problem 9 &mdash; Regen Braking</a>
+    <a href="#prob10">Problem 10 &mdash; Full Cycle SEC</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Review</div>
+    <a href="#summary">Summary &amp; Takeaways</a>
+  </div>
+</nav>
+
+<!-- ============== MAIN CONTENT ============== -->
+<main class="main-content">
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <div class="lecture-number">Lecture 6 &mdash; Electric Drives</div>
+    <h1>Specific Energy<br>Consumption</h1>
+    <p class="subtitle">How much electricity does it actually cost to move a train? Let's turn physics into money.</p>
+    <div class="hero-meta">Section 3.3 &bull; Electric Traction &bull; kWh per tonne-km</div>
+  </div>
+
+  <!-- ============================================
+       SECTION 1: SEC DEFINITION
+       ============================================ -->
+  <div class="section" id="sec-definition">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#9889; What is Specific Energy Consumption?</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <!-- MOTIVATION -->
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p><strong>Here's the scenario.</strong> You're an engineer at a railway company. The finance team walks in and says: <em>"We need to know the electricity bill for running this train on this route. How many kilowatt-hours per trip?"</em></p>
+        <p>You know the train's speed profile. You know the route (gradients, distances). You know the motor and gearbox efficiencies. But how do you connect all these mechanical facts to an <strong>electricity bill</strong>?</p>
+        <p>That's exactly what Specific Energy Consumption (SEC) gives us &mdash; a single number that captures the energy efficiency of the entire train operation. It's how railway engineers compare routes, train designs, and operating strategies. It's the number that decides whether a railway line is <strong>profitable or bankrupt</strong>.</p>
+      </div>
+
+      <!-- INTUITION -->
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>Think of SEC like fuel economy for a car, but normalized for weight. A car might get 8 litres per 100 km. But that doesn't account for whether the car is empty or carrying 5 passengers with luggage.</p>
+        <p>For trains, we normalize by <strong>both distance and weight</strong>. Why? Because a 200-tonne metro train using the same energy as a 2000-tonne freight train is <em>not</em> equally efficient. By dividing by both tonnes and kilometers, we get a fair comparison metric:</p>
+        <p style="text-align:center; font-size:1.15em; font-weight:600;">SEC = Energy consumed per tonne of train per km of travel</p>
+        <p>Lower SEC = more efficient operation = lower electricity bill = happier accountants.</p>
+      </div>
+
+      <!-- DEEP DIVE -->
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+        <h4>Formal Definition</h4>
+        <p>Specific Energy Consumption is the <strong>electrical energy consumed from the supply</strong>, measured in kWh, to move one tonne of train weight over one kilometre during a complete operating cycle.</p>
+
+        <div class="equation-box">
+          <span class="eq-label">Specific Energy Consumption</span>
+          \[\text{SEC} = \frac{E_{\text{electrical,net}}}{M \times D} \quad \left[\frac{\text{kWh}}{\text{tonne} \cdot \text{km}}\right]\]
+        </div>
+
+        <p>Where:</p>
+        <ul>
+          <li>\(E_{\text{electrical,net}}\) = net electrical energy drawn from the supply (kWh)</li>
+          <li>\(M\) = total train mass (tonnes)</li>
+          <li>\(D\) = total distance traveled in the cycle (km)</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-body">
+            <strong>Key insight</strong>
+            The word "net" matters here. If the train can return energy to the grid during braking (regenerative braking), that energy is subtracted from what was consumed. Without regeneration, we only count the energy drawn from the supply during motoring phases.
+          </div>
+        </div>
+
+        <h4>Typical SEC Values</h4>
+        <table class="data-table">
+          <thead>
+            <tr><th>System Type</th><th>SEC (kWh/tonne-km)</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Metro / Suburban</td><td>0.04 &ndash; 0.08</td><td>Frequent stops, regen helps</td></tr>
+            <tr><td>Intercity Rail</td><td>0.02 &ndash; 0.05</td><td>Long cruise phases</td></tr>
+            <tr><td>High-Speed Rail</td><td>0.03 &ndash; 0.06</td><td>Aero drag dominates</td></tr>
+            <tr><td>Freight</td><td>0.01 &ndash; 0.03</td><td>Heavy, slow, efficient</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAKEAWAY -->
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p><strong>SEC</strong> is the universal metric for traction energy efficiency. Units: <strong>kWh/(tonne&middot;km)</strong>. It accounts for everything &mdash; the motor losses, the gearbox losses, the route profile, and whether we can recover braking energy. Master this number, and you can put a price tag on any train journey.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 2: ENERGY FLOW IN THE SYSTEM
+       ============================================ -->
+  <div class="section" id="energy-flow">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#9879; Energy Flow: Supply to Wheel Rims</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>When we say "the train uses 500 kWh," where does all that energy actually <em>go</em>? Not all of it reaches the wheels. Every component in the chain &mdash; converter, motor, gearbox &mdash; eats a portion. We need to trace the energy from the supply all the way to the rail to understand the losses.</p>
+      </div>
+
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>Imagine pouring water through a series of sieves. You start with a full bucket (electrical energy from the grid), but each sieve (converter, motor, gearbox) lets some water leak out. What arrives at the bottom (the wheels) is less than what you started with. The ratio of what arrives to what you started with is the <strong>overall efficiency \(\eta\)</strong>.</p>
+        <p>Going backwards &mdash; during regenerative braking &mdash; the water flows upward through the same leaky sieves. So the energy returned to the grid is also reduced by \(\eta\).</p>
+      </div>
+
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+        <!-- SVG: Energy Flow Diagram -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 780 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Energy flow diagram from supply to wheel rims">
+            <!-- Supply -->
+            <rect x="10" y="80" width="110" height="80" rx="12" fill="#4361ee" opacity="0.9"/>
+            <text x="65" y="115" text-anchor="middle" fill="white" class="svg-text svg-label">Electrical</text>
+            <text x="65" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">Supply</text>
+            <text x="65" y="155" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">P_in</text>
+
+            <!-- Arrow 1 -->
+            <line x1="120" y1="120" x2="175" y2="120" stroke="#4361ee" stroke-width="3" marker-end="url(#arrowBlue)"/>
+            <text x="148" y="108" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">P_in</text>
+
+            <!-- Converter -->
+            <rect x="175" y="80" width="110" height="80" rx="12" fill="#7c3aed" opacity="0.85"/>
+            <text x="230" y="115" text-anchor="middle" fill="white" class="svg-text svg-label">Power</text>
+            <text x="230" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">Converter</text>
+            <text x="230" y="155" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&eta;_conv</text>
+            <!-- Loss arrow -->
+            <line x1="230" y1="160" x2="230" y2="210" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="230" y="228" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Converter</text>
+            <text x="230" y="242" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Losses</text>
+
+            <!-- Arrow 2 -->
+            <line x1="285" y1="120" x2="340" y2="120" stroke="#7c3aed" stroke-width="3" marker-end="url(#arrowPurple)"/>
+
+            <!-- Motor -->
+            <rect x="340" y="80" width="110" height="80" rx="12" fill="#059669" opacity="0.85"/>
+            <text x="395" y="115" text-anchor="middle" fill="white" class="svg-text svg-label">Electric</text>
+            <text x="395" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">Motor</text>
+            <text x="395" y="155" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&eta;_motor</text>
+            <!-- Loss arrow -->
+            <line x1="395" y1="160" x2="395" y2="210" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="395" y="228" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Motor</text>
+            <text x="395" y="242" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Losses</text>
+
+            <!-- Arrow 3 -->
+            <line x1="450" y1="120" x2="505" y2="120" stroke="#059669" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <text x="478" y="108" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">P_mech</text>
+
+            <!-- Gearbox -->
+            <rect x="505" y="80" width="110" height="80" rx="12" fill="#d97706" opacity="0.85"/>
+            <text x="560" y="115" text-anchor="middle" fill="white" class="svg-text svg-label">Gearbox</text>
+            <text x="560" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">/ Coupling</text>
+            <text x="560" y="155" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&eta;_gear</text>
+            <!-- Loss arrow -->
+            <line x1="560" y1="160" x2="560" y2="210" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="560" y="228" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Gearbox</text>
+            <text x="560" y="242" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Losses</text>
+
+            <!-- Arrow 4 -->
+            <line x1="615" y1="120" x2="660" y2="120" stroke="#d97706" stroke-width="3" marker-end="url(#arrowOrange)"/>
+            <text x="638" y="108" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">P_out</text>
+
+            <!-- Wheels -->
+            <rect x="660" y="80" width="110" height="80" rx="12" fill="#dc2626" opacity="0.85"/>
+            <text x="715" y="115" text-anchor="middle" fill="white" class="svg-text svg-label">Wheel</text>
+            <text x="715" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">Rims</text>
+            <text x="715" y="155" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">F_t &times; v</text>
+
+            <!-- Overall efficiency label -->
+            <rect x="180" y="20" width="420" height="32" rx="8" fill="var(--bg-secondary)" stroke="var(--border-color)" stroke-width="1"/>
+            <text x="390" y="42" text-anchor="middle" fill="var(--accent-primary)" class="svg-text svg-label">&eta; = &eta;_conv &times; &eta;_motor &times; &eta;_gear (overall efficiency)</text>
+
+            <!-- Arrow definitions -->
+            <defs>
+              <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#4361ee"/></marker>
+              <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7c3aed"/></marker>
+              <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#059669"/></marker>
+              <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#d97706"/></marker>
+            </defs>
+          </svg>
+          <div class="diagram-caption">Figure 1 &mdash; Energy flow from supply to wheel rims. Each stage introduces losses, reducing the useful energy delivered.</div>
+        </div>
+
+        <h4>The Power Chain</h4>
+        <p>At any instant, power flows through the chain:</p>
+        \[P_{\text{in}} \xrightarrow{\eta_{\text{conv}}} P_{\text{motor}} \xrightarrow{\eta_{\text{motor}}} P_{\text{mech}} \xrightarrow{\eta_{\text{gear}}} P_{\text{out}}\]
+
+        <p>The output power at the wheel rims is:</p>
+        <div class="equation-box">
+          <span class="eq-label">Power at Wheel Rims</span>
+          \[P_{\text{out}} = F_t \times v = \eta \cdot P_{\text{in}}\]
+        </div>
+
+        <p>Where \(\eta = \eta_{\text{conv}} \times \eta_{\text{motor}} \times \eta_{\text{gear}}\) is the overall efficiency.</p>
+
+        <p>Integrating power over time gives energy:</p>
+        <div class="equation-box">
+          <span class="eq-label">Energy at Wheel Rims</span>
+          \[E_{\text{out}} = \int F_t \cdot v \, dt = \int F_t \, ds = \sum_{i} F_i \times D_i\]
+        </div>
+
+        <p>That last form is key: for each phase of the journey where force \(F_i\) is roughly constant over distance \(D_i\), the mechanical energy is simply <strong>force times distance</strong>.</p>
+
+        <h4>Going from Mechanical to Electrical</h4>
+        <ul>
+          <li><strong>Motoring</strong> (drawing from supply): \(E_{\text{in}} = \dfrac{E_{\text{out,motoring}}}{\eta}\)</li>
+          <li><strong>Regenerating</strong> (returning to supply): \(E_{\text{regen}} = E_{\text{out,braking}} \times \eta\)</li>
+        </ul>
+
+        <div class="callout">
+          <div class="callout-icon">&#9888;&#65039;</div>
+          <div class="callout-body">
+            <strong>Notice the asymmetry!</strong>
+            When motoring, we <em>divide</em> by \(\eta\) (we need more electrical energy than mechanical). When regenerating, we <em>multiply</em> by \(\eta\) (we recover less electrical energy than the mechanical energy at the wheels). Losses bite us both ways!
+          </div>
+        </div>
+      </div>
+
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p>Energy at the wheels = Force &times; Distance. To find electrical energy: divide by \(\eta\) for motoring, multiply by \(\eta\) for regeneration. The overall \(\eta\) captures converter + motor + gearbox losses.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 3: FORCES AND ENERGY COMPONENTS
+       ============================================ -->
+  <div class="section" id="sec-force-energy">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#9881; Force Components &amp; Their Energy</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>We said energy = force &times; distance. But the tractive force isn't constant throughout a journey! The train accelerates, climbs hills, runs at constant speed, and brakes. In each phase, different force components are active. We need to break down the total force into its components and figure out which ones contribute energy in each phase.</p>
+      </div>
+
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>Think of the tractive force as having three "layers" stacked on top of each other:</p>
+        <ol>
+          <li><strong>Resistance \(F_r\)</strong> &mdash; Always present, always opposes motion. Like a tax you pay on every meter you travel.</li>
+          <li><strong>Gradient \(F_g\)</strong> &mdash; Only present on slopes. Going up? It's an extra burden. Going down? It's a gift (free force in your direction).</li>
+          <li><strong>Acceleration \(F_a\)</strong> &mdash; Only present when changing speed. Speeding up costs energy. Slowing down releases energy.</li>
+        </ol>
+        <p>The motor must produce enough force to cover <em>all active layers</em>. During cruising on flat track, only resistance remains. During acceleration uphill, all three stack up.</p>
+      </div>
+
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+        <h4>The Three Force Components</h4>
+        <p>Recall from Lecture 5, the total tractive effort is:</p>
+        <div class="equation-box">
+          <span class="eq-label">Total Tractive Effort</span>
+          \[F_t = F_a + F_g + F_r\]
+        </div>
+
+        <p>Where:</p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Component</th><th>Formula</th><th>When Present</th><th>Sign</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>\(F_a\) &mdash; Acceleration</td>
+              <td>\(277.8 \, M_e \, \alpha\) (N)</td>
+              <td>Acc. &amp; Dec. only</td>
+              <td>+ acc, &minus; dec</td>
+            </tr>
+            <tr>
+              <td>\(F_g\) &mdash; Gradient</td>
+              <td>\(9.81 \, M \, G\) (N)</td>
+              <td>On slopes only</td>
+              <td>+ uphill, &minus; downhill</td>
+            </tr>
+            <tr>
+              <td>\(F_r\) &mdash; Resistance</td>
+              <td>\(r \, M\) (N)</td>
+              <td>Always</td>
+              <td>Always + (opposes motion)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>Here \(\alpha\) is in km/h/s, \(M\) in tonnes, \(M_e = k \cdot M\) is the effective mass (accounting for rotational inertia), \(G\) is the gradient (as a fraction or &permil;), and \(r\) is specific resistance in N/tonne.</p>
+
+        <h4>Energy for Each Phase</h4>
+        <p>For each phase \(i\) of the duty cycle:</p>
+        <div class="equation-box">
+          <span class="eq-label">Phase Energy</span>
+          \[E_i = F_i \times D_i \quad \text{(Joules)}\]
+        </div>
+        <p>where \(F_i\) is the net tractive force during phase \(i\) and \(D_i\) is the distance covered (in metres for Joules, or in km if force is in kN to get kJ).</p>
+
+        <h4>Distance Calculation from Speed-Time</h4>
+        <p>Remember, distance = area under the speed-time curve:</p>
+        <ul>
+          <li><strong>Acceleration (0 to \(V_m\)):</strong> \(D_1 = \frac{1}{2} V_m t_1\)</li>
+          <li><strong>Constant speed:</strong> \(D = V_m \times t\)</li>
+          <li><strong>Deceleration (\(V\) to 0):</strong> \(D = \frac{1}{2} V \cdot t\)</li>
+        </ul>
+        <p>(Convert km/h to m/s by dividing by 3.6, and time in seconds, to get distance in metres.)</p>
+      </div>
+
+      <!-- SIGN CONVENTION SUB-SECTION -->
+      <div class="subsection" id="sec-sign-convention">
+        <h3>Sign Convention: Motoring vs. Generating</h3>
+
+        <div class="block-motivation">
+          <div class="block-label">&#x1F7E1; Why This Matters</div>
+          <p>Getting the signs wrong is the single biggest source of errors in SEC calculations. Let's nail this down once and for all. When is the motor <em>consuming</em> energy, and when is it <em>producing</em> energy?</p>
+        </div>
+
+        <div class="block-deepdive">
+          <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+          <div class="sign-positive">
+            <strong>&#x2795; Positive Force / Positive Energy &mdash; MOTORING</strong>
+            <p>The motor drives the wheels. Electrical energy flows <strong>from supply to motor</strong>. The motor is a consumer.</p>
+            <p>This happens during: acceleration, climbing, cruising against resistance.</p>
+          </div>
+
+          <div class="sign-negative">
+            <strong>&#x2796; Negative Force / Negative Energy &mdash; GENERATING</strong>
+            <p>The load drives the motor. Electrical energy flows <strong>from motor back toward supply</strong>. The motor acts as a generator.</p>
+            <p>This happens in two situations:</p>
+            <ol>
+              <li><strong>Steep downhill:</strong> Gravity force exceeds resistance &rarr; net force pushes the train forward without the motor. The motor must actually <em>resist</em> to maintain speed, acting as a generator.</li>
+              <li><strong>Deceleration (braking):</strong> The train's kinetic energy drives the wheels. The motor converts this into electrical energy.</li>
+            </ol>
+          </div>
+
+          <h4>What Happens to Regenerated Energy?</h4>
+          <p>When the motor generates, the energy can be:</p>
+          <ul>
+            <li><strong>Returned to the grid</strong> (regenerative braking) &mdash; the most efficient option, used in modern inverter-fed systems</li>
+            <li><strong>Stored in batteries or supercapacitors</strong> &mdash; used in some metro and hybrid systems</li>
+            <li><strong>Dissipated in resistors</strong> (dynamic/rheostatic braking) &mdash; energy wasted as heat, but at least it provides controlled braking</li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-icon">&#129300;</div>
+            <div class="callout-body">
+              <strong>Challenge for you:</strong>
+              A train is going downhill on a gentle gradient. The resistance force is 30 N/tonne and the gravity component is 25 N/tonne. Is the motor in motoring or generating mode? Think about it before reading on!
+              <br><br>
+              <em>Answer: Motoring! The gravity force (25 N/t) doesn't fully overcome resistance (30 N/t). The motor still needs to supply 5 N/tonne to maintain speed. The gradient only reduces the motor's burden &mdash; it doesn't eliminate it.</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="block-takeaway">
+          <div class="block-label">&#x1F7E3; Takeaway</div>
+          <p><strong>+E = motoring</strong> (supply feeds motor). <strong>&minus;E = generating</strong> (motor feeds supply). A phase is "generating" only when the <em>total net force</em> is negative &mdash; meaning gravity or deceleration overpowers resistance. Always check the net force, not individual components!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 4: DUTY CYCLE ANALYSIS
+       ============================================ -->
+  <div class="section" id="sec-duty-cycle">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128202; Duty Cycle Energy Analysis</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>A real train journey isn't just "go fast, then stop." It's a complex sequence: accelerate, cruise on flat, climb a hill, descend a hill, coast, and brake. Each phase has different forces, different distances, and different energy requirements. We need a <strong>systematic method</strong> to analyze the entire duty cycle.</p>
+      </div>
+
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>Here's our game plan, nice and simple:</p>
+        <ol>
+          <li>Draw the speed-time diagram for the whole journey</li>
+          <li>Identify each phase (acceleration, cruising, coasting, braking...)</li>
+          <li>For each phase, calculate the distance (area under v-t curve)</li>
+          <li>For each phase, calculate the net force (add up the active components)</li>
+          <li>Energy for each phase = force &times; distance</li>
+          <li>Classify each phase as motoring (+) or generating (&minus;)</li>
+          <li>Sum up, account for efficiency, and calculate SEC</li>
+        </ol>
+        <p>It's bookkeeping. Careful, methodical bookkeeping. Let's set up the diagrams that make this systematic.</p>
+      </div>
+
+      <div class="block-deepdive" id="sec-phase-breakdown">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+        <h4>A Typical 5-Phase Duty Cycle</h4>
+        <p>Let's consider a representative journey with 5 distinct phases:</p>
+
+        <!-- SVG: Speed-Time Diagram -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Speed-time diagram showing 5 phases of a train duty cycle">
+            <!-- Axes -->
+            <line x1="60" y1="280" x2="720" y2="280" stroke="var(--text-primary)" stroke-width="2"/>
+            <line x1="60" y1="280" x2="60" y2="30" stroke="var(--text-primary)" stroke-width="2"/>
+            <!-- Axis labels -->
+            <text x="390" y="320" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-label">Time (s)</text>
+            <text x="25" y="155" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-label" transform="rotate(-90 25 155)">Speed (km/h)</text>
+            <text x="60" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">0</text>
+
+            <!-- Vm line -->
+            <line x1="55" y1="80" x2="60" y2="80" stroke="var(--text-muted)" stroke-width="1"/>
+            <text x="48" y="84" text-anchor="end" fill="var(--text-muted)" class="svg-text svg-small">V_m</text>
+
+            <!-- Phase fills -->
+            <!-- Phase 1: Acceleration -->
+            <polygon points="60,280 180,80 180,280" fill="#4caf50" opacity="0.15"/>
+            <!-- Phase 2: Free run uphill -->
+            <rect x="180" y="80" width="150" height="200" fill="#2196f3" opacity="0.1"/>
+            <!-- Phase 3: Free run downhill -->
+            <rect x="330" y="80" width="130" height="200" fill="#ff9800" opacity="0.1"/>
+            <!-- Phase 4: Coasting -->
+            <polygon points="460,80 560,120 560,280 460,280" fill="#9c27b0" opacity="0.08"/>
+            <!-- Phase 5: Braking -->
+            <polygon points="560,120 700,280 560,280" fill="#f44336" opacity="0.12"/>
+
+            <!-- Speed profile line -->
+            <polyline points="60,280 180,80 330,80 460,80 560,120 700,280" fill="none" stroke="var(--accent-primary)" stroke-width="3.5" stroke-linejoin="round"/>
+
+            <!-- Phase labels -->
+            <text x="120" y="200" text-anchor="middle" fill="#388e3c" class="svg-text svg-small" font-weight="700">Phase 1</text>
+            <text x="120" y="216" text-anchor="middle" fill="#388e3c" class="svg-text svg-tiny">Acceleration</text>
+            <text x="120" y="230" text-anchor="middle" fill="#388e3c" class="svg-text svg-tiny">(level)</text>
+
+            <text x="255" y="140" text-anchor="middle" fill="#1565c0" class="svg-text svg-small" font-weight="700">Phase 2</text>
+            <text x="255" y="156" text-anchor="middle" fill="#1565c0" class="svg-text svg-tiny">Free run</text>
+            <text x="255" y="170" text-anchor="middle" fill="#1565c0" class="svg-text svg-tiny">(up-gradient)</text>
+
+            <text x="395" y="140" text-anchor="middle" fill="#e65100" class="svg-text svg-small" font-weight="700">Phase 3</text>
+            <text x="395" y="156" text-anchor="middle" fill="#e65100" class="svg-text svg-tiny">Free run</text>
+            <text x="395" y="170" text-anchor="middle" fill="#e65100" class="svg-text svg-tiny">(down-gradient)</text>
+
+            <text x="510" y="200" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-small" font-weight="700">Phase 4</text>
+            <text x="510" y="216" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">Coasting</text>
+
+            <text x="630" y="200" text-anchor="middle" fill="#c62828" class="svg-text svg-small" font-weight="700">Phase 5</text>
+            <text x="630" y="216" text-anchor="middle" fill="#c62828" class="svg-text svg-tiny">Braking</text>
+
+            <!-- Time markers -->
+            <text x="60" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">0</text>
+            <text x="180" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">t1</text>
+            <text x="330" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">t2</text>
+            <text x="460" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">t3</text>
+            <text x="560" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">t4</text>
+            <text x="700" y="298" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">t5</text>
+
+            <!-- Dashed V line for coasting -->
+            <line x1="460" y1="80" x2="460" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>
+            <line x1="560" y1="120" x2="560" y2="280" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4,4"/>
+          </svg>
+          <div class="diagram-caption">Figure 2 &mdash; Speed-time diagram for a 5-phase duty cycle. Distance for each phase = area under the curve.</div>
+        </div>
+
+        <h4>Phase-by-Phase Force and Energy</h4>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Phase</th><th>Speed</th><th>Distance</th><th>Net Force</th><th>Energy Sign</th></tr>
+          </thead>
+          <tbody>
+            <tr class="phase-motoring">
+              <td><strong>1. Acceleration</strong><br>(level track)</td>
+              <td>0 &rarr; \(V_m\)</td>
+              <td>\(\frac{1}{2}V_m t_1\)</td>
+              <td>\(F_a + F_r\)</td>
+              <td>&#x2795; Motoring</td>
+            </tr>
+            <tr class="phase-motoring">
+              <td><strong>2. Free run</strong><br>(up-gradient)</td>
+              <td>\(V_m\) const</td>
+              <td>\(V_m \cdot t_2\)</td>
+              <td>\(F_g + F_r\)</td>
+              <td>&#x2795; Motoring</td>
+            </tr>
+            <tr>
+              <td><strong>3. Free run</strong><br>(down-gradient)</td>
+              <td>\(V_m\) const</td>
+              <td>\(V_m \cdot t_3\)</td>
+              <td>\(-F_g + F_r\)</td>
+              <td>&#x2795; or &#x2796; *</td>
+            </tr>
+            <tr class="phase-coast">
+              <td><strong>4. Coasting</strong></td>
+              <td>Decreasing</td>
+              <td>from v-t area</td>
+              <td>0 (supply off)</td>
+              <td>0 (no elec.)</td>
+            </tr>
+            <tr class="phase-regen">
+              <td><strong>5. Braking</strong></td>
+              <td>\(V \rarr 0\)</td>
+              <td>\(\frac{1}{2}V \cdot t_5\)</td>
+              <td>\(-F_d + F_r\)</td>
+              <td>&#x2796; Regen</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>* Phase 3 (downhill free run): If \(|F_g| > F_r\), the net force is negative &mdash; generating mode. If \(|F_g| < F_r\), the motor still needs to supply the difference &mdash; motoring mode.</p>
+
+        <!-- SVG: Force-Distance Diagram -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Force-distance diagram showing positive and negative energy phases">
+            <!-- Axes -->
+            <line x1="60" y1="200" x2="720" y2="200" stroke="var(--text-primary)" stroke-width="2"/>
+            <line x1="60" y1="330" x2="60" y2="30" stroke="var(--text-primary)" stroke-width="2"/>
+            <!-- Axis labels -->
+            <text x="390" y="355" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-label">Distance (m)</text>
+            <text x="22" y="200" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-label" transform="rotate(-90 22 200)">Force (N)</text>
+
+            <!-- Zero line label -->
+            <text x="48" y="204" text-anchor="end" fill="var(--text-muted)" class="svg-text svg-small">0</text>
+            <text x="48" y="104" text-anchor="end" fill="#388e3c" class="svg-text svg-tiny">+F</text>
+            <text x="48" y="274" text-anchor="end" fill="#c62828" class="svg-text svg-tiny">-F</text>
+
+            <!-- Phase 1: large positive rectangle -->
+            <rect x="70" y="70" width="120" height="130" fill="#4caf50" opacity="0.35" stroke="#388e3c" stroke-width="1.5"/>
+            <text x="130" y="140" text-anchor="middle" fill="#1b5e20" class="svg-text svg-small" font-weight="700">E1 (+)</text>
+            <text x="130" y="158" text-anchor="middle" fill="#1b5e20" class="svg-text svg-tiny">Fa + Fr</text>
+            <text x="130" y="215" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">D1</text>
+
+            <!-- Phase 2: medium positive rectangle -->
+            <rect x="200" y="130" width="130" height="70" fill="#2196f3" opacity="0.3" stroke="#1565c0" stroke-width="1.5"/>
+            <text x="265" y="170" text-anchor="middle" fill="#0d47a1" class="svg-text svg-small" font-weight="700">E2 (+)</text>
+            <text x="265" y="186" text-anchor="middle" fill="#0d47a1" class="svg-text svg-tiny">Fg + Fr</text>
+            <text x="265" y="215" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">D2</text>
+
+            <!-- Phase 3: small negative rectangle -->
+            <rect x="340" y="200" width="110" height="50" fill="#ff9800" opacity="0.3" stroke="#e65100" stroke-width="1.5"/>
+            <text x="395" y="230" text-anchor="middle" fill="#e65100" class="svg-text svg-small" font-weight="700">E3 (&minus;)</text>
+            <text x="395" y="246" text-anchor="middle" fill="#e65100" class="svg-text svg-tiny">-Fg + Fr</text>
+            <text x="395" y="265" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">D3</text>
+
+            <!-- Phase 4: coasting - no bar, just label -->
+            <rect x="460" y="195" width="80" height="10" fill="#9c27b0" opacity="0.2" stroke="#6a1b9a" stroke-width="1" stroke-dasharray="4,3"/>
+            <text x="500" y="215" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">Phase 4</text>
+            <text x="500" y="228" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">Coasting</text>
+            <text x="500" y="241" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">(no elec. E)</text>
+
+            <!-- Phase 5: large negative rectangle -->
+            <rect x="550" y="200" width="130" height="100" fill="#f44336" opacity="0.25" stroke="#c62828" stroke-width="1.5"/>
+            <text x="615" y="255" text-anchor="middle" fill="#c62828" class="svg-text svg-small" font-weight="700">E5 (&minus;)</text>
+            <text x="615" y="273" text-anchor="middle" fill="#c62828" class="svg-text svg-tiny">-Fd + Fr</text>
+            <text x="615" y="315" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">D5</text>
+
+            <!-- Labels for positive/negative regions -->
+            <text x="700" y="90" text-anchor="end" fill="#388e3c" class="svg-text svg-small" font-weight="600">MOTORING</text>
+            <text x="700" y="104" text-anchor="end" fill="#388e3c" class="svg-text svg-tiny">(motor consumes)</text>
+            <text x="700" y="300" text-anchor="end" fill="#c62828" class="svg-text svg-small" font-weight="600">GENERATING</text>
+            <text x="700" y="314" text-anchor="end" fill="#c62828" class="svg-text svg-tiny">(motor returns)</text>
+
+            <!-- Dashed zero reference across -->
+            <line x1="65" y1="200" x2="690" y2="200" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4" opacity="0.5"/>
+          </svg>
+          <div class="diagram-caption">Figure 3 &mdash; Force-distance diagram. Areas above the zero line represent energy consumed (motoring). Areas below represent energy that can be recovered (generating).</div>
+        </div>
+
+        <!-- SVG: Energy Diagram (bar chart style) -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Energy bar diagram showing motoring and regenerating contributions">
+            <!-- Title -->
+            <text x="380" y="28" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-title">Energy Balance for Complete Duty Cycle</text>
+
+            <!-- Bars -->
+            <!-- E1 -->
+            <rect x="80" y="80" width="80" height="150" rx="6" fill="#4caf50" opacity="0.75"/>
+            <text x="120" y="165" text-anchor="middle" fill="white" class="svg-text svg-label">E1</text>
+            <text x="120" y="180" text-anchor="middle" fill="rgba(255,255,255,0.8)" class="svg-text svg-tiny">+Large</text>
+            <text x="120" y="250" text-anchor="middle" fill="#388e3c" class="svg-text svg-tiny">Accel</text>
+
+            <!-- E2 -->
+            <rect x="180" y="140" width="80" height="90" rx="6" fill="#2196f3" opacity="0.75"/>
+            <text x="220" y="190" text-anchor="middle" fill="white" class="svg-text svg-label">E2</text>
+            <text x="220" y="205" text-anchor="middle" fill="rgba(255,255,255,0.8)" class="svg-text svg-tiny">+Medium</text>
+            <text x="220" y="250" text-anchor="middle" fill="#1565c0" class="svg-text svg-tiny">Uphill</text>
+
+            <!-- E3 (negative, shown below baseline) -->
+            <rect x="280" y="230" width="80" height="40" rx="6" fill="#ff9800" opacity="0.75"/>
+            <text x="320" y="255" text-anchor="middle" fill="white" class="svg-text svg-label">E3</text>
+            <text x="320" y="285" text-anchor="middle" fill="#e65100" class="svg-text svg-tiny">Downhill</text>
+            <text x="320" y="298" text-anchor="middle" fill="#e65100" class="svg-text svg-tiny">(&minus;small)</text>
+
+            <!-- E4 (zero) -->
+            <rect x="380" y="225" width="80" height="10" rx="3" fill="#9c27b0" opacity="0.4"/>
+            <text x="420" y="222" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-label">E4</text>
+            <text x="420" y="250" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">Coast</text>
+            <text x="420" y="263" text-anchor="middle" fill="#6a1b9a" class="svg-text svg-tiny">(zero)</text>
+
+            <!-- E5 (negative, shown below baseline) -->
+            <rect x="480" y="230" width="80" height="70" rx="6" fill="#f44336" opacity="0.7"/>
+            <text x="520" y="270" text-anchor="middle" fill="white" class="svg-text svg-label">E5</text>
+            <text x="520" y="310" text-anchor="middle" fill="#c62828" class="svg-text svg-tiny">Braking</text>
+
+            <!-- Sum block -->
+            <rect x="600" y="100" width="100" height="200" rx="8" fill="none" stroke="var(--accent-primary)" stroke-width="2.5" stroke-dasharray="6,4"/>
+            <text x="650" y="160" text-anchor="middle" fill="var(--accent-primary)" class="svg-text svg-label">E_net</text>
+            <text x="650" y="180" text-anchor="middle" fill="var(--accent-primary)" class="svg-text svg-tiny">=E1+E2</text>
+            <text x="650" y="195" text-anchor="middle" fill="var(--accent-primary)" class="svg-text svg-tiny">+E3+E5</text>
+            <text x="650" y="220" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">(after &eta;)</text>
+
+            <!-- Baseline -->
+            <line x1="70" y1="230" x2="580" y2="230" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <text x="65" y="234" text-anchor="end" fill="var(--text-muted)" class="svg-text svg-tiny">0</text>
+
+            <!-- Legend -->
+            <rect x="100" y="50" width="12" height="12" rx="2" fill="#4caf50" opacity="0.75"/>
+            <text x="118" y="61" fill="var(--text-secondary)" class="svg-text svg-tiny">Motoring (+)</text>
+            <rect x="210" y="50" width="12" height="12" rx="2" fill="#f44336" opacity="0.7"/>
+            <text x="228" y="61" fill="var(--text-secondary)" class="svg-text svg-tiny">Generating (&minus;)</text>
+            <rect x="320" y="50" width="12" height="12" rx="2" fill="#9c27b0" opacity="0.4"/>
+            <text x="338" y="61" fill="var(--text-secondary)" class="svg-text svg-tiny">No electrical exchange</text>
+          </svg>
+          <div class="diagram-caption">Figure 4 &mdash; Energy contributions from each phase. Green bars above the zero line are energy consumed; red/orange bars below are energy that can be recovered through regeneration.</div>
+        </div>
+      </div>
+
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p>Systematic phase-by-phase analysis: identify the phase &rarr; calculate distance (area under v-t) &rarr; calculate net force (sum of active components) &rarr; compute energy (F &times; D) &rarr; classify as motoring or generating. This is the backbone of every SEC calculation.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 5: REGENERATIVE BRAKING
+       ============================================ -->
+  <div class="section" id="sec-regen">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#9889; Regenerative Braking</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>Every time a train brakes, an enormous amount of kinetic energy is destroyed. A 500-tonne train at 150 km/h carries about 430 MJ of kinetic energy &mdash; enough to power 40 homes for a day. Just throwing that away as heat in brake pads is an engineering crime. Can we recapture it?</p>
+      </div>
+
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>Imagine a ball rolling downhill into a valley. To stop it at the bottom, you could put a wall in the way (friction brakes &mdash; energy becomes heat and noise) or you could use the ball's momentum to wind up a spring (regenerative braking &mdash; energy stored for later use).</p>
+        <p>In electric traction, the "spring" is the power grid itself. When the motor runs as a generator, it pumps electrical energy back into the supply line. Other trains on the same grid can use this energy immediately. It's beautifully efficient &mdash; but not free. The generator conversion has losses (multiply by \(\eta\)), so we don't get everything back.</p>
+      </div>
+
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+        <!-- SVG: Regenerative Braking Flow -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Regenerative braking energy flow diagram">
+            <!-- Title -->
+            <text x="380" y="28" text-anchor="middle" fill="var(--text-primary)" class="svg-text svg-title">Regenerative Braking Energy Flow</text>
+
+            <!-- Kinetic Energy source -->
+            <rect x="20" y="100" width="130" height="80" rx="12" fill="#dc2626" opacity="0.85"/>
+            <text x="85" y="135" text-anchor="middle" fill="white" class="svg-text svg-label">Kinetic</text>
+            <text x="85" y="155" text-anchor="middle" fill="white" class="svg-text svg-label">Energy</text>
+            <text x="85" y="172" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&frac12;Mv&sup2;</text>
+
+            <!-- Arrow -->
+            <line x1="150" y1="140" x2="200" y2="140" stroke="#dc2626" stroke-width="3" marker-end="url(#arrowRed)"/>
+            <text x="175" y="130" text-anchor="middle" fill="var(--text-muted)" class="svg-text svg-tiny">Wheels</text>
+
+            <!-- Motor as Generator -->
+            <rect x="200" y="100" width="140" height="80" rx="12" fill="#059669" opacity="0.85"/>
+            <text x="270" y="128" text-anchor="middle" fill="white" class="svg-text svg-label">Motor as</text>
+            <text x="270" y="148" text-anchor="middle" fill="white" class="svg-text svg-label">Generator</text>
+            <text x="270" y="170" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&times; &eta;_motor &times; &eta;_gear</text>
+
+            <!-- Loss from motor -->
+            <line x1="270" y1="180" x2="270" y2="230" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="270" y="248" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Mech + Elec</text>
+            <text x="270" y="262" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Losses</text>
+
+            <!-- Arrow to converter -->
+            <line x1="340" y1="140" x2="400" y2="140" stroke="#059669" stroke-width="3" marker-end="url(#arrowGreen2)"/>
+
+            <!-- Converter -->
+            <rect x="400" y="100" width="130" height="80" rx="12" fill="#7c3aed" opacity="0.85"/>
+            <text x="465" y="128" text-anchor="middle" fill="white" class="svg-text svg-label">Power</text>
+            <text x="465" y="148" text-anchor="middle" fill="white" class="svg-text svg-label">Converter</text>
+            <text x="465" y="170" text-anchor="middle" fill="rgba(255,255,255,0.7)" class="svg-text svg-tiny">&times; &eta;_conv</text>
+
+            <!-- Loss from converter -->
+            <line x1="465" y1="180" x2="465" y2="230" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="465" y="248" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Converter</text>
+            <text x="465" y="262" text-anchor="middle" fill="#ef4444" class="svg-text svg-tiny">Losses</text>
+
+            <!-- Arrow to grid / options -->
+            <line x1="530" y1="140" x2="580" y2="100" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrowPurple2)"/>
+            <line x1="530" y1="140" x2="580" y2="140" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrowPurple2)"/>
+            <line x1="530" y1="140" x2="580" y2="180" stroke="#7c3aed" stroke-width="2.5" marker-end="url(#arrowPurple2)"/>
+
+            <!-- Options -->
+            <rect x="585" y="75" width="155" height="36" rx="8" fill="#4361ee" opacity="0.8"/>
+            <text x="662" y="98" text-anchor="middle" fill="white" class="svg-text svg-small">Back to Grid</text>
+
+            <rect x="585" y="120" width="155" height="36" rx="8" fill="#d97706" opacity="0.8"/>
+            <text x="662" y="143" text-anchor="middle" fill="white" class="svg-text svg-small">Battery / Capacitor</text>
+
+            <rect x="585" y="165" width="155" height="36" rx="8" fill="#dc2626" opacity="0.7"/>
+            <text x="662" y="188" text-anchor="middle" fill="white" class="svg-text svg-small">Resistor (wasted)</text>
+
+            <!-- Net energy formula -->
+            <rect x="130" y="270" width="500" height="28" rx="6" fill="var(--bg-secondary)" stroke="var(--border-color)"/>
+            <text x="380" y="290" text-anchor="middle" fill="var(--accent-primary)" class="svg-text svg-small" font-weight="600">E_regen = |E_braking| &times; &eta;_motor &times; &eta;_gear &times; &eta;_conv = |E_braking| &times; &eta;</text>
+
+            <defs>
+              <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#dc2626"/></marker>
+              <marker id="arrowGreen2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#059669"/></marker>
+              <marker id="arrowPurple2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#7c3aed"/></marker>
+            </defs>
+          </svg>
+          <div class="diagram-caption">Figure 5 &mdash; Regenerative braking energy flow. Kinetic energy passes through the motor (as generator) and converter back to the supply, with losses at each stage.</div>
+        </div>
+
+        <h4>Energy Recovery Calculation</h4>
+        <p>The energy available at the wheels during a braking phase is:</p>
+        \[E_{\text{braking}} = |F_{\text{net}}| \times D_{\text{braking}}\]
+
+        <p>The electrical energy actually returned to the supply is:</p>
+        <div class="equation-box">
+          <span class="eq-label">Regenerated Energy</span>
+          \[E_{\text{regen}} = |E_{\text{braking}}| \times \eta\]
+        </div>
+
+        <p>Where \(\eta\) is the overall regeneration efficiency (motor + gearbox + converter).</p>
+
+        <div class="callout">
+          <div class="callout-icon">&#128270;</div>
+          <div class="callout-body">
+            <strong>Why can't we recover 100%?</strong>
+            <p>Even with a perfect regeneration system, there are fundamental losses: copper losses in the generator windings, iron losses in the core, friction in the gearbox, switching losses in the converter. A typical overall regeneration efficiency is 70-85%. That means for every 100 kWh of braking energy, only 70-85 kWh makes it back to the grid.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p>Regenerative braking recovers \(E_{\text{regen}} = |E_{\text{braking}}| \times \eta\). Not all braking energy can be recovered &mdash; losses occur at every stage. But even partial recovery significantly reduces the electricity bill, especially for metro systems with frequent stops.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 6: SEC CALCULATION METHOD
+       ============================================ -->
+  <div class="section" id="sec-calculation">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128200; The Complete SEC Calculation</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>We've assembled all the pieces. Now let's put them together into a complete, step-by-step recipe that you can apply to any duty cycle. This is the method you'll use in every exam problem and every real engineering calculation.</p>
+      </div>
+
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Complete Method</div>
+
+        <div class="step">
+          <div class="step-label">Step 1 &mdash; Draw the speed-time diagram</div>
+          <p>Identify every phase: acceleration, cruising, gradient changes, coasting, braking. Mark the times and speeds.</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 2 &mdash; Calculate distances</div>
+          <p>For each phase, find the distance from the area under the speed-time curve. Remember to convert units (km/h &times; seconds &divide; 3.6 = metres, or km/h &times; hours = km).</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 3 &mdash; Calculate forces for each phase</div>
+          <p>Add up the active force components for each phase:</p>
+          <ul>
+            <li>Acceleration: \(F = 277.8 \, M_e \, \alpha + 9.81 \, M \, G + r \, M\)</li>
+            <li>Constant speed: \(F = 9.81 \, M \, G + r \, M\) (no acceleration force)</li>
+            <li>Coasting: no electrical force needed</li>
+            <li>Braking: \(F = -277.8 \, M_e \, \beta + r \, M\) (deceleration opposes motion)</li>
+          </ul>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 4 &mdash; Calculate energy for each phase</div>
+          <p>\(E_i = F_i \times D_i\) (in watt-seconds if F in N and D in m)</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 5 &mdash; Separate motoring and braking</div>
+          <p>\(E_{\text{motoring}} = \sum (\text{all positive } E_i)\)</p>
+          <p>\(E_{\text{braking}} = \sum (|\text{all negative } E_i|)\)</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 6 &mdash; Calculate electrical energy</div>
+          <p>Electrical energy drawn from supply during motoring:</p>
+          \[E_{\text{in}} = \frac{E_{\text{motoring}}}{\eta}\]
+          <p>Electrical energy returned during regeneration:</p>
+          \[E_{\text{regen}} = E_{\text{braking}} \times \eta\]
+          <p>Net electrical energy consumed:</p>
+          <div class="equation-box">
+            <span class="eq-label">Net Electrical Energy</span>
+            \[E_{\text{net}} = E_{\text{in}} - E_{\text{regen}} = \frac{E_{\text{motoring}}}{\eta} - E_{\text{braking}} \times \eta\]
+          </div>
+          <p>If there is no regeneration (e.g., dynamic braking only), then \(E_{\text{net}} = E_{\text{in}} = E_{\text{motoring}} / \eta\).</p>
+        </div>
+
+        <div class="step">
+          <div class="step-label">Step 7 &mdash; Calculate SEC</div>
+          <p>Convert joules to kWh (\(1 \text{ kWh} = 3.6 \times 10^6 \text{ J}\)):</p>
+          <div class="equation-box">
+            <span class="eq-label">Specific Energy Consumption</span>
+            \[\boxed{\text{SEC} = \frac{E_{\text{net}} \;(\text{Wh})}{M \;(\text{t}) \times D \;(\text{km}) \times 1000} \quad \text{kWh/(t} \cdot \text{km)}}\]
+          </div>
+          <p>Or equivalently: \(\text{SEC} = \dfrac{E_{\text{net}} \;(\text{J})}{M \;(\text{t}) \times D \;(\text{km}) \times 3.6 \times 10^6}\)</p>
+        </div>
+
+        <div class="callout">
+          <div class="callout-icon">&#9888;&#65039;</div>
+          <div class="callout-body">
+            <strong>Unit conversion trap!</strong>
+            <p>The most common error in SEC problems is unit confusion. Keep track carefully:</p>
+            <ul>
+              <li>Forces in Newtons (N), distances in metres (m) &rarr; energy in Joules (J) = Watt-seconds (Ws)</li>
+              <li>1 kWh = 3,600,000 J = 3.6 &times; 10<sup>6</sup> J</li>
+              <li>1 Wh = 3,600 J</li>
+              <li>Speed conversion: 1 km/h = 1/3.6 m/s</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p>Seven steps: Diagram &rarr; Distances &rarr; Forces &rarr; Energies &rarr; Separate &plusmn; &rarr; Efficiency correction &rarr; SEC. The net electrical energy is \(E_{\text{motoring}}/\eta - E_{\text{braking}} \times \eta\). Then divide by mass &times; distance. That's the complete recipe.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 7: MODERN TRACTION WITH IM + INVERTER
+       ============================================ -->
+  <div class="section" id="sec-im-inverter">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128268; Induction Motor with Inverter in Traction</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-motivation">
+        <div class="block-label">&#x1F7E1; The Problem</div>
+        <p>Historically, DC series motors dominated traction. But they can't easily regenerate energy. Modern systems use induction motors with inverters. Why did the entire industry switch, and how does this affect our energy calculations?</p>
+      </div>
+
+      <div class="block-intuition">
+        <div class="block-label">&#x1F535; The Intuition</div>
+        <p>The DC series motor is like a one-way street &mdash; power flows from supply to wheels, period. The induction motor with an inverter is like a <strong>two-way highway</strong>. By changing the inverter's switching pattern, we can:</p>
+        <ul>
+          <li>Drive the motor forward (motoring) &mdash; consuming energy</li>
+          <li>Drive the motor backward as a generator &mdash; returning energy</li>
+          <li>Control speed smoothly at any frequency</li>
+          <li>Operate in all four quadrants (forward/reverse, motoring/braking)</li>
+        </ul>
+        <p>This four-quadrant capability is what makes regenerative braking practical and efficient in modern electric trains.</p>
+      </div>
+
+      <div class="block-deepdive">
+        <div class="block-label">&#x1F7E2; The Deep Dive</div>
+
+        <h4>Key Advantages for SEC</h4>
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>DC Series Motor</th><th>IM + Inverter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Regenerative braking</td>
+              <td>Difficult / not practical</td>
+              <td>Built-in, efficient</td>
+            </tr>
+            <tr>
+              <td>Speed control</td>
+              <td>Resistor-based (lossy)</td>
+              <td>Variable frequency (efficient)</td>
+            </tr>
+            <tr>
+              <td>Four-quadrant operation</td>
+              <td>Needs complex switching</td>
+              <td>Natural capability</td>
+            </tr>
+            <tr>
+              <td>Typical SEC reduction</td>
+              <td>Baseline</td>
+              <td>20&ndash;40% lower</td>
+            </tr>
+            <tr>
+              <td>Maintenance</td>
+              <td>Brushes, commutator wear</td>
+              <td>Nearly maintenance-free</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Impact on SEC Calculation</h4>
+        <p>With IM + inverter systems, we can <strong>always assume regeneration is possible</strong> (unless stated otherwise). The SEC calculation uses the full formula:</p>
+        \[\text{SEC} = \frac{E_{\text{motoring}}/\eta - E_{\text{braking}} \times \eta}{M \times D}\]
+        <p>The regeneration term \(E_{\text{braking}} \times \eta\) directly reduces the electricity bill. In metro systems with stops every 1-2 km, this can save 20-40% of energy compared to non-regenerative systems.</p>
+      </div>
+
+      <div class="block-takeaway">
+        <div class="block-label">&#x1F7E3; Takeaway</div>
+        <p>Modern IM + inverter traction enables efficient regenerative braking, typically reducing SEC by 20-40%. The inverter provides four-quadrant operation &mdash; smooth speed control in both directions with seamless transitions between motoring and generating.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SECTION 8: PRACTICE PROBLEMS
+       ============================================ -->
+
+  <!-- PROBLEM 7 -->
+  <div class="section" id="prob7">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128221; Problem 7 &mdash; Uphill Journey SEC</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#128218;</span> Problem Statement
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+          <p>A <strong>500-tonne train</strong> climbs an up-gradient with \(G = 10\) (i.e., 10&permil;). The duty cycle has four phases:</p>
+          <ol>
+            <li>Acceleration at \(\alpha = 1.5\) km/h/s for 100 seconds</li>
+            <li>Constant speed for 60 minutes</li>
+            <li>Coasting for 3 minutes</li>
+            <li>Dynamic braking at \(\beta = 2\) km/h/s to rest</li>
+          </ol>
+          <p>Given: \(r = 30\) N/tonne, \(M_e = 1.1M\), \(\eta = 85\%\)</p>
+          <p><strong>Find:</strong> (a) Average speed &nbsp; (b) Specific energy consumption</p>
+        </div>
+      </div>
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#9999;&#65039;</span> Detailed Solution
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+
+          <div class="step">
+            <div class="step-label">Step 1 &mdash; Basic Parameters</div>
+            <p>\(M = 500\) t, \(M_e = 1.1 \times 500 = 550\) t, \(G = 10\), \(r = 30\) N/t, \(\eta = 0.85\)</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 2 &mdash; Maximum Speed</div>
+            <p>\(V_m = \alpha \times t_1 = 1.5 \times 100 = 150\) km/h = \(150/3.6 = 41.67\) m/s</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 3 &mdash; Phase Times and Distances</div>
+            <p><strong>Phase 1 (Acceleration):</strong> \(t_1 = 100\) s</p>
+            <p>\(D_1 = \frac{1}{2} \times 41.67 \times 100 = 2083.3\) m</p>
+
+            <p><strong>Phase 2 (Constant speed):</strong> \(t_2 = 60 \times 60 = 3600\) s</p>
+            <p>\(D_2 = 41.67 \times 3600 = 150{,}000\) m = 150 km</p>
+
+            <p><strong>Phase 3 (Coasting):</strong> \(t_3 = 3 \times 60 = 180\) s</p>
+            <p>During coasting, speed decreases from \(V_m\). Let's approximate the average speed during coasting. The deceleration during coasting is caused by resistance + gradient. The coasting deceleration:</p>
+            <p>\(a_{\text{coast}} = \frac{(F_g + F_r)}{277.8 \times M_e} = \frac{(9.81 \times 500 \times 10) + (30 \times 500)}{277.8 \times 550}\)</p>
+            <p>\(= \frac{49050 + 15000}{152790} = \frac{64050}{152790} = 0.419\) km/h/s</p>
+            <p>Speed drop = \(0.419 \times 180 = 75.5\) km/h</p>
+            <p>Speed at end of coasting = \(150 - 75.5 = 74.5\) km/h = 20.7 m/s</p>
+            <p>Average speed during coasting = \(\frac{150 + 74.5}{2} = 112.25\) km/h = 31.18 m/s</p>
+            <p>\(D_3 = 31.18 \times 180 = 5612\) m</p>
+
+            <p><strong>Phase 4 (Braking):</strong> \(\beta = 2\) km/h/s, initial speed = 74.5 km/h</p>
+            <p>\(t_4 = 74.5 / 2 = 37.25\) s</p>
+            <p>\(D_4 = \frac{1}{2} \times (74.5/3.6) \times 37.25 = \frac{1}{2} \times 20.69 \times 37.25 = 385.4\) m</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 4 &mdash; Total Distance and Average Speed</div>
+            <p>\(D_{\text{total}} = 2083.3 + 150000 + 5612 + 385.4 = 158{,}081\) m = <strong>158.08 km</strong></p>
+            <p>Total time = \(100 + 3600 + 180 + 37.25 = 3917.25\) s = 1.088 hours</p>
+            <p><strong>(a) Average speed</strong> = \(\frac{158.08}{1.088} = \mathbf{145.3}\) <strong>km/h</strong></p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 5 &mdash; Forces for Each Phase</div>
+            <p><strong>Phase 1 (Acceleration up-gradient):</strong></p>
+            <p>\(F_1 = 277.8 \times M_e \times \alpha + 9.81 \times M \times G + r \times M\)</p>
+            <p>\(= 277.8 \times 550 \times 1.5 + 9.81 \times 500 \times 10 + 30 \times 500\)</p>
+            <p>\(= 229{,}185 + 49{,}050 + 15{,}000 = 293{,}235\) N</p>
+
+            <p><strong>Phase 2 (Constant speed up-gradient):</strong></p>
+            <p>\(F_2 = 9.81 \times 500 \times 10 + 30 \times 500 = 49{,}050 + 15{,}000 = 64{,}050\) N</p>
+
+            <p><strong>Phase 3 (Coasting):</strong> No electrical energy (supply disconnected)</p>
+
+            <p><strong>Phase 4 (Dynamic braking):</strong> Energy dissipated in resistors (not returned to grid)</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 6 &mdash; Energy Calculation</div>
+            <p><strong>Phase 1:</strong> \(E_1 = F_1 \times D_1 = 293{,}235 \times 2{,}083.3 = 610.98 \times 10^6\) J</p>
+            <p><strong>Phase 2:</strong> \(E_2 = F_2 \times D_2 = 64{,}050 \times 150{,}000 = 9{,}607.5 \times 10^6\) J</p>
+            <p><strong>Phase 3:</strong> \(E_3 = 0\) (no electrical energy)</p>
+            <p><strong>Phase 4:</strong> \(E_4 = 0\) for grid (dynamic braking &mdash; energy wasted in resistors)</p>
+            <p>Total motoring energy: \(E_{\text{motor}} = (610.98 + 9607.5) \times 10^6 = 10{,}218.5 \times 10^6\) J</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 7 &mdash; Electrical Energy and SEC</div>
+            <p>Electrical energy from supply:</p>
+            <p>\(E_{\text{in}} = \frac{E_{\text{motor}}}{\eta} = \frac{10{,}218.5 \times 10^6}{0.85} = 12{,}021.8 \times 10^6\) J</p>
+            <p>Convert to kWh: \(E_{\text{in}} = \frac{12{,}021.8 \times 10^6}{3.6 \times 10^6} = 3{,}339.4\) kWh</p>
+            <p><strong>(b) SEC</strong> = \(\frac{3339.4}{500 \times 158.08} = \frac{3339.4}{79040} = \mathbf{0.0423}\) <strong>kWh/(t&middot;km)</strong></p>
+          </div>
+
+          <div class="callout">
+            <div class="callout-icon">&#128161;</div>
+            <div class="callout-body">
+              <strong>Observation:</strong> Note how Phase 2 (constant speed uphill) dominates the energy consumption. It accounts for about 94% of the total energy! This makes sense &mdash; the train climbs for a full hour. The acceleration phase, despite having a much larger force, covers a relatively short distance.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- PROBLEM 9 -->
+  <div class="section" id="prob9">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128221; Problem 9 &mdash; Regenerative Braking Energy</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#128218;</span> Problem Statement
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+          <p>A <strong>500-tonne train</strong> on a down-gradient of \(G = 8\) (8&permil;) decelerates from 150 km/h to 100 km/h in 50 seconds using regenerative braking.</p>
+          <p>Given: \(r = 40\) N/tonne, \(M_e = 1.1M\), \(\eta_{\text{regen}} = 80\%\)</p>
+          <p><strong>Find:</strong> Energy returned to the supply line</p>
+        </div>
+      </div>
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#9999;&#65039;</span> Detailed Solution
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+
+          <div class="step">
+            <div class="step-label">Step 1 &mdash; Deceleration Rate</div>
+            <p>\(\beta = \frac{V_1 - V_2}{t} = \frac{150 - 100}{50} = 1\) km/h/s</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 2 &mdash; Forces Acting</div>
+            <p><strong>Deceleration force</strong> (opposes motion, acts as braking):</p>
+            <p>\(F_d = 277.8 \times M_e \times \beta = 277.8 \times 550 \times 1 = 152{,}790\) N</p>
+
+            <p><strong>Gravity force</strong> (downhill &mdash; helps motion, so it acts in the direction of travel):</p>
+            <p>\(F_g = 9.81 \times M \times G = 9.81 \times 500 \times 8 = 39{,}240\) N (in direction of motion)</p>
+
+            <p><strong>Resistance force</strong> (always opposes motion):</p>
+            <p>\(F_r = r \times M = 40 \times 500 = 20{,}000\) N (opposing motion)</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 3 &mdash; Net Force at Wheel Rims</div>
+            <p>Let's think carefully about the forces. Taking the direction of motion as positive:</p>
+            <ul>
+              <li>Gravity: \(+39{,}240\) N (pushing train forward downhill)</li>
+              <li>Resistance: \(-20{,}000\) N (opposing motion)</li>
+              <li>Braking force needed: We need net deceleration of 1 km/h/s</li>
+            </ul>
+            <p>The total braking force required at the wheels is:</p>
+            <p>\(F_{\text{brake}} = F_d - F_g + F_r = 152{,}790 - 39{,}240 + 20{,}000 = 133{,}550\) N</p>
+
+            <p>Wait &mdash; let me reconsider. The deceleration force \(F_d = 277.8 M_e \beta\) is the total inertial force needed. The motor must provide a braking force that, combined with resistance and accounting for gravity, produces this deceleration.</p>
+
+            <p>Motor braking force = \(F_d + F_r - F_g = 152{,}790 + 20{,}000 - 39{,}240 = 133{,}550\) N</p>
+
+            <p>This is the mechanical energy the motor absorbs at the wheels (acting as generator).</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 4 &mdash; Distance During Braking</div>
+            <p>Average speed = \(\frac{150 + 100}{2} = 125\) km/h = 34.72 m/s</p>
+            <p>\(D = 34.72 \times 50 = 1{,}736.1\) m</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 5 &mdash; Energy at Wheel Rims</div>
+            <p>\(E_{\text{wheels}} = F_{\text{brake}} \times D = 133{,}550 \times 1{,}736.1 = 231.8 \times 10^6\) J</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 6 &mdash; Energy Returned to Supply</div>
+            <p>\(E_{\text{regen}} = E_{\text{wheels}} \times \eta = 231.8 \times 10^6 \times 0.80 = 185.4 \times 10^6\) J</p>
+            <p>Convert to kWh:</p>
+            <p>\(E_{\text{regen}} = \frac{185.4 \times 10^6}{3.6 \times 10^6} = \mathbf{51.5 \text{ kWh}}\)</p>
+          </div>
+
+          <div class="callout">
+            <div class="callout-icon">&#129300;</div>
+            <div class="callout-body">
+              <strong>Think about this:</strong>
+              <p>Notice the gravity force <em>reduces</em> the motor's braking effort. On a downhill, gravity is already helping to push the train forward, so the motor doesn't need to absorb as much energy to slow it down. If the gradient were steeper, even less energy would be available for regeneration. And if the gradient were steep <em>enough</em>, you might need the motor to provide a driving force (motoring) even while decelerating!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- PROBLEM 10 -->
+  <div class="section" id="prob10">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128221; Problem 10 &mdash; Complex Multi-Phase SEC</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#128218;</span> Problem Statement
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+          <p>A <strong>500-tonne train</strong> completes a duty cycle with five phases:</p>
+          <ol>
+            <li>Acceleration at \(\alpha = 3\) km/h/s on level track for 1 minute</li>
+            <li>Constant speed for 30 minutes on up-gradient \(G = 10\)</li>
+            <li>Constant speed for 30 minutes on down-gradient \(G = 6\)</li>
+            <li>Coasting for 5 minutes on level track</li>
+            <li>Regenerative braking at \(\beta = 3\) km/h/s on level track to stop</li>
+          </ol>
+          <p>Given: \(r = 30\) N/tonne, \(M_e = 1.1M\), \(\eta = 85\%\)</p>
+          <p><strong>Find:</strong> Specific Energy Consumption</p>
+        </div>
+      </div>
+
+      <div class="example-box">
+        <div class="example-header" onclick="toggleExample(this)">
+          <span>&#9999;&#65039;</span> Detailed Solution
+          <span style="margin-left:auto;">&#9660;</span>
+        </div>
+        <div class="example-body">
+
+          <div class="step">
+            <div class="step-label">Step 1 &mdash; Parameters</div>
+            <p>\(M = 500\) t, \(M_e = 550\) t, \(r = 30\) N/t, \(\eta = 0.85\)</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 2 &mdash; Maximum Speed</div>
+            <p>\(V_m = \alpha \times t_1 = 3 \times 60 = 180\) km/h = 50 m/s</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 3 &mdash; Phase-by-Phase Analysis</div>
+
+            <h4>Phase 1: Acceleration on Level Track</h4>
+            <p>\(t_1 = 60\) s, \(D_1 = \frac{1}{2} \times 50 \times 60 = 1{,}500\) m</p>
+            <p>\(F_1 = 277.8 \times 550 \times 3 + 0 + 30 \times 500 = 458{,}370 + 15{,}000 = 473{,}370\) N</p>
+            <p>\(E_1 = 473{,}370 \times 1{,}500 = 710.06 \times 10^6\) J <span style="color:#388e3c; font-weight:700;">(+Motoring)</span></p>
+
+            <h4>Phase 2: Constant Speed, Up-Gradient G=10</h4>
+            <p>\(t_2 = 30 \times 60 = 1{,}800\) s, \(D_2 = 50 \times 1{,}800 = 90{,}000\) m</p>
+            <p>\(F_2 = 9.81 \times 500 \times 10 + 30 \times 500 = 49{,}050 + 15{,}000 = 64{,}050\) N</p>
+            <p>\(E_2 = 64{,}050 \times 90{,}000 = 5{,}764.5 \times 10^6\) J <span style="color:#388e3c; font-weight:700;">(+Motoring)</span></p>
+
+            <h4>Phase 3: Constant Speed, Down-Gradient G=6</h4>
+            <p>\(t_3 = 1{,}800\) s, \(D_3 = 50 \times 1{,}800 = 90{,}000\) m</p>
+            <p>\(F_3 = -9.81 \times 500 \times 6 + 30 \times 500 = -29{,}430 + 15{,}000 = -14{,}430\) N</p>
+            <p>The force is <strong>negative</strong>! Gravity exceeds resistance &mdash; the motor acts as a generator.</p>
+            <p>\(E_3 = -14{,}430 \times 90{,}000 = -1{,}298.7 \times 10^6\) J <span style="color:#c62828; font-weight:700;">(&minus;Generating)</span></p>
+
+            <h4>Phase 4: Coasting on Level Track</h4>
+            <p>\(t_4 = 5 \times 60 = 300\) s. Supply disconnected.</p>
+            <p>Coasting deceleration = \(\frac{F_r}{277.8 \times M_e} = \frac{15{,}000}{277.8 \times 550} = 0.0982\) km/h/s</p>
+            <p>Speed drop = \(0.0982 \times 300 = 29.4\) km/h</p>
+            <p>Speed at end of coasting = \(180 - 29.4 = 150.6\) km/h = 41.83 m/s</p>
+            <p>Average speed = \(\frac{50 + 41.83}{2} = 45.92\) m/s</p>
+            <p>\(D_4 = 45.92 \times 300 = 13{,}775\) m</p>
+            <p>\(E_4 = 0\) (no electrical energy exchange)</p>
+
+            <h4>Phase 5: Regenerative Braking on Level Track</h4>
+            <p>Initial speed = 150.6 km/h = 41.83 m/s, \(\beta = 3\) km/h/s</p>
+            <p>\(t_5 = 150.6 / 3 = 50.2\) s</p>
+            <p>\(D_5 = \frac{1}{2} \times 41.83 \times 50.2 = 1{,}049.9\) m</p>
+            <p>Braking force: \(F_d = 277.8 \times 550 \times 3 = 458{,}370\) N (deceleration)</p>
+            <p>Motor braking force = \(F_d - F_r = 458{,}370 - 15{,}000 = 443{,}370\) N</p>
+            <p>(Resistance helps the braking, so motor absorbs less)</p>
+            <p>\(E_5 = -443{,}370 \times 1{,}049.9 = -465.5 \times 10^6\) J <span style="color:#c62828; font-weight:700;">(&minus;Generating)</span></p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 4 &mdash; Energy Summation</div>
+            <p><strong>Motoring energy (at wheels):</strong></p>
+            <p>\(E_{\text{motor}} = E_1 + E_2 = (710.06 + 5764.5) \times 10^6 = 6{,}474.56 \times 10^6\) J</p>
+
+            <p><strong>Generating energy (at wheels):</strong></p>
+            <p>\(E_{\text{gen}} = |E_3| + |E_5| = (1298.7 + 465.5) \times 10^6 = 1{,}764.2 \times 10^6\) J</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 5 &mdash; Electrical Energy</div>
+            <p>Electrical energy consumed (motoring):</p>
+            <p>\(E_{\text{in}} = \frac{6{,}474.56 \times 10^6}{0.85} = 7{,}617.1 \times 10^6\) J = \(\frac{7617.1 \times 10^6}{3.6 \times 10^6} = 2{,}115.9\) kWh</p>
+
+            <p>Electrical energy returned (regeneration):</p>
+            <p>\(E_{\text{regen}} = 1{,}764.2 \times 10^6 \times 0.85 = 1{,}499.6 \times 10^6\) J = 416.5 kWh</p>
+
+            <p>Net electrical energy:</p>
+            <p>\(E_{\text{net}} = 2{,}115.9 - 416.5 = 1{,}699.4\) kWh</p>
+          </div>
+
+          <div class="step">
+            <div class="step-label">Step 6 &mdash; SEC Calculation</div>
+            <p>Total distance: \(D = 1500 + 90000 + 90000 + 13775 + 1049.9 = 196{,}325\) m = 196.33 km</p>
+            <p>\[\boxed{\text{SEC} = \frac{1699.4}{500 \times 196.33} = \frac{1699.4}{98{,}165} = \mathbf{0.0173} \text{ kWh/(t\(\cdot\)km)}}\]</p>
+          </div>
+
+          <div class="callout">
+            <div class="callout-icon">&#128161;</div>
+            <div class="callout-body">
+              <strong>Analysis of the result:</strong>
+              <p>This SEC of 0.0173 kWh/(t&middot;km) is relatively low. Why? Two reasons:</p>
+              <ol>
+                <li>The down-gradient section (Phase 3) generates significant energy that is returned to the grid</li>
+                <li>Regenerative braking (Phase 5) recovers additional energy</li>
+              </ol>
+              <p>Together, regeneration reduced the energy bill by about \(\frac{416.5}{2115.9} \approx 20\%\). In a metro system with more frequent stops, this percentage would be even higher!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- ============================================
+       SUMMARY SECTION
+       ============================================ -->
+  <div class="section" id="summary">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#128218; Complete Summary &amp; Takeaways</h2>
+      <span class="collapse-icon">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="block-takeaway" style="border-left-width: 6px;">
+        <div class="block-label">&#x1F4DD; Complete Summary</div>
+
+        <h4>1. SEC is the Universal Traction Energy Metric</h4>
+        <p>SEC = kWh/(tonne&middot;km). It normalizes energy consumption by both train weight and distance, enabling fair comparisons between different trains, routes, and operating strategies.</p>
+
+        <h4>2. Energy at Wheels = Force &times; Distance</h4>
+        <p>Break the journey into phases. For each phase: identify the active force components (\(F_a, F_g, F_r\)), calculate the distance, and compute energy. The sign of the net force determines whether the phase is motoring (+) or generating (&minus;).</p>
+
+        <h4>3. Efficiency Works Both Ways</h4>
+        <p>Motoring: \(E_{\text{electrical}} = E_{\text{mechanical}} / \eta\) (we need MORE electrical than mechanical). Regenerating: \(E_{\text{returned}} = E_{\text{mechanical}} \times \eta\) (we recover LESS than the mechanical energy). Losses always work against us.</p>
+
+        <h4>4. Regenerative Braking Saves 20-40%</h4>
+        <p>Modern IM + inverter systems enable practical regenerative braking. The energy equation becomes: \(E_{\text{net}} = E_{\text{motoring}}/\eta - E_{\text{braking}} \times \eta\).</p>
+
+        <h4>5. The 7-Step Method</h4>
+        <p>Diagram &rarr; Distances &rarr; Forces &rarr; Phase Energies &rarr; Separate &plusmn; &rarr; Efficiency &rarr; SEC. Follow this systematically and you'll never go wrong.</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="card-icon">&#128208;</div>
+          <h4>Key Equations</h4>
+          <p>\(\text{SEC} = \frac{E_{\text{net}}}{M \times D}\)</p>
+          <p>\(E_i = F_i \times D_i\)</p>
+          <p>\(E_{\text{net}} = \frac{E_{\text{mot}}}{\eta} - E_{\text{brk}} \times \eta\)</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">&#128290;</div>
+          <h4>Key Conversions</h4>
+          <p>1 kWh = 3.6 &times; 10<sup>6</sup> J</p>
+          <p>1 km/h = 1/3.6 m/s</p>
+          <p>277.8 = 1000/3.6 (unit factor)</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">&#128680;</div>
+          <h4>Common Pitfalls</h4>
+          <p>Unit confusion (J vs kWh, m vs km). Forgetting \(M_e\) for acceleration. Wrong sign for downhill gradient. Forgetting coasting has zero electrical energy.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align: center; padding: 40px 20px 20px; color: var(--text-muted); font-size: 13px;">
+    <p>Lecture 6 &mdash; Specific Energy Consumption &bull; Electric Drives Course</p>
+    <p style="margin-top: 6px; opacity: 0.6;">Built with the motivation-first teaching methodology</p>
+  </div>
+
+</main>
+
+<!-- ============== JAVASCRIPT ============== -->
+<script>
+// ========================
+// THEME TOGGLE
+// ========================
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('lecture-theme', next);
+  var btn = document.querySelector('.theme-toggle');
+  btn.textContent = next === 'dark' ? '\u2600' : '\u263E';
+}
+
+// Load saved theme
+(function() {
+  var saved = localStorage.getItem('lecture-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+  var btn = document.querySelector('.theme-toggle');
+  if (btn) {
+    btn.textContent = (saved || 'light') === 'dark' ? '\u2600' : '\u263E';
+  }
+})();
+
+// ========================
+// SIDEBAR TOGGLE (mobile)
+// ========================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar on link click (mobile)
+document.querySelectorAll('.sidebar a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+});
+
+// ========================
+// COLLAPSIBLE SECTIONS
+// ========================
+function toggleSection(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// ========================
+// COLLAPSIBLE EXAMPLES
+// ========================
+function toggleExample(header) {
+  header.parentElement.classList.toggle('collapsed');
+}
+
+// ========================
+// PROGRESS BAR
+// ========================
+window.addEventListener('scroll', function() {
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress-bar').style.width = progress + '%';
+
+  // Back to top button
+  var btn = document.getElementById('back-to-top');
+  if (scrollTop > 400) {
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+  }
+});
+
+// ========================
+// ACTIVE SIDEBAR LINK
+// ========================
+(function() {
+  var links = document.querySelectorAll('.sidebar a[href^="#"]');
+  var sections = [];
+  links.forEach(function(link) {
+    var id = link.getAttribute('href').slice(1);
+    var el = document.getElementById(id);
+    if (el) sections.push({ el: el, link: link });
+  });
+
+  function updateActive() {
+    var scrollPos = window.pageYOffset + 120;
+    var current = null;
+    for (var i = sections.length - 1; i >= 0; i--) {
+      if (sections[i].el.offsetTop <= scrollPos) {
+        current = sections[i];
+        break;
+      }
+    }
+    links.forEach(function(l) { l.classList.remove('active'); });
+    if (current) current.link.classList.add('active');
+  }
+
+  window.addEventListener('scroll', updateActive);
+  updateActive();
+})();
+</script>
+
+</body>
+</html>

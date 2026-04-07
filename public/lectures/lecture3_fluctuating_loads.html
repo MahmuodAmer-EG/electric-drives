@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 3: Dynamics — Fluctuating Loads &amp; Special Load Types</title>
+
+    <!-- MathJax CDN -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                tags: 'ams'
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script>
+        (function() {
+            var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+            var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+            var s = document.createElement('script');
+            s.async = true; s.src = primary;
+            s.onerror = function() {
+                var s2 = document.createElement('script');
+                s2.async = true; s2.src = fallback;
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        })();
+    </script>
+
+    <style>
+        /* ===== CSS Custom Properties ===== */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-sidebar: #f1f3f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: #495057;
+            --text-muted: #868e96;
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+            --accent-primary: #4263eb;
+            --accent-primary-light: #dbe4ff;
+            --accent-hover: #3b5bdb;
+
+            --motivation-bg: #fff9db;
+            --motivation-border: #fcc419;
+            --motivation-header: #e67700;
+            --motivation-text: #664d03;
+            --motivation-icon: #f59f00;
+
+            --intuition-bg: #d0ebff;
+            --intuition-border: #339af0;
+            --intuition-header: #1864ab;
+            --intuition-text: #1864ab;
+            --intuition-icon: #339af0;
+
+            --deepdive-bg: #d3f9d8;
+            --deepdive-border: #51cf66;
+            --deepdive-header: #2b8a3e;
+            --deepdive-text: #2b8a3e;
+            --deepdive-icon: #40c057;
+
+            --takeaway-bg: #f3f0ff;
+            --takeaway-border: #7950f2;
+            --takeaway-header: #5f3dc4;
+            --takeaway-text: #5f3dc4;
+
+            --example-bg: #fff5f5;
+            --example-border: #ff6b6b;
+            --example-header: #c92a2a;
+
+            --progress-color: #4263eb;
+            --sidebar-width: 280px;
+            --header-height: 56px;
+
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        /* ===== Dark Mode ===== */
+        [data-theme="dark"] {
+            --bg-primary: #1a1b26;
+            --bg-secondary: #1f2029;
+            --bg-sidebar: #16171f;
+            --text-primary: #c8d3f5;
+            --text-secondary: #a9b1d6;
+            --text-muted: #636a8a;
+            --border-color: #2f3146;
+            --border-light: #262737;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+
+            --accent-primary: #7aa2f7;
+            --accent-primary-light: #283457;
+            --accent-hover: #89b4fa;
+
+            --motivation-bg: #2d2a1e;
+            --motivation-border: #e0a800;
+            --motivation-header: #fbbf24;
+            --motivation-text: #fde68a;
+            --motivation-icon: #f59e0b;
+
+            --intuition-bg: #1a2638;
+            --intuition-border: #3b82f6;
+            --intuition-header: #7aa2f7;
+            --intuition-text: #93c5fd;
+            --intuition-icon: #60a5fa;
+
+            --deepdive-bg: #1a2e1a;
+            --deepdive-border: #4ade80;
+            --deepdive-header: #86efac;
+            --deepdive-text: #86efac;
+            --deepdive-icon: #4ade80;
+
+            --takeaway-bg: #251d3a;
+            --takeaway-border: #a78bfa;
+            --takeaway-header: #c4b5fd;
+            --takeaway-text: #c4b5fd;
+
+            --example-bg: #2d1a1a;
+            --example-border: #f87171;
+            --example-header: #fca5a5;
+
+            --progress-color: #7aa2f7;
+        }
+
+        /* ===== Reset & Base ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+            scroll-padding-top: calc(var(--header-height) + 20px);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ===== Progress Bar ===== */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), #845ef7, var(--accent-primary));
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+            z-index: 10000;
+            transition: width 0.15s ease-out;
+            border-radius: 0 2px 2px 0;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== Top Header ===== */
+        .top-header {
+            position: fixed;
+            top: 3px;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 900;
+            backdrop-filter: blur(12px);
+            background: color-mix(in srgb, var(--bg-primary) 85%, transparent);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .lecture-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            background: var(--accent-primary-light);
+            padding: 4px 14px;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .header-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: none;
+            padding: 0;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: var(--accent-primary);
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            transform: translateX(24px);
+        }
+
+        .theme-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            z-index: 1;
+            transition: opacity 0.3s;
+        }
+
+        .theme-icon.sun {
+            left: 6px;
+            opacity: 1;
+        }
+
+        .theme-icon.moon {
+            right: 6px;
+            opacity: 0;
+        }
+
+        [data-theme="dark"] .theme-icon.sun {
+            opacity: 0;
+        }
+
+        [data-theme="dark"] .theme-icon.moon {
+            opacity: 1;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            position: fixed;
+            top: calc(var(--header-height) + 3px);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height) - 3px);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 800;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .sidebar-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-muted);
+            padding: 0 20px 12px;
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-item {
+            position: relative;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 8px 20px 8px 24px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .toc-link:hover {
+            color: var(--accent-primary);
+            background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+        }
+
+        .toc-link.active {
+            color: var(--accent-primary);
+            background: var(--accent-primary-light);
+            border-left-color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .toc-link.sub {
+            padding-left: 40px;
+            font-size: 0.8rem;
+        }
+
+        .toc-link.subsub {
+            padding-left: 56px;
+            font-size: 0.77rem;
+        }
+
+        .toc-section-label {
+            display: block;
+            padding: 16px 20px 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: calc(var(--header-height) + 30px) 48px 80px;
+            max-width: 900px;
+            margin-right: auto;
+        }
+
+        /* ===== Hero Section ===== */
+        .hero {
+            text-align: center;
+            padding: 48px 0 40px;
+            margin-bottom: 48px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .hero-course {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.25;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .hero-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .hero-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ===== Section Styles ===== */
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .section-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 32px 0 16px;
+        }
+
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 24px 0 12px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text-secondary);
+        }
+
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== Collapsible Sections ===== */
+        .collapsible {
+            margin-bottom: 20px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: box-shadow 0.2s;
+        }
+
+        .collapsible:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .collapsible-header:hover {
+            filter: brightness(0.97);
+        }
+
+        .collapsible-chevron {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            color: var(--text-muted);
+        }
+
+        .collapsible.open .collapsible-chevron {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+        }
+
+        .collapsible.open .collapsible-body {
+            max-height: 5000px;
+            padding: 0 20px 20px;
+        }
+
+        /* ===== Motivation (Yellow) ===== */
+        .motivation .collapsible-header {
+            background: var(--motivation-bg);
+            color: var(--motivation-header);
+            border-bottom: 1px solid var(--motivation-border);
+        }
+
+        .motivation .collapsible-body {
+            background: var(--motivation-bg);
+        }
+
+        .motivation .collapsible-body p,
+        .motivation .collapsible-body li {
+            color: var(--motivation-text);
+        }
+
+        /* ===== Intuition (Blue) ===== */
+        .intuition .collapsible-header {
+            background: var(--intuition-bg);
+            color: var(--intuition-header);
+            border-bottom: 1px solid var(--intuition-border);
+        }
+
+        .intuition .collapsible-body {
+            background: var(--intuition-bg);
+        }
+
+        .intuition .collapsible-body p,
+        .intuition .collapsible-body li {
+            color: var(--intuition-text);
+        }
+
+        /* ===== Deep Dive (Green) ===== */
+        .deepdive .collapsible-header {
+            background: var(--deepdive-bg);
+            color: var(--deepdive-header);
+            border-bottom: 1px solid var(--deepdive-border);
+        }
+
+        .deepdive .collapsible-body {
+            background: var(--deepdive-bg);
+        }
+
+        .deepdive .collapsible-body p,
+        .deepdive .collapsible-body li {
+            color: var(--deepdive-text);
+        }
+
+        /* ===== Takeaway (Purple) ===== */
+        .takeaway {
+            background: var(--takeaway-bg);
+            border: 1px solid var(--takeaway-border);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .takeaway-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--takeaway-header);
+            margin-bottom: 10px;
+        }
+
+        .takeaway p,
+        .takeaway li {
+            color: var(--takeaway-text);
+        }
+
+        /* ===== Example Box (Red) ===== */
+        .example-box {
+            background: var(--example-bg);
+            border: 1px solid var(--example-border);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 24px 0;
+        }
+
+        .example-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--example-header);
+            margin-bottom: 12px;
+        }
+
+        .example-box p,
+        .example-box li {
+            color: var(--text-secondary);
+        }
+
+        /* ===== Lists ===== */
+        ul, ol {
+            margin: 10px 0 14px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        li::marker {
+            color: var(--accent-primary);
+        }
+
+        /* ===== SVG Diagrams ===== */
+        .diagram-container {
+            margin: 28px 0;
+            text-align: center;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .diagram-caption {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        [data-theme="dark"] .diagram-container svg {
+            background: #1e2030;
+        }
+
+        [data-theme="dark"] .diagram-container svg text {
+            fill: #c8d3f5;
+        }
+
+        [data-theme="dark"] .diagram-container svg .diagram-dark-invert {
+            filter: invert(0.85) hue-rotate(180deg);
+        }
+
+        /* ===== Equation Display ===== */
+        .equation-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .equation-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== Info Cards ===== */
+        .info-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .info-card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== Key Term ===== */
+        .key-term {
+            display: inline;
+            background: var(--accent-primary-light);
+            color: var(--accent-primary);
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.92em;
+        }
+
+        /* ===== Comparison Grid ===== */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+        }
+
+        .comparison-card h4 {
+            margin-top: 0;
+            font-size: 0.95rem;
+        }
+
+        /* ===== Back to Top ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 44px;
+            height: 44px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 500;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding-left: 32px;
+                padding-right: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .menu-btn {
+                display: flex;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: calc(var(--header-height) + 20px) 18px 60px;
+            }
+
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .section-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        /* ===== Sidebar Overlay ===== */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 799;
+        }
+
+        .sidebar-overlay.visible {
+            display: block;
+        }
+
+        /* ===== Print ===== */
+        @media print {
+            .sidebar, .top-header, #progress-bar, .back-to-top, .theme-toggle, .menu-btn {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+            }
+            .collapsible-body {
+                max-height: none !important;
+                padding: 0 20px 20px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Progress Bar -->
+    <div id="progress-bar" style="width: 0%"></div>
+
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <span class="lecture-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Lecture 3
+            </span>
+            <span class="header-title">Fluctuating Loads &amp; Special Drives</span>
+        </div>
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                <span class="theme-icon sun">&#9728;</span>
+                <span class="theme-icon moon">&#9790;</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-title">Table of Contents</div>
+        <nav>
+            <ul class="toc-list">
+                <li class="toc-item"><a class="toc-link" href="#intro">Introduction</a></li>
+
+                <li><span class="toc-section-label">A &mdash; Fluctuating Loads</span></li>
+                <li class="toc-item"><a class="toc-link sub" href="#fluct-problem">The Problem</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#flywheel-solution">The Flywheel Solution</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#flywheel-how">How a Flywheel Works</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#flywheel-diagrams">Speed &amp; Torque Diagrams</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#flywheel-math">Calculating J<sub>fw</sub></a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#flywheel-takeaway">Takeaway</a></li>
+
+                <li><span class="toc-section-label">B &mdash; Constant Power Drives</span></li>
+                <li class="toc-item"><a class="toc-link sub" href="#reel-problem">The Problem</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#reel-intuition">The Intuition</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#reel-math">The Deep Dive</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#reel-takeaway">Takeaway</a></li>
+
+                <li><span class="toc-section-label">C &mdash; Compressor Drives</span></li>
+                <li class="toc-item"><a class="toc-link sub" href="#comp-problem">The Problem</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#comp-intuition">The Intuition</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#comp-math">The Deep Dive</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#comp-takeaway">Takeaway</a></li>
+
+                <li><span class="toc-section-label">Practice</span></li>
+                <li class="toc-item"><a class="toc-link sub" href="#problem16">Problem 16</a></li>
+                <li class="toc-item"><a class="toc-link sub" href="#problem17">Problem 17</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Hero -->
+        <div class="hero" id="intro">
+            <div class="hero-course">Electric Drives &mdash; EE Course</div>
+            <h1>Dynamics: Fluctuating Loads<br>&amp; Special Load Types</h1>
+            <p class="hero-subtitle">
+                What happens when a motor faces wild swings in torque demand? How do paper mills keep winding at constant speed?
+                And how does your refrigerator actually cool things? Let's find out.
+            </p>
+            <div class="hero-meta">
+                <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Lecture 3
+                </span>
+                <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    ~45 min read
+                </span>
+                <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Sheet 01: Problems 16 &amp; 17
+                </span>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION A: FLUCTUATING LOADS                                 -->
+        <!-- ============================================================ -->
+        <div class="section" id="fluct-loads">
+            <div class="section-header">
+                <span class="section-number">A</span>
+                <h2>Fluctuating Loads &amp; the Flywheel</h2>
+            </div>
+
+            <!-- A.1 Motivation -->
+            <div id="fluct-problem" class="collapsible motivation open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E1;</span>
+                    <span>The Problem &mdash; Why Should We Care?</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Picture a <strong>paper cutter</strong> in a factory. For most of each cycle it just sits there, idling.
+                        Then &mdash; <em>slam</em> &mdash; it drives through a thick stack of paper in a fraction of a second,
+                        demanding an enormous burst of torque. Then it's back to idling.
+                    </p>
+                    <p>
+                        Now think about <strong>electric hammers</strong>, <strong>pressing machines</strong>, and <strong>punch presses</strong>.
+                        They all share the same pattern: <em>brief, intense torque demand</em> separated by <em>long idle or light-load periods</em>.
+                    </p>
+                    <p>This creates two painful engineering problems:</p>
+                    <ol>
+                        <li>
+                            <strong>Oversized motors with poor utilization.</strong>
+                            If we pick a motor rated for the peak torque, it spends most of its time at a tiny fraction
+                            of its capacity. That's expensive hardware sitting idle &mdash; and the motor operates far from
+                            its efficient zone. We're paying for horsepower we rarely use.
+                        </li>
+                        <li>
+                            <strong>Grid disturbances.</strong>
+                            Every time the load slams on, the motor draws a huge current spike.
+                            Other equipment sharing the same power line sees voltage sags, flicker, and
+                            all the headaches that come with them. Your factory neighbors will not be happy.
+                        </li>
+                    </ol>
+                    <p>
+                        So here's our challenge: <strong>How can we let a modest motor handle a huge intermittent load,
+                        without hammering the grid?</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- A.2 Intuition: The Flywheel -->
+            <div id="flywheel-solution" class="collapsible intuition open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F535;</span>
+                    <span>The Intuition &mdash; Enter the Flywheel</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        The solution is beautifully simple and centuries old: add a <strong>flywheel</strong>
+                        (in Arabic: <span style="font-family: 'Segoe UI', sans-serif; font-weight: 600;">الحدافة</span>).
+                    </p>
+                    <p>
+                        A flywheel is just a <strong>heavy disc</strong> &mdash; typically cast iron &mdash; with most of its mass
+                        concentrated at the <strong>outer rim</strong>. Some designs are even hollow inside. The key
+                        property is that it has a large <strong>moment of inertia</strong> \( J \).
+                    </p>
+                    <p>Think of it like a <strong>mechanical battery</strong>:</p>
+                    <ul>
+                        <li>
+                            <strong>During the light-load period</strong>: the motor doesn't need much torque, so the
+                            <em>excess motor torque</em> goes into speeding up the flywheel. It's <em>charging</em> &mdash;
+                            storing kinetic energy \(\tfrac{1}{2}J\omega^2\).
+                        </li>
+                        <li>
+                            <strong>During the heavy-load period</strong>: the load demands far more torque than the motor
+                            can provide alone. The flywheel <em>discharges</em> &mdash; it slows down, converting its stored
+                            kinetic energy into the extra torque needed to meet the load.
+                        </li>
+                    </ul>
+                    <p>
+                        The result? We can use a <strong>much smaller motor</strong>. The motor only needs to supply the
+                        <em>average</em> power over the full cycle, not the peak. The flywheel smooths out the difference.
+                    </p>
+
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Real-World Analogy
+                        </div>
+                        <p>
+                            It's exactly like a <strong>car flywheel</strong>. In a 4-cylinder diesel engine, power strokes
+                            happen only part of each revolution. The flywheel keeps the crankshaft spinning
+                            smoothly between power strokes, preventing jerky rotation. Same idea, same physics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A.3 Deep Dive: How the Flywheel Works -->
+            <div id="flywheel-how" class="collapsible deepdive open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E2;</span>
+                    <span>Deep Dive &mdash; How the Flywheel Actually Works</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>Let's nail down the variables and the physics step by step.</p>
+
+                    <h4>Variables &amp; Definitions</h4>
+                    <ul>
+                        <li>\( T_{Lh} \) &mdash; <strong>High</strong> load torque (during the working stroke)</li>
+                        <li>\( T_{Ll} \) &mdash; <strong>Low</strong> load torque (during the idle/light period)</li>
+                        <li>\( t_h \) &mdash; Duration of the heavy-load period</li>
+                        <li>\( t_l \) &mdash; Duration of the light-load period</li>
+                        <li>\( T_r \) &mdash; <strong>Rated</strong> motor torque &mdash; this should be much less than \( T_{Lh} \)</li>
+                        <li>\( \omega_{mo} \) &mdash; No-load motor speed</li>
+                        <li>\( \omega_{\max} \) &mdash; Maximum speed (reached at end of light-load period)</li>
+                        <li>\( \omega_{\min} \) &mdash; Minimum speed (reached at end of heavy-load period)</li>
+                        <li>\( T_{\max} \) &mdash; Motor torque at \(\omega_{\min}\) (highest motor torque in the cycle)</li>
+                        <li>\( T_{\min} \) &mdash; Motor torque at \(\omega_{\max}\) (lowest motor torque in the cycle)</li>
+                        <li>\( J_{fw} \) &mdash; Moment of inertia of the flywheel</li>
+                    </ul>
+
+                    <h4>The Fundamental Equation of Motion</h4>
+                    <p>At every instant, Newton's second law for rotation tells us:</p>
+                    <div class="equation-block">
+                        <div class="equation-label">Equation of Motion</div>
+                        \[
+                            J_{\text{total}} \frac{d\omega}{dt} = T_{\text{motor}} - T_{\text{load}}
+                        \]
+                    </div>
+                    <p>
+                        Where \( J_{\text{total}} = J_{\text{motor}} + J_{\text{flywheel}} + J_{\text{load}} \).
+                    </p>
+
+                    <h4>During the Heavy-Load Period</h4>
+                    <p>
+                        The load torque \( T_{Lh} \) exceeds the motor torque. So \( T_{\text{motor}} - T_{Lh} < 0 \),
+                        which means \( d\omega/dt < 0 \) &mdash; the system <strong>decelerates</strong>. The flywheel is
+                        <em>releasing</em> its stored energy to help the motor cope.
+                    </p>
+                    <p>
+                        Speed drops from \(\omega_{\max}\) down to \(\omega_{\min}\).
+                    </p>
+
+                    <h4>During the Light-Load Period</h4>
+                    <p>
+                        The motor torque exceeds the light load \( T_{Ll} \). So \( T_{\text{motor}} - T_{Ll} > 0 \),
+                        and the system <strong>accelerates</strong>. The flywheel absorbs this surplus energy, speeding up from
+                        \(\omega_{\min}\) back to \(\omega_{\max}\).
+                    </p>
+
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Key Insight: Energy Balance
+                        </div>
+                        <p>
+                            In steady-state, the energy the flywheel <em>stores</em> during the light period exactly equals
+                            the energy it <em>releases</em> during the heavy period. The speed oscillates between
+                            \(\omega_{\min}\) and \(\omega_{\max}\) every cycle, but the average speed stays constant.
+                        </p>
+                    </div>
+
+                    <h4>Benefits of Adding a Flywheel</h4>
+                    <ol>
+                        <li><strong>Smaller motor:</strong> We rate the motor for average power, not peak power.</li>
+                        <li><strong>Smoother current draw:</strong> No violent current spikes &mdash; the grid is happy.</li>
+                        <li><strong>Speed regulation:</strong> Speed varies within a controlled band \([\omega_{\min}, \omega_{\max}]\).</li>
+                        <li><strong>Lower cost:</strong> Smaller motor + smoother operation = cheaper system overall.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- A.4 Diagrams -->
+            <div id="flywheel-diagrams" class="collapsible deepdive open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E2;</span>
+                    <span>Deep Dive &mdash; Speed &amp; Torque Diagrams</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+
+                    <h4>Fluctuating Load Torque-Time Diagram</h4>
+                    <p>
+                        Let's visualize what the load looks like over time. The torque alternates between a high value and a low value:
+                    </p>
+
+                    <!-- SVG: Fluctuating Load Torque-Time Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+                            <!-- Background grid -->
+                            <defs>
+                                <pattern id="grid1" width="50" height="50" patternUnits="userSpaceOnUse">
+                                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect x="70" y="20" width="600" height="260" fill="url(#grid1)" rx="4"/>
+
+                            <!-- Axes -->
+                            <line x1="70" y1="280" x2="680" y2="280" stroke="#333" stroke-width="2"/>
+                            <line x1="70" y1="280" x2="70" y2="20" stroke="#333" stroke-width="2"/>
+                            <!-- Arrowheads -->
+                            <polygon points="680,280 672,276 672,284" fill="#333"/>
+                            <polygon points="70,20 66,28 74,28" fill="#333"/>
+
+                            <!-- Axis labels -->
+                            <text x="690" y="285" font-size="14" fill="#333" font-weight="600">t</text>
+                            <text x="55" y="18" font-size="14" fill="#333" font-weight="600">T<tspan baseline-shift="sub" font-size="10">L</tspan></text>
+
+                            <!-- Load torque waveform -->
+                            <polyline points="70,280 70,80 220,80 220,220 470,220 470,80 570,80 570,220 670,220"
+                                      fill="none" stroke="#e03131" stroke-width="2.5"/>
+
+                            <!-- Fill high load -->
+                            <rect x="70" y="80" width="150" height="200" fill="#e03131" opacity="0.1"/>
+                            <rect x="470" y="80" width="100" height="200" fill="#e03131" opacity="0.1"/>
+
+                            <!-- Fill low load -->
+                            <rect x="220" y="220" width="250" height="60" fill="#339af0" opacity="0.1"/>
+                            <rect x="570" y="220" width="100" height="60" fill="#339af0" opacity="0.1"/>
+
+                            <!-- Dashed lines for TLh and TLl -->
+                            <line x1="70" y1="80" x2="68" y2="80" stroke="#e03131" stroke-width="1.5"/>
+                            <line x1="70" y1="220" x2="68" y2="220" stroke="#339af0" stroke-width="1.5"/>
+
+                            <!-- Labels -->
+                            <text x="20" y="85" font-size="13" fill="#e03131" font-weight="600">T<tspan baseline-shift="sub" font-size="9">Lh</tspan></text>
+                            <text x="20" y="225" font-size="13" fill="#339af0" font-weight="600">T<tspan baseline-shift="sub" font-size="9">Ll</tspan></text>
+
+                            <!-- Time labels -->
+                            <line x1="70" y1="290" x2="70" y2="295" stroke="#333" stroke-width="1.5"/>
+                            <line x1="220" y1="290" x2="220" y2="295" stroke="#333" stroke-width="1.5"/>
+                            <line x1="470" y1="290" x2="470" y2="295" stroke="#333" stroke-width="1.5"/>
+                            <line x1="570" y1="290" x2="570" y2="295" stroke="#333" stroke-width="1.5"/>
+
+                            <!-- Horizontal arrows for th and tl -->
+                            <line x1="75" y1="305" x2="215" y2="305" stroke="#e03131" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                            <line x1="215" y1="305" x2="75" y2="305" stroke="#e03131" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+                            <text x="120" y="302" font-size="12" fill="#e03131" font-weight="600" text-anchor="middle">t<tspan baseline-shift="sub" font-size="9">h</tspan></text>
+
+                            <line x1="225" y1="305" x2="465" y2="305" stroke="#339af0" stroke-width="1.5"/>
+                            <text x="345" y="302" font-size="12" fill="#1864ab" font-weight="600" text-anchor="middle">t<tspan baseline-shift="sub" font-size="9">l</tspan></text>
+
+                            <!-- Cycle label -->
+                            <line x1="75" y1="315" x2="465" y2="315" stroke="#333" stroke-width="1" stroke-dasharray="4"/>
+                            <text x="270" y="315" font-size="11" fill="#555" text-anchor="middle">One cycle T = t<tspan baseline-shift="sub" font-size="8">h</tspan> + t<tspan baseline-shift="sub" font-size="8">l</tspan></text>
+
+                            <!-- Rated torque line -->
+                            <line x1="70" y1="170" x2="670" y2="170" stroke="#7950f2" stroke-width="1.5" stroke-dasharray="8,4"/>
+                            <text x="675" y="174" font-size="12" fill="#7950f2" font-weight="600">T<tspan baseline-shift="sub" font-size="9">r</tspan></text>
+                        </svg>
+                        <div class="diagram-caption">
+                            Figure 1: Fluctuating load torque profile. The load alternates between T<sub>Lh</sub> (heavy) and T<sub>Ll</sub> (light).
+                            The dashed purple line shows the rated motor torque T<sub>r</sub>, which is much smaller than T<sub>Lh</sub>.
+                        </div>
+                    </div>
+
+                    <h4>Speed Variation with Flywheel</h4>
+                    <p>
+                        With a flywheel attached, the speed oscillates within a band. Let's see how:
+                    </p>
+
+                    <!-- SVG: Speed Variation Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+                            <defs>
+                                <pattern id="grid2" width="50" height="50" patternUnits="userSpaceOnUse">
+                                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect x="70" y="20" width="600" height="260" fill="url(#grid2)" rx="4"/>
+
+                            <!-- Axes -->
+                            <line x1="70" y1="280" x2="680" y2="280" stroke="#333" stroke-width="2"/>
+                            <line x1="70" y1="280" x2="70" y2="20" stroke="#333" stroke-width="2"/>
+                            <polygon points="680,280 672,276 672,284" fill="#333"/>
+                            <polygon points="70,20 66,28 74,28" fill="#333"/>
+
+                            <text x="690" y="285" font-size="14" fill="#333" font-weight="600">t</text>
+                            <text x="50" y="18" font-size="14" fill="#333" font-weight="600">&omega;</text>
+
+                            <!-- omega_mo (no load) -->
+                            <line x1="70" y1="60" x2="670" y2="60" stroke="#aaa" stroke-width="1" stroke-dasharray="6,4"/>
+                            <text x="12" y="64" font-size="12" fill="#888" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="9">mo</tspan></text>
+
+                            <!-- omega_max -->
+                            <line x1="70" y1="100" x2="670" y2="100" stroke="#2f9e44" stroke-width="1" stroke-dasharray="4,3"/>
+                            <text x="8" y="104" font-size="12" fill="#2f9e44" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="9">max</tspan></text>
+
+                            <!-- omega_min -->
+                            <line x1="70" y1="200" x2="670" y2="200" stroke="#e03131" stroke-width="1" stroke-dasharray="4,3"/>
+                            <text x="8" y="204" font-size="12" fill="#e03131" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="9">min</tspan></text>
+
+                            <!-- Speed curve (oscillating) -->
+                            <path d="M70,100
+                                     Q95,100 120,120
+                                     Q170,180 220,200
+                                     Q270,200 320,170
+                                     Q400,110 470,100
+                                     Q495,100 520,120
+                                     Q555,170 570,200
+                                     Q600,200 630,170
+                                     Q660,120 670,100"
+                                  fill="none" stroke="#4263eb" stroke-width="2.5"/>
+
+                            <!-- Shaded region -->
+                            <rect x="70" y="100" width="600" height="100" fill="#4263eb" opacity="0.06" rx="2"/>
+
+                            <!-- Annotations -->
+                            <text x="145" y="250" font-size="11" fill="#e03131" text-anchor="middle" font-weight="600">Heavy load</text>
+                            <text x="145" y="264" font-size="11" fill="#e03131" text-anchor="middle">(decelerating)</text>
+
+                            <text x="370" y="250" font-size="11" fill="#2f9e44" text-anchor="middle" font-weight="600">Light load</text>
+                            <text x="370" y="264" font-size="11" fill="#2f9e44" text-anchor="middle">(accelerating)</text>
+
+                            <text x="520" y="250" font-size="11" fill="#e03131" text-anchor="middle" font-weight="600">Heavy</text>
+
+                            <text x="640" y="250" font-size="11" fill="#2f9e44" text-anchor="middle" font-weight="600">Light</text>
+
+                            <!-- Speed band label -->
+                            <line x1="660" y1="100" x2="660" y2="200" stroke="#4263eb" stroke-width="1.5"/>
+                            <line x1="656" y1="100" x2="664" y2="100" stroke="#4263eb" stroke-width="1.5"/>
+                            <line x1="656" y1="200" x2="664" y2="200" stroke="#4263eb" stroke-width="1.5"/>
+                            <text x="680" y="155" font-size="10" fill="#4263eb" font-weight="600" text-anchor="middle">&Delta;&omega;</text>
+                        </svg>
+                        <div class="diagram-caption">
+                            Figure 2: Speed oscillation with a flywheel. During heavy load, speed drops from &omega;<sub>max</sub> to &omega;<sub>min</sub>.
+                            During light load, it recovers. The shaded band shows the operating speed range.
+                        </div>
+                    </div>
+
+                    <h4>Motor Speed-Torque Curve with Operating Points</h4>
+                    <p>
+                        Let's map these operating points onto the motor's characteristic curve. We assume
+                        a motor with a roughly linear torque-speed characteristic (like a DC motor or the
+                        stable region of an induction motor).
+                    </p>
+
+                    <!-- SVG: Speed-Torque Characteristic -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 650 400" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+                            <defs>
+                                <pattern id="grid3" width="50" height="50" patternUnits="userSpaceOnUse">
+                                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                                </pattern>
+                            </defs>
+                            <rect x="70" y="20" width="540" height="340" fill="url(#grid3)" rx="4"/>
+
+                            <!-- Axes -->
+                            <line x1="70" y1="360" x2="620" y2="360" stroke="#333" stroke-width="2"/>
+                            <line x1="70" y1="360" x2="70" y2="20" stroke="#333" stroke-width="2"/>
+                            <polygon points="620,360 612,356 612,364" fill="#333"/>
+                            <polygon points="70,20 66,28 74,28" fill="#333"/>
+
+                            <text x="630" y="365" font-size="14" fill="#333" font-weight="600">T</text>
+                            <text x="50" y="18" font-size="14" fill="#333" font-weight="600">&omega;</text>
+
+                            <!-- Motor characteristic (linear, negative slope) -->
+                            <line x1="70" y1="50" x2="550" y2="340" stroke="#4263eb" stroke-width="2.5"/>
+                            <text x="530" y="332" font-size="12" fill="#4263eb" font-weight="700" transform="rotate(-30, 530, 332)">Motor T-&omega;</text>
+
+                            <!-- omega_mo -->
+                            <text x="20" y="55" font-size="12" fill="#888" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="9">mo</tspan></text>
+                            <line x1="68" y1="50" x2="72" y2="50" stroke="#888" stroke-width="1.5"/>
+
+                            <!-- omega_max point -->
+                            <circle cx="190" cy="120" r="6" fill="#2f9e44" stroke="white" stroke-width="2"/>
+                            <line x1="70" y1="120" x2="185" y2="120" stroke="#2f9e44" stroke-width="1" stroke-dasharray="4,3"/>
+                            <line x1="190" y1="120" x2="190" y2="360" stroke="#2f9e44" stroke-width="1" stroke-dasharray="4,3"/>
+                            <text x="20" y="124" font-size="11" fill="#2f9e44" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="8">max</tspan></text>
+                            <text x="182" y="378" font-size="11" fill="#2f9e44" font-weight="600">T<tspan baseline-shift="sub" font-size="8">min</tspan></text>
+
+                            <!-- omega_min point -->
+                            <circle cx="350" cy="218" r="6" fill="#e03131" stroke="white" stroke-width="2"/>
+                            <line x1="70" y1="218" x2="345" y2="218" stroke="#e03131" stroke-width="1" stroke-dasharray="4,3"/>
+                            <line x1="350" y1="218" x2="350" y2="360" stroke="#e03131" stroke-width="1" stroke-dasharray="4,3"/>
+                            <text x="20" y="222" font-size="11" fill="#e03131" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="8">min</tspan></text>
+                            <text x="340" y="378" font-size="11" fill="#e03131" font-weight="600">T<tspan baseline-shift="sub" font-size="8">max</tspan></text>
+
+                            <!-- Rated point (middle) -->
+                            <circle cx="270" cy="168" r="5" fill="#7950f2" stroke="white" stroke-width="2"/>
+                            <line x1="70" y1="168" x2="265" y2="168" stroke="#7950f2" stroke-width="1" stroke-dasharray="4,3"/>
+                            <line x1="270" y1="168" x2="270" y2="360" stroke="#7950f2" stroke-width="1" stroke-dasharray="4,3"/>
+                            <text x="20" y="172" font-size="11" fill="#7950f2" font-weight="600">&omega;<tspan baseline-shift="sub" font-size="8">r</tspan></text>
+                            <text x="262" y="378" font-size="11" fill="#7950f2" font-weight="600">T<tspan baseline-shift="sub" font-size="8">r</tspan></text>
+
+                            <!-- TLh line (vertical) -->
+                            <line x1="500" y1="30" x2="500" y2="350" stroke="#e03131" stroke-width="1.5" stroke-dasharray="6,4"/>
+                            <text x="505" y="45" font-size="12" fill="#e03131" font-weight="600">T<tspan baseline-shift="sub" font-size="9">Lh</tspan></text>
+
+                            <!-- Annotation -->
+                            <text x="400" y="60" font-size="11" fill="#555" text-anchor="middle">Motor can't reach T<tspan baseline-shift="sub" font-size="8">Lh</tspan> alone!</text>
+                            <text x="400" y="76" font-size="11" fill="#555" text-anchor="middle">Flywheel provides the difference.</text>
+                        </svg>
+                        <div class="diagram-caption">
+                            Figure 3: Motor speed-torque characteristic with operating points.
+                            The motor operates between (T<sub>min</sub>, &omega;<sub>max</sub>) and (T<sub>max</sub>, &omega;<sub>min</sub>).
+                            Note how T<sub>Lh</sub> is far beyond normal motor range &mdash; the flywheel bridges the gap.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A.5 Deep Dive: Calculating Jfw -->
+            <div id="flywheel-math" class="collapsible deepdive open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E2;</span>
+                    <span>Deep Dive &mdash; Calculating the Flywheel Inertia J<sub>fw</sub></span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Now let's do the math. We want to find the minimum flywheel inertia \( J_{fw} \) so that
+                        the motor torque never exceeds a specified maximum \( T_{\max} \).
+                    </p>
+
+                    <h4>Assumptions</h4>
+                    <ul>
+                        <li>The motor has a <strong>linear speed-torque characteristic</strong> in the operating region.</li>
+                        <li>The load torque switches sharply between \( T_{Lh} \) and \( T_{Ll} \).</li>
+                        <li>We are in <strong>periodic steady state</strong>: the speed pattern repeats every cycle.</li>
+                    </ul>
+
+                    <h4>Step 1: Linear Motor Characteristic</h4>
+                    <p>
+                        For a motor with a linear \(T\)-\(\omega\) characteristic, we can write:
+                    </p>
+                    <div class="equation-block">
+                        <div class="equation-label">Motor Characteristic</div>
+                        \[
+                            T = T_{\text{stall}} \left(1 - \frac{\omega}{\omega_{mo}}\right)
+                            \quad \text{or equivalently} \quad
+                            \omega = \omega_{mo}\left(1 - \frac{T}{T_{\text{stall}}}\right)
+                        \]
+                    </div>
+                    <p>
+                        We can also express the relationship between speed and torque changes as a slope:
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            \frac{d\omega}{dT} = -\frac{\omega_{mo}}{T_{\text{stall}}} = \text{const}
+                        \]
+                    </div>
+
+                    <h4>Step 2: Energy Balance Over the Heavy-Load Period</h4>
+                    <p>
+                        During the heavy-load period \( t_h \), the speed drops from \(\omega_{\max}\) to \(\omega_{\min}\).
+                        The kinetic energy released by the flywheel (and the entire rotating system) must equal the
+                        deficit between what the load demands and what the motor provides:
+                    </p>
+                    <div class="equation-block">
+                        <div class="equation-label">Energy Balance (Heavy Load)</div>
+                        \[
+                            \frac{1}{2} J_{\text{total}} \left(\omega_{\max}^2 - \omega_{\min}^2\right)
+                            = \int_0^{t_h} \left(T_{Lh} - T_{\text{motor}}(t)\right) \, dt
+                        \]
+                    </div>
+
+                    <h4>Step 3: Simplification for Linear Characteristics</h4>
+                    <p>
+                        If we assume the motor torque varies approximately linearly between \(T_{\max}\) (at \(\omega_{\min}\))
+                        and some intermediate value during the deceleration, we can approximate the integral. For a linear motor curve, the average motor torque during the heavy-load period is:
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            \bar{T}_{\text{motor,h}} \approx \frac{T_{\max} + T_{\min}}{2}
+                        \]
+                        <p style="margin-top:8px;">
+                            Wait &mdash; that's not quite right for the heavy period alone. More precisely, during the
+                            heavy-load period the motor torque varies from some value at \(\omega_{\max}\) to \(T_{\max}\) at \(\omega_{\min}\).
+                            Let's use the exact energy approach instead.
+                        </p>
+                    </div>
+
+                    <h4>Step 4: Exact Approach Using the Equation of Motion</h4>
+                    <p>
+                        We start from:
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            J \frac{d\omega}{dt} = T(\omega) - T_L
+                        \]
+                    </div>
+                    <p>
+                        For the linear motor characteristic \( T(\omega) = T_{\text{stall}}\!\left(1 - \frac{\omega}{\omega_{mo}}\right) \), during the heavy load:
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            J \frac{d\omega}{dt} = T_{\text{stall}}\!\left(1 - \frac{\omega}{\omega_{mo}}\right) - T_{Lh}
+                        \]
+                    </div>
+                    <p>
+                        This is a first-order linear ODE in \(\omega\). Solving it (or using the energy approach by multiplying both sides by \(\omega\) and integrating) gives us the relationship between \(J\), the speed limits, the load torque, and the time period.
+                    </p>
+                    <p>
+                        The practical formula, derived from the energy balance, is:
+                    </p>
+                    <div class="equation-block">
+                        <div class="equation-label">Flywheel Inertia Formula</div>
+                        \[
+                            J_{fw} = \frac{\displaystyle\int_0^{t_h} \left(T_{Lh} - T_{\text{motor}}\right) dt}
+                                          {\frac{1}{2}\left(\omega_{\max}^2 - \omega_{\min}^2\right)}
+                            - J_{\text{motor}} - J_{\text{load}}
+                        \]
+                    </div>
+                    <p>
+                        Or equivalently, since \(\omega_{\max}^2 - \omega_{\min}^2 = (\omega_{\max}+\omega_{\min})(\omega_{\max}-\omega_{\min})\):
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            J_{fw} \approx \frac{2 \times E_{\text{deficit}}}
+                                               {(\omega_{\max}+\omega_{\min})(\omega_{\max}-\omega_{\min})}
+                            - J_{\text{existing}}
+                        \]
+                    </div>
+
+                    <h4>Step 5: Practical Simplification</h4>
+                    <p>
+                        When the speed variation is small (which is usually what we want), we can approximate
+                        \(\omega_{\max} + \omega_{\min} \approx 2\bar{\omega}\) where \(\bar{\omega}\) is the average speed.
+                        Then:
+                    </p>
+                    <div class="equation-block">
+                        <div class="equation-label">Simplified Formula</div>
+                        \[
+                            J_{\text{total}} \approx \frac{E_{\text{deficit}}}{\bar{\omega} \cdot \Delta\omega}
+                        \]
+                        <p style="margin-top:8px;">
+                            where \(\Delta\omega = \omega_{\max} - \omega_{\min}\) is the allowable speed drop.
+                        </p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Design Trade-off
+                        </div>
+                        <p>
+                            A bigger flywheel (larger \(J_{fw}\)) means a smaller speed drop \(\Delta\omega\), but the
+                            flywheel itself is heavier, more expensive, and takes longer to start up. There's always
+                            a balance between <em>smooth operation</em> and <em>practical constraints</em>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- A.6 Takeaway -->
+            <div id="flywheel-takeaway" class="takeaway">
+                <div class="takeaway-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Takeaway &mdash; Fluctuating Loads
+                </div>
+                <ul>
+                    <li>Intermittent loads demand huge peak torque but low average torque.</li>
+                    <li>A <strong>flywheel</strong> acts as a mechanical energy buffer &mdash; stores energy during light periods, releases it during heavy periods.</li>
+                    <li>This lets us use a <strong>smaller, cheaper motor</strong> rated for average (not peak) power.</li>
+                    <li>The grid sees <strong>smooth, steady current</strong> instead of violent spikes.</li>
+                    <li>The trade-off: speed <em>does</em> vary within a band \([\omega_{\min}, \omega_{\max}]\), and the flywheel adds weight and cost.</li>
+                    <li>The required \(J_{fw}\) is determined by the energy deficit during the heavy-load period and the allowable speed drop.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION B: CONSTANT POWER DRIVES                            -->
+        <!-- ============================================================ -->
+        <div class="section" id="const-power">
+            <div class="section-header">
+                <span class="section-number">B</span>
+                <h2>Constant Power Drives (Take-up Rolls)</h2>
+            </div>
+
+            <!-- B.1 Motivation -->
+            <div id="reel-problem" class="collapsible motivation open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E1;</span>
+                    <span>The Problem &mdash; Winding Material onto a Roll</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Think about a machine that winds <strong>paper, plastic film, wire, or steel strip</strong> onto a roll.
+                        This is a <span class="key-term">take-up reel</span> (or coiler).
+                    </p>
+                    <p>
+                        Here's the catch: as material builds up on the roll, the <strong>radius increases</strong>.
+                        But we need the <strong>linear speed of the material</strong> (the speed at which the strip feeds in)
+                        to stay constant &mdash; otherwise the material stretches, sags, or breaks.
+                    </p>
+                    <p>
+                        So as the roll gets fatter, the motor must spin <em>slower</em>. And since the roll is heavier and
+                        has a larger moment arm, the motor must provide <em>more torque</em>. This creates a unique
+                        operating profile that we need to understand.
+                    </p>
+                </div>
+            </div>
+
+            <!-- B.2 Intuition -->
+            <div id="reel-intuition" class="collapsible intuition open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F535;</span>
+                    <span>The Intuition &mdash; Why It's "Constant Power"</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Let's think about this with simple relationships:
+                    </p>
+                    <ul>
+                        <li>The material feeds at constant linear speed \( v \).</li>
+                        <li>The tension force \( F \) on the material is constant (set by the process).</li>
+                        <li>Mechanical power = \( P = F \times v \). Both are constant, so <strong>power is constant</strong>.</li>
+                    </ul>
+                    <p>
+                        Now let's look at what happens to the motor:
+                    </p>
+                    <ul>
+                        <li>Linear speed: \( v = \omega_m \times r \). Since \( v \) is constant and \( r \) increases, \( \omega_m \) must <strong>decrease</strong>.</li>
+                        <li>Motor torque: \( T = F \times r \). Since \( F \) is constant and \( r \) increases, \( T \) must <strong>increase</strong>.</li>
+                        <li>Power: \( P = T \times \omega_m \). One goes up, the other goes down &mdash; the product stays the same!</li>
+                    </ul>
+                    <p>
+                        This is why we call it a <strong>constant power drive</strong>. The motor must be rated for the
+                        <strong>maximum torque</strong> (which occurs at the largest roll radius), but it operates at
+                        constant power throughout.
+                    </p>
+
+                    <!-- SVG: Take-up Roll Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+                            <!-- Small roll -->
+                            <g transform="translate(140, 170)">
+                                <circle cx="0" cy="0" r="30" fill="#dee2e6" stroke="#868e96" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="12" fill="#495057" stroke="#333" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="3" fill="#333"/>
+                                <!-- Arrow for rotation -->
+                                <path d="M -38,10 A 40,40 0 0,1 -20,-36" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#arrowBlue)"/>
+                                <text x="0" y="55" text-anchor="middle" font-size="12" fill="#333" font-weight="600">Start</text>
+                                <text x="0" y="70" text-anchor="middle" font-size="11" fill="#555">r = r<tspan baseline-shift="sub" font-size="8">min</tspan></text>
+                                <text x="0" y="85" text-anchor="middle" font-size="11" fill="#4263eb">&omega; = &omega;<tspan baseline-shift="sub" font-size="8">max</tspan></text>
+                                <text x="0" y="100" text-anchor="middle" font-size="11" fill="#e03131">T = T<tspan baseline-shift="sub" font-size="8">min</tspan></text>
+                            </g>
+
+                            <!-- Medium roll -->
+                            <g transform="translate(350, 170)">
+                                <circle cx="0" cy="0" r="55" fill="#dee2e6" stroke="#868e96" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="12" fill="#495057" stroke="#333" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="3" fill="#333"/>
+                                <path d="M -63,10 A 65,65 0 0,1 -30,-58" fill="none" stroke="#4263eb" stroke-width="2" marker-end="url(#arrowBlue)"/>
+                                <text x="0" y="80" text-anchor="middle" font-size="12" fill="#333" font-weight="600">Middle</text>
+                                <text x="0" y="95" text-anchor="middle" font-size="11" fill="#555">r growing</text>
+                                <text x="0" y="110" text-anchor="middle" font-size="11" fill="#7950f2">P = const</text>
+                            </g>
+
+                            <!-- Large roll -->
+                            <g transform="translate(560, 170)">
+                                <circle cx="0" cy="0" r="85" fill="#dee2e6" stroke="#868e96" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="12" fill="#495057" stroke="#333" stroke-width="1.5"/>
+                                <circle cx="0" cy="0" r="3" fill="#333"/>
+                                <path d="M -93,10 A 95,95 0 0,1 -40,-87" fill="none" stroke="#4263eb" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
+                                <text x="0" y="105" text-anchor="middle" font-size="12" fill="#333" font-weight="600">End</text>
+                                <text x="0" y="120" text-anchor="middle" font-size="11" fill="#555">r = r<tspan baseline-shift="sub" font-size="8">max</tspan></text>
+                                <text x="0" y="135" text-anchor="middle" font-size="11" fill="#e03131">&omega; = &omega;<tspan baseline-shift="sub" font-size="8">min</tspan></text>
+                                <text x="0" y="150" text-anchor="middle" font-size="11" fill="#2f9e44">T = T<tspan baseline-shift="sub" font-size="8">max</tspan></text>
+                            </g>
+
+                            <!-- Material strip -->
+                            <line x1="30" y1="140" x2="110" y2="140" stroke="#e03131" stroke-width="2" stroke-dasharray="6,3"/>
+                            <defs>
+                                <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                    <polygon points="0,0 8,3 0,6" fill="#4263eb"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Arrow showing progression -->
+                            <line x1="195" y1="170" x2="265" y2="170" stroke="#555" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+                            <line x1="420" y1="170" x2="460" y2="170" stroke="#555" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+                            <defs>
+                                <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                    <polygon points="0,0 8,3 0,6" fill="#555"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Title -->
+                            <text x="350" y="30" text-anchor="middle" font-size="15" fill="#333" font-weight="700">Take-up Roll: Radius Increases Over Time</text>
+
+                            <!-- Constant v arrow at top -->
+                            <line x1="100" y1="50" x2="600" y2="50" stroke="#2f9e44" stroke-width="2" marker-end="url(#arrowGreen)"/>
+                            <text x="350" y="45" text-anchor="middle" font-size="12" fill="#2f9e44" font-weight="600">v = constant (material linear speed)</text>
+                            <defs>
+                                <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                                    <polygon points="0,0 8,3 0,6" fill="#2f9e44"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <div class="diagram-caption">
+                            Figure 4: Take-up reel drive. As material winds on, the radius grows. The motor must slow down to
+                            keep linear speed constant, while torque increases. Power = T &times; &omega; stays constant.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B.3 Deep Dive -->
+            <div id="reel-math" class="collapsible deepdive open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E2;</span>
+                    <span>Deep Dive &mdash; The Mathematics of Constant Power</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <h4>Fundamental Relationships</h4>
+                    <p>Let's define our variables clearly:</p>
+                    <ul>
+                        <li>\( v \) &mdash; Linear speed of the material (constant)</li>
+                        <li>\( F \) &mdash; Tension force on the material (constant)</li>
+                        <li>\( r \) &mdash; Current radius of the roll (increases with time)</li>
+                        <li>\( \omega_m \) &mdash; Angular speed of the roll/motor</li>
+                    </ul>
+
+                    <div class="equation-block">
+                        <div class="equation-label">Kinematic Constraint</div>
+                        \[
+                            v = \omega_m \times r
+                            \quad \Longrightarrow \quad
+                            \omega_m = \frac{v}{r}
+                        \]
+                    </div>
+
+                    <p>As \( r \) increases, \( \omega_m \) decreases inversely.</p>
+
+                    <div class="equation-block">
+                        <div class="equation-label">Torque Relationship</div>
+                        \[
+                            T = F \times r
+                        \]
+                    </div>
+
+                    <p>As \( r \) increases, torque increases linearly.</p>
+
+                    <div class="equation-block">
+                        <div class="equation-label">Power</div>
+                        \[
+                            P = T \times \omega_m = (F \times r) \times \frac{v}{r} = F \times v = \text{constant}
+                        \]
+                    </div>
+
+                    <h4>Motor Rating</h4>
+                    <p>
+                        The motor must handle:
+                    </p>
+                    <ul>
+                        <li><strong>Maximum torque</strong> \( T_{\max} = F \times r_{\max} \) (at full roll)</li>
+                        <li><strong>Maximum speed</strong> \( \omega_{\max} = v / r_{\min} \) (at empty core)</li>
+                        <li><strong>Constant power</strong> \( P = F \times v \) throughout</li>
+                    </ul>
+                    <p>
+                        The <strong>speed range</strong> is:
+                    </p>
+                    <div class="equation-block">
+                        \[
+                            \text{Speed range} = \frac{\omega_{\max}}{\omega_{\min}} = \frac{r_{\max}}{r_{\min}}
+                        \]
+                    </div>
+                    <p>
+                        This ratio can be quite large (3:1 to 10:1 or more), which makes motor selection
+                        an important design task. The motor must maintain rated torque at the lowest speed
+                        and handle the full speed range.
+                    </p>
+
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Practical Note
+                        </div>
+                        <p>
+                            In practice, these drives often use <strong>DC motors with field weakening</strong> or
+                            <strong>variable-frequency AC drives</strong> to achieve the wide speed range required.
+                            The drive must provide constant torque at low speeds and constant power at high speeds &mdash;
+                            or vice versa, depending on the starting condition.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B.4 Takeaway -->
+            <div id="reel-takeaway" class="takeaway">
+                <div class="takeaway-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Takeaway &mdash; Constant Power Drives
+                </div>
+                <ul>
+                    <li>Take-up reel drives wind material at constant linear speed and constant tension.</li>
+                    <li>Since \( P = F \times v = \) const, this is a <strong>constant power</strong> application.</li>
+                    <li>As the roll radius grows: speed decreases, torque increases, power stays the same.</li>
+                    <li>The motor must be rated for <strong>maximum torque at minimum speed</strong>.</li>
+                    <li>The speed ratio \( r_{\max}/r_{\min} \) determines the required speed range of the drive.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION C: COMPRESSOR DRIVES                                 -->
+        <!-- ============================================================ -->
+        <div class="section" id="compressor">
+            <div class="section-header">
+                <span class="section-number">C</span>
+                <h2>Compressor Drives</h2>
+            </div>
+
+            <!-- C.1 Motivation -->
+            <div id="comp-problem" class="collapsible motivation open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E1;</span>
+                    <span>The Problem &mdash; Keeping Things Cold</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Open your kitchen &mdash; that humming box is your <strong>refrigerator</strong>. The heart
+                        of every refrigerator, air conditioner, and heat pump is a <strong>compressor</strong>.
+                    </p>
+                    <p>
+                        Compressors have a very characteristic load profile: the torque they demand is
+                        <strong>proportional to speed</strong>. Run the compressor faster, and it has to work harder
+                        to compress the gas. This gives us a \( T \propto \omega \) load characteristic.
+                    </p>
+                    <p>
+                        Another important feature: compressors <strong>never need to reverse direction</strong>.
+                        The gas flow is always one way through the refrigeration cycle. This simplifies the drive
+                        requirements considerably.
+                    </p>
+                </div>
+            </div>
+
+            <!-- C.2 Intuition -->
+            <div id="comp-intuition" class="collapsible intuition open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F535;</span>
+                    <span>The Intuition &mdash; How Refrigeration Works</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Before we dive into the motor characteristics, let's understand <em>what</em> the compressor
+                        is doing. The refrigeration cycle is elegantly simple once you see it:
+                    </p>
+
+                    <ol>
+                        <li>
+                            <strong>Compression</strong>: The compressor squeezes the refrigerant gas to high pressure.
+                            This also heats it up (think: bicycle pump getting warm).
+                        </li>
+                        <li>
+                            <strong>Condensation</strong>: The hot, high-pressure gas flows through the
+                            <strong>condenser</strong> (the coils on the outside/back of your fridge). It exchanges heat with
+                            the ambient air, cools down, and <em>liquefies</em>.
+                        </li>
+                        <li>
+                            <strong>Expansion</strong>: The liquid refrigerant passes through a tiny
+                            <strong>expansion valve</strong>. Pressure drops dramatically. (Like releasing an aerosol can &mdash;
+                            the escaping gas feels cold.)
+                        </li>
+                        <li>
+                            <strong>Evaporation</strong>: The low-pressure liquid enters the <strong>evaporator</strong>
+                            (the coils <em>inside</em> the fridge). Here it expands and <em>boils</em>, absorbing heat from the
+                            fridge interior. This is what makes things cold!
+                        </li>
+                        <li>
+                            <strong>Return</strong>: The refrigerant, now a gas again, returns to the compressor, and
+                            the cycle repeats.
+                        </li>
+                    </ol>
+
+                    <p>
+                        The compressor is the <strong>engine of this cycle</strong>. Its electric motor must run
+                        reliably, efficiently, and in one direction only.
+                    </p>
+
+                    <!-- SVG: Refrigeration Cycle Diagram -->
+                    <div class="diagram-container">
+                        <svg viewBox="0 0 700 440" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, system-ui, sans-serif">
+                            <!-- Background -->
+                            <rect x="10" y="10" width="680" height="420" rx="12" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1"/>
+
+                            <!-- Title -->
+                            <text x="350" y="40" text-anchor="middle" font-size="16" fill="#333" font-weight="700">Refrigeration Cycle</text>
+
+                            <!-- Compressor -->
+                            <rect x="50" y="80" width="140" height="70" rx="10" fill="#4263eb" stroke="#3b5bdb" stroke-width="2"/>
+                            <text x="120" y="112" text-anchor="middle" font-size="13" fill="white" font-weight="700">COMPRESSOR</text>
+                            <text x="120" y="132" text-anchor="middle" font-size="10" fill="#dbe4ff">High P, High T gas</text>
+
+                            <!-- Motor icon inside compressor -->
+                            <circle cx="70" cy="110" r="12" fill="none" stroke="#dbe4ff" stroke-width="1.5"/>
+                            <text x="70" y="114" text-anchor="middle" font-size="9" fill="#dbe4ff" font-weight="700">M</text>
+
+                            <!-- Condenser -->
+                            <rect x="300" y="80" width="160" height="70" rx="10" fill="#e03131" stroke="#c92a2a" stroke-width="2"/>
+                            <text x="380" y="108" text-anchor="middle" font-size="13" fill="white" font-weight="700">CONDENSER</text>
+                            <text x="380" y="128" text-anchor="middle" font-size="10" fill="#ffe3e3">(outside/back)</text>
+
+                            <!-- Heat arrows from condenser -->
+                            <text x="530" y="95" font-size="11" fill="#e03131" font-weight="600">Heat out</text>
+                            <line x1="462" y1="100" x2="510" y2="85" stroke="#e03131" stroke-width="1.5" marker-end="url(#arrowRed2)"/>
+                            <line x1="462" y1="115" x2="510" y2="115" stroke="#e03131" stroke-width="1.5" marker-end="url(#arrowRed2)"/>
+                            <line x1="462" y1="130" x2="510" y2="145" stroke="#e03131" stroke-width="1.5" marker-end="url(#arrowRed2)"/>
+                            <defs>
+                                <marker id="arrowRed2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                                    <polygon points="0,0 7,2.5 0,5" fill="#e03131"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Expansion Valve -->
+                            <rect x="300" y="270" width="160" height="70" rx="10" fill="#f59f00" stroke="#e67700" stroke-width="2"/>
+                            <text x="380" y="298" text-anchor="middle" font-size="13" fill="white" font-weight="700">EXPANSION</text>
+                            <text x="380" y="318" text-anchor="middle" font-size="13" fill="white" font-weight="700">VALVE</text>
+
+                            <!-- Evaporator -->
+                            <rect x="50" y="270" width="140" height="70" rx="10" fill="#339af0" stroke="#1c7ed6" stroke-width="2"/>
+                            <text x="120" y="298" text-anchor="middle" font-size="13" fill="white" font-weight="700">EVAPORATOR</text>
+                            <text x="120" y="318" text-anchor="middle" font-size="10" fill="#d0ebff">(inside fridge)</text>
+
+                            <!-- Heat arrows into evaporator -->
+                            <text x="120" y="378" font-size="11" fill="#339af0" font-weight="600">Absorbs heat</text>
+                            <line x1="80" y1="368" x2="95" y2="345" stroke="#339af0" stroke-width="1.5" marker-end="url(#arrowBlue2)"/>
+                            <line x1="120" y1="366" x2="120" y2="345" stroke="#339af0" stroke-width="1.5" marker-end="url(#arrowBlue2)"/>
+                            <line x1="160" y1="368" x2="145" y2="345" stroke="#339af0" stroke-width="1.5" marker-end="url(#arrowBlue2)"/>
+                            <defs>
+                                <marker id="arrowBlue2" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+                                    <polygon points="0,0 7,2.5 0,5" fill="#339af0"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Flow arrows: Compressor to Condenser -->
+                            <line x1="192" y1="115" x2="296" y2="115" stroke="#555" stroke-width="2.5" marker-end="url(#arrowFlow)"/>
+                            <text x="244" y="105" text-anchor="middle" font-size="10" fill="#e03131" font-weight="600">Hot gas</text>
+
+                            <!-- Flow: Condenser down to Expansion -->
+                            <line x1="380" y1="152" x2="380" y2="267" stroke="#555" stroke-width="2.5" marker-end="url(#arrowFlow)"/>
+                            <text x="410" y="210" font-size="10" fill="#555" font-weight="600">Liquid</text>
+
+                            <!-- Flow: Expansion to Evaporator -->
+                            <line x1="298" y1="305" x2="194" y2="305" stroke="#555" stroke-width="2.5" marker-end="url(#arrowFlow)"/>
+                            <text x="244" y="296" text-anchor="middle" font-size="10" fill="#339af0" font-weight="600">Cold liquid</text>
+
+                            <!-- Flow: Evaporator up to Compressor -->
+                            <line x1="120" y1="268" x2="120" y2="153" stroke="#555" stroke-width="2.5" marker-end="url(#arrowFlow)"/>
+                            <text x="100" y="210" font-size="10" fill="#555" font-weight="600" transform="rotate(-90,100,210)">Cold gas</text>
+
+                            <defs>
+                                <marker id="arrowFlow" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0,0 9,3.5 0,7" fill="#555"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Phase labels -->
+                            <text x="244" y="60" text-anchor="middle" font-size="11" fill="#e03131">&#9312; Compress</text>
+                            <text x="500" y="210" text-anchor="middle" font-size="11" fill="#e67700">&#9313; Condense &amp; liquefy</text>
+                            <text x="244" y="340" text-anchor="middle" font-size="11" fill="#f59f00">&#9314; Expand</text>
+                            <text x="35" y="210" text-anchor="middle" font-size="11" fill="#339af0" transform="rotate(-90,35,210)">&#9315; Evaporate</text>
+
+                            <!-- Cold zone -->
+                            <rect x="20" y="260" width="200" height="100" rx="14" fill="#339af0" opacity="0.06" stroke="#339af0" stroke-width="1" stroke-dasharray="5"/>
+                            <text x="120" y="398" text-anchor="middle" font-size="10" fill="#1864ab">COLD ZONE (inside fridge)</text>
+
+                            <!-- Hot zone -->
+                            <rect x="270" y="68" width="220" height="96" rx="14" fill="#e03131" opacity="0.06" stroke="#e03131" stroke-width="1" stroke-dasharray="5"/>
+                            <text x="380" y="58" text-anchor="middle" font-size="10" fill="#c92a2a">HOT ZONE (outside)</text>
+                        </svg>
+                        <div class="diagram-caption">
+                            Figure 5: Simplified refrigeration cycle. The compressor drives the cycle &mdash; compressing gas,
+                            which gets cooled in the condenser, expanded through a valve, and then evaporated to absorb heat.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C.3 Deep Dive -->
+            <div id="comp-math" class="collapsible deepdive open">
+                <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                    <span>&#x1F7E2;</span>
+                    <span>Deep Dive &mdash; Compressor Load Characteristic</span>
+                    <svg class="collapsible-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="collapsible-body">
+                    <h4>The T &prop; &omega; Characteristic</h4>
+                    <p>
+                        For a compressor, the load torque is proportional to speed:
+                    </p>
+                    <div class="equation-block">
+                        <div class="equation-label">Compressor Load Characteristic</div>
+                        \[
+                            T_L = k \cdot \omega
+                        \]
+                    </div>
+                    <p>
+                        where \( k \) is a constant that depends on the compressor design and operating conditions.
+                    </p>
+
+                    <p>The mechanical power consumed is therefore:</p>
+                    <div class="equation-block">
+                        \[
+                            P = T_L \times \omega = k \cdot \omega^2
+                        \]
+                    </div>
+                    <p>
+                        So power goes as the <strong>square of speed</strong>. Double the speed and power consumption quadruples.
+                        This is different from both the fluctuating load (where torque varies with time) and the
+                        constant power drive (where power is fixed).
+                    </p>
+
+                    <h4>Key Characteristics of Compressor Drives</h4>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h4>Load Profile</h4>
+                            <ul>
+                                <li>\( T \propto \omega \) (linear)</li>
+                                <li>\( P \propto \omega^2 \) (quadratic)</li>
+                                <li>Starting torque can be high</li>
+                            </ul>
+                        </div>
+                        <div class="comparison-card">
+                            <h4>Drive Requirements</h4>
+                            <ul>
+                                <li>Unidirectional &mdash; no reversal</li>
+                                <li>Variable speed desirable for efficiency</li>
+                                <li>Soft starting often needed</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h4>Motor Selection for Compressors</h4>
+                    <p>
+                        Because the load torque is proportional to speed, the motor operating point is naturally
+                        stable. If the motor speeds up slightly, the load increases, which tends to slow it back down.
+                        This is a <strong>self-regulating</strong> characteristic.
+                    </p>
+                    <p>
+                        Common motor choices for compressors include:
+                    </p>
+                    <ul>
+                        <li><strong>Single-phase induction motors</strong> (small refrigerators, AC units)</li>
+                        <li><strong>Three-phase induction motors</strong> (industrial refrigeration)</li>
+                        <li><strong>Permanent magnet synchronous motors</strong> (modern inverter-driven compressors for energy efficiency)</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <div class="info-card-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Energy Efficiency
+                        </div>
+                        <p>
+                            Modern inverter-driven compressors vary their speed to match the cooling demand.
+                            Instead of cycling on and off (which wastes energy at each start), they run continuously
+                            at a lower speed. Since \( P \propto \omega^2 \), running at half speed uses only
+                            <strong>one-quarter</strong> the power. This is why inverter AC units are so much more efficient.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C.4 Takeaway -->
+            <div id="comp-takeaway" class="takeaway">
+                <div class="takeaway-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Takeaway &mdash; Compressor Drives
+                </div>
+                <ul>
+                    <li>Compressors have a \( T \propto \omega \) load characteristic (torque proportional to speed).</li>
+                    <li>Power consumption follows \( P \propto \omega^2 \) &mdash; very sensitive to speed.</li>
+                    <li>No direction reversal needed &mdash; simplifies the drive.</li>
+                    <li>The self-regulating nature makes the operating point inherently stable.</li>
+                    <li>Variable-speed drives (inverters) can dramatically improve compressor efficiency.</li>
+                    <li>The refrigeration cycle: Compress &rarr; Condense &rarr; Expand &rarr; Evaporate &rarr; Repeat.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION D: COMPARING ALL THREE LOAD TYPES                    -->
+        <!-- ============================================================ -->
+        <div class="section" id="comparison">
+            <div class="section-header">
+                <span class="section-number" style="background: #7950f2;">&#8721;</span>
+                <h2>Comparison of Load Types</h2>
+            </div>
+
+            <p>Let's put everything side by side so we can see the differences clearly:</p>
+
+            <div style="overflow-x:auto; margin: 20px 0;">
+                <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: var(--accent-primary-light);">
+                            <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid var(--accent-primary); color: var(--text-primary);">Feature</th>
+                            <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid var(--accent-primary); color: var(--text-primary);">Fluctuating Load</th>
+                            <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid var(--accent-primary); color: var(--text-primary);">Constant Power</th>
+                            <th style="padding: 12px 16px; text-align: left; border-bottom: 2px solid var(--accent-primary); color: var(--text-primary);">Compressor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--border-light);">
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Torque profile</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Periodic: high &amp; low</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Increases with radius</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">\( T \propto \omega \)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-light); background: var(--bg-secondary);">
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Power profile</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Periodic spikes</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Constant</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">\( P \propto \omega^2 \)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-light);">
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Speed behavior</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Oscillates in band</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Decreases over time</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Roughly constant</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-light); background: var(--bg-secondary);">
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Key solution</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Flywheel</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Wide-range drive</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Inverter for efficiency</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--border-light);">
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Direction reversal?</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Usually no</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Sometimes (unwind)</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">No</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 16px; font-weight: 600; color: var(--text-primary);">Examples</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Punch press, hammer</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Paper mill, wire winder</td>
+                            <td style="padding: 10px 16px; color: var(--text-secondary);">Fridge, AC unit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION E: PRACTICE PROBLEMS                                 -->
+        <!-- ============================================================ -->
+        <div class="section" id="practice">
+            <div class="section-header">
+                <span class="section-number" style="background: #e03131;">P</span>
+                <h2>Practice Problems (Sheet 01)</h2>
+            </div>
+
+            <!-- Problem 16 -->
+            <div id="problem16" class="example-box">
+                <div class="example-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    Problem 16 &mdash; Flywheel with Wound Rotor IM
+                </div>
+                <p><strong>Given:</strong></p>
+                <ul>
+                    <li>6-pole, 50 Hz wound rotor induction motor</li>
+                    <li>Flywheel with \( J = 1000 \; \text{kg} \cdot \text{m}^2 \)</li>
+                    <li>Load: \( T_L = 1000 \; \text{N} \cdot \text{m} \) for 10 seconds, then <strong>no-load</strong></li>
+                    <li>Motor has a linear torque-speed characteristic in the operating region</li>
+                </ul>
+                <p><strong>Find:</strong></p>
+                <ol>
+                    <li>The maximum motor torque during the cycle</li>
+                    <li>The speed at the end of the deceleration (heavy load) period</li>
+                </ol>
+
+                <h4>Solution Approach</h4>
+                <p><strong>Step 1:</strong> Find the synchronous speed.</p>
+                <div class="equation-block">
+                    \[
+                        n_s = \frac{120 f}{p} = \frac{120 \times 50}{6} = 1000 \; \text{rpm}
+                    \]
+                    \[
+                        \omega_s = \frac{2\pi \times 1000}{60} = 104.72 \; \text{rad/s}
+                    \]
+                </div>
+
+                <p>
+                    <strong>Step 2:</strong> Apply the equation of motion. During the heavy-load period,
+                    the motor decelerates as the flywheel gives up energy. During the no-load period,
+                    the motor accelerates back up. In steady state, the energy stored equals energy released.
+                </p>
+
+                <p>
+                    <strong>Step 3:</strong> Use the energy balance and the linear motor characteristic to solve
+                    for \( T_{\max} \), \( \omega_{\min} \), and \( \omega_{\max} \). The key equations are:
+                </p>
+                <div class="equation-block">
+                    \[
+                        J(\omega_{\max} - \omega_{\min}) = (T_{Lh} - \bar{T}_{\text{motor}}) \times t_h
+                    \]
+                    \[
+                        \frac{1}{2}J(\omega_{\max}^2 - \omega_{\min}^2) = \int_0^{t_h}(T_L - T_{\text{motor}})d t
+                    \]
+                </div>
+
+                <p>
+                    The detailed numerical solution requires iterating with the linear motor characteristic
+                    or solving the first-order ODE analytically.
+                </p>
+            </div>
+
+            <!-- Problem 17 -->
+            <div id="problem17" class="example-box" style="margin-top: 28px;">
+                <div class="example-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                    Problem 17 &mdash; Designing the Flywheel Inertia
+                </div>
+                <p><strong>Given:</strong></p>
+                <ul>
+                    <li>Motor with a linear torque-speed characteristic</li>
+                    <li>Load: \( T_L = 600 \; \text{N} \cdot \text{m} \) for 10 seconds, then light/no-load</li>
+                    <li>Requirement: limit motor torque to a maximum of \( T_{\max} = 450 \; \text{N} \cdot \text{m} \)</li>
+                </ul>
+                <p><strong>Find:</strong></p>
+                <ul>
+                    <li>The required moment of inertia \( J \) of the flywheel</li>
+                </ul>
+
+                <h4>Solution Approach</h4>
+                <p>
+                    <strong>Key idea:</strong> The motor can only supply up to 450 N&middot;m, but the load demands 600 N&middot;m.
+                    The difference of 150 N&middot;m must come from the flywheel's stored kinetic energy.
+                </p>
+                <p>
+                    <strong>Step 1:</strong> Calculate the energy deficit during the heavy-load period:
+                </p>
+                <div class="equation-block">
+                    \[
+                        E_{\text{deficit}} \approx (T_L - T_{\max}) \times t_h = (600 - 450) \times 10 = 1500 \; \text{N} \cdot \text{m} \cdot \text{s}
+                    \]
+                    <p style="margin-top:6px;font-size:0.88rem;">
+                        (This is a simplified approximation. The actual deficit depends on how motor torque varies
+                        with speed during deceleration.)
+                    </p>
+                </div>
+
+                <p>
+                    <strong>Step 2:</strong> Determine the allowable speed drop \(\Delta\omega\) and average speed \(\bar{\omega}\)
+                    from the motor characteristic and the rated operating point.
+                </p>
+
+                <p>
+                    <strong>Step 3:</strong> Apply the flywheel inertia formula:
+                </p>
+                <div class="equation-block">
+                    \[
+                        J_{fw} = \frac{E_{\text{deficit}}}{\bar{\omega} \cdot \Delta\omega}
+                    \]
+                </div>
+                <p>
+                    The exact values depend on the specific motor parameters (stall torque, no-load speed)
+                    which determine the operating speed range.
+                </p>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- FINAL TAKEAWAY                                               -->
+        <!-- ============================================================ -->
+        <div class="section" id="final">
+            <div class="section-header">
+                <span class="section-number" style="background: #845ef7;">&#10003;</span>
+                <h2>Lecture Summary</h2>
+            </div>
+
+            <div class="takeaway" style="border-color: #845ef7;">
+                <div class="takeaway-title" style="color: #845ef7;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Key Takeaways from Lecture 3
+                </div>
+                <ol>
+                    <li style="margin-bottom:12px;">
+                        <strong>Fluctuating loads</strong> (punch presses, hammers) cycle between high and low torque.
+                        A <strong>flywheel</strong> smooths this out by storing and releasing kinetic energy, allowing
+                        a smaller motor and cleaner grid current.
+                    </li>
+                    <li style="margin-bottom:12px;">
+                        <strong>Constant power drives</strong> (take-up reels) maintain constant linear speed and tension.
+                        As the roll radius grows, speed drops and torque rises, but \( P = T\omega = Fv = \) constant.
+                        The motor must handle the full speed range and maximum torque.
+                    </li>
+                    <li style="margin-bottom:12px;">
+                        <strong>Compressor drives</strong> have \( T \propto \omega \) and \( P \propto \omega^2 \).
+                        They never reverse direction. Variable-speed operation (via inverters) can dramatically
+                        improve energy efficiency.
+                    </li>
+                    <li>
+                        Each load type requires a <strong>different motor selection and drive strategy</strong>.
+                        Understanding the load characteristic is the first step in designing any electric drive system.
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center; padding: 40px 0 20px; border-top: 1px solid var(--border-color); margin-top: 40px;">
+            <p style="font-size: 0.82rem; color: var(--text-muted);">
+                Electric Drives &mdash; Lecture 3: Dynamics &mdash; Fluctuating Loads &amp; Special Load Types
+            </p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                Designed for learning. All diagrams are schematic illustrations, not to scale.
+            </p>
+        </div>
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+
+    <!-- ===== JavaScript ===== -->
+    <script>
+        // ===== Theme Toggle =====
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        function setTheme(theme) {
+            html.setAttribute('data-theme', theme);
+            localStorage.setItem('lecture-theme', theme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('lecture-theme');
+        if (savedTheme) {
+            setTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+
+        // ===== Collapsible Sections =====
+        function toggleCollapsible(header) {
+            const collapsible = header.parentElement;
+            collapsible.classList.toggle('open');
+        }
+
+        // ===== Progress Bar =====
+        const progressBar = document.getElementById('progress-bar');
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = Math.min(progress, 100) + '%';
+        }
+
+        // ===== Back to Top Button =====
+        const backToTop = document.getElementById('backToTop');
+        function updateBackToTop() {
+            if (window.scrollY > 400) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        }
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ===== Active TOC Highlighting =====
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sections = [];
+
+        tocLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                const target = document.getElementById(href.slice(1));
+                if (target) {
+                    sections.push({ el: target, link: link });
+                }
+            }
+        });
+
+        function updateActiveToc() {
+            const scrollPos = window.scrollY + 120;
+            let activeIndex = 0;
+
+            for (let i = sections.length - 1; i >= 0; i--) {
+                if (sections[i].el.offsetTop <= scrollPos) {
+                    activeIndex = i;
+                    break;
+                }
+            }
+
+            tocLinks.forEach(l => l.classList.remove('active'));
+            if (sections[activeIndex]) {
+                sections[activeIndex].link.classList.add('active');
+
+                // Scroll TOC to active item
+                const sidebar = document.getElementById('sidebar');
+                const activeLink = sections[activeIndex].link;
+                const linkTop = activeLink.offsetTop;
+                const sidebarHeight = sidebar.clientHeight;
+                if (linkTop > sidebarHeight / 2) {
+                    sidebar.scrollTop = linkTop - sidebarHeight / 2;
+                }
+            }
+        }
+
+        // Throttled scroll handler
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateProgress();
+                    updateBackToTop();
+                    updateActiveToc();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // ===== Mobile Sidebar =====
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('visible');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('visible');
+        }
+
+        menuBtn.addEventListener('click', () => {
+            if (sidebar.classList.contains('open')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar on TOC link click (mobile)
+        tocLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+
+        // ===== Initial state =====
+        updateProgress();
+        updateBackToTop();
+        updateActiveToc();
+    </script>
+</body>
+</html>

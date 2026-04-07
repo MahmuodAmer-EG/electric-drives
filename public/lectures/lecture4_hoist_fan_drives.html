@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 4: Dynamics — Hoist Drives &amp; Fan Drives</title>
+
+    <!-- MathJax CDN -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        document.body.classList.add('mathjax-ready');
+                    });
+                }
+            }
+        };
+    </script>
+    <script>
+        (function() {
+            var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+            var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+            var s = document.createElement('script');
+            s.async = true; s.src = primary;
+            s.onerror = function() {
+                var s2 = document.createElement('script');
+                s2.async = true; s2.src = fallback;
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        })();
+    </script>
+
+    <style>
+        /* ===== CSS CUSTOM PROPERTIES ===== */
+        :root {
+            /* Light Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-sidebar: #f1f3f5;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+            /* Accent Colors */
+            --accent-primary: #4361ee;
+            --accent-primary-light: #eef0ff;
+            --accent-secondary: #7209b7;
+
+            /* Motivation (Yellow/Amber) */
+            --motivation-bg: #fff8e1;
+            --motivation-border: #ffca28;
+            --motivation-text: #f57f17;
+            --motivation-icon: #ff8f00;
+            --motivation-gradient: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+
+            /* Intuition (Blue) */
+            --intuition-bg: #e3f2fd;
+            --intuition-border: #42a5f5;
+            --intuition-text: #1565c0;
+            --intuition-icon: #1e88e5;
+            --intuition-gradient: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+
+            /* Deep Dive (Green) */
+            --deepdive-bg: #e8f5e9;
+            --deepdive-border: #66bb6a;
+            --deepdive-text: #2e7d32;
+            --deepdive-icon: #43a047;
+            --deepdive-gradient: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+
+            /* Takeaway */
+            --takeaway-bg: #fce4ec;
+            --takeaway-border: #ef5350;
+            --takeaway-text: #c62828;
+            --takeaway-gradient: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+
+            /* Example / Practice */
+            --example-bg: #f3e5f5;
+            --example-border: #ab47bc;
+            --example-text: #6a1b9a;
+
+            --progress-bg: var(--accent-primary);
+            --code-bg: #f5f5f5;
+            --sidebar-width: 300px;
+            --header-height: 60px;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-sidebar: #0f1629;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --border-color: #2a2a4a;
+            --border-light: #252545;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+            --accent-primary: #6c8cff;
+            --accent-primary-light: #1a1a3e;
+            --accent-secondary: #a855f7;
+
+            --motivation-bg: #2a2410;
+            --motivation-border: #d4a017;
+            --motivation-text: #ffd54f;
+            --motivation-icon: #ffc107;
+            --motivation-gradient: linear-gradient(135deg, #2a2410 0%, #332b10 100%);
+
+            --intuition-bg: #0d1b2a;
+            --intuition-border: #2196f3;
+            --intuition-text: #64b5f6;
+            --intuition-icon: #42a5f5;
+            --intuition-gradient: linear-gradient(135deg, #0d1b2a 0%, #132238 100%);
+
+            --deepdive-bg: #0d2818;
+            --deepdive-border: #4caf50;
+            --deepdive-text: #81c784;
+            --deepdive-icon: #66bb6a;
+            --deepdive-gradient: linear-gradient(135deg, #0d2818 0%, #143820 100%);
+
+            --takeaway-bg: #2a0f15;
+            --takeaway-border: #ef5350;
+            --takeaway-text: #ef9a9a;
+            --takeaway-gradient: linear-gradient(135deg, #2a0f15 0%, #3a1520 100%);
+
+            --example-bg: #1a0f2e;
+            --example-border: #9c27b0;
+            --example-text: #ce93d8;
+
+            --code-bg: #0d1117;
+        }
+
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            z-index: 10000;
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ===== HEADER ===== */
+        .main-header {
+            position: fixed;
+            top: 4px;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.9);
+        }
+
+        [data-theme="dark"] .main-header {
+            background: rgba(26,26,46,0.92);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .header-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: relative;
+            width: 56px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: none;
+            padding: 0;
+        }
+
+        .theme-toggle::after {
+            content: '☀️';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-primary);
+            border-radius: 50%;
+            transition: transform 0.3s, content 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: var(--accent-primary);
+        }
+
+        [data-theme="dark"] .theme-toggle::after {
+            content: '🌙';
+            transform: translateX(28px);
+        }
+
+        /* Print Button */
+        .print-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .print-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            top: calc(var(--header-height) + 4px);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height) - 4px);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            z-index: 900;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 0 20px 12px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 8px;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .toc-list li {
+            margin: 0;
+        }
+
+        .toc-list a {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            line-height: 1.4;
+        }
+
+        .toc-list a:hover {
+            background: var(--accent-primary-light);
+            color: var(--accent-primary);
+            border-left-color: var(--accent-primary);
+        }
+
+        .toc-list a.active {
+            background: var(--accent-primary-light);
+            color: var(--accent-primary);
+            border-left-color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .toc-list .toc-sub {
+            padding-left: 36px;
+            font-size: 0.82rem;
+        }
+
+        .toc-list .toc-subsub {
+            padding-left: 52px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: calc(var(--header-height) + 4px);
+            padding: 40px 48px 80px;
+            max-width: 900px;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .lecture-hero {
+            text-align: center;
+            padding: 48px 24px 40px;
+            margin-bottom: 48px;
+            background: linear-gradient(135deg, var(--accent-primary-light) 0%, var(--bg-secondary) 100%);
+            border-radius: 16px;
+            border: 1px solid var(--border-light);
+        }
+
+        .lecture-number {
+            display: inline-block;
+            background: var(--accent-primary);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .lecture-hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .lecture-hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .lecture-hero .arabic-title {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            direction: rtl;
+            margin-bottom: 20px;
+        }
+
+        .lecture-meta {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .meta-icon {
+            font-size: 1rem;
+        }
+
+        /* ===== SECTION HEADINGS ===== */
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 56px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2 .section-icon {
+            font-size: 1.6rem;
+        }
+
+        h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 36px 0 16px;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 24px 0 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        /* ===== COLORED SECTION CARDS ===== */
+        .card {
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin: 24px 0;
+            border-left: 5px solid;
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 12px;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .card h4 {
+            margin-top: 0;
+        }
+
+        /* Motivation Card */
+        .card-motivation {
+            background: var(--motivation-gradient);
+            border-left-color: var(--motivation-border);
+        }
+
+        .card-motivation .card-label {
+            background: var(--motivation-border);
+            color: #4a3000;
+        }
+
+        [data-theme="dark"] .card-motivation .card-label {
+            color: #1a1000;
+        }
+
+        /* Intuition Card */
+        .card-intuition {
+            background: var(--intuition-gradient);
+            border-left-color: var(--intuition-border);
+        }
+
+        .card-intuition .card-label {
+            background: var(--intuition-border);
+            color: white;
+        }
+
+        /* Deep Dive Card */
+        .card-deepdive {
+            background: var(--deepdive-gradient);
+            border-left-color: var(--deepdive-border);
+        }
+
+        .card-deepdive .card-label {
+            background: var(--deepdive-border);
+            color: white;
+        }
+
+        /* Takeaway Card */
+        .card-takeaway {
+            background: var(--takeaway-gradient);
+            border-left-color: var(--takeaway-border);
+        }
+
+        .card-takeaway .card-label {
+            background: var(--takeaway-border);
+            color: white;
+        }
+
+        /* Example Card */
+        .card-example {
+            background: var(--example-bg);
+            border-left-color: var(--example-border);
+        }
+
+        .card-example .card-label {
+            background: var(--example-border);
+            color: white;
+        }
+
+        /* ===== COLLAPSIBLE SECTIONS ===== */
+        .collapsible {
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            transition: box-shadow 0.3s;
+        }
+
+        .collapsible:hover {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .collapsible-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+            background: var(--bg-secondary);
+            transition: background 0.2s;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .collapsible-header:hover {
+            background: var(--accent-primary-light);
+        }
+
+        .collapsible-header .chevron {
+            transition: transform 0.3s;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .collapsible.open .collapsible-header .chevron {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease;
+            padding: 0 20px;
+        }
+
+        .collapsible.open .collapsible-body {
+            max-height: 5000px;
+            padding: 20px;
+        }
+
+        /* ===== SVG DIAGRAMS ===== */
+        .diagram-container {
+            margin: 24px 0;
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            overflow-x: auto;
+        }
+
+        .diagram-container svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .diagram-caption {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* ===== TABLES ===== */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .styled-table thead {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .styled-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .styled-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        .styled-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .styled-table tbody tr:hover {
+            background: var(--accent-primary-light);
+        }
+
+        .styled-table tbody tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+
+        /* ===== EQUATIONS ===== */
+        .equation-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 20px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .equation-box .eq-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        /* ===== LISTS ===== */
+        ul, ol {
+            margin: 12px 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        li::marker {
+            color: var(--accent-primary);
+        }
+
+        /* ===== HIGHLIGHT BOX ===== */
+        .highlight-box {
+            background: var(--accent-primary-light);
+            border: 1px solid var(--accent-primary);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .highlight-box strong {
+            color: var(--accent-primary);
+        }
+
+        /* ===== KEY CONCEPT ===== */
+        .key-concept {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            margin: 16px 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .key-concept-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ===== QUADRANT DIAGRAM SPECIFIC ===== */
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .quadrant-cell {
+            padding: 16px;
+            border-radius: 10px;
+            border: 2px solid;
+            text-align: center;
+        }
+
+        .quadrant-cell h5 {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .quadrant-cell p {
+            font-size: 0.85rem;
+            margin: 4px 0;
+        }
+
+        .q1 { border-color: #4caf50; background: rgba(76,175,80,0.08); }
+        .q2 { border-color: #2196f3; background: rgba(33,150,243,0.08); }
+        .q3 { border-color: #ff9800; background: rgba(255,152,0,0.08); }
+        .q4 { border-color: #f44336; background: rgba(244,67,54,0.08); }
+
+        /* ===== FOOTER ===== */
+        .lecture-footer {
+            margin-top: 64px;
+            padding: 32px 0;
+            border-top: 2px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .footer-nav a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--accent-primary);
+            transition: all 0.2s;
+        }
+
+        .footer-nav a:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* ===== BACK TO TOP ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 500;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 0;
+                padding: 32px 24px 80px;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 899;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .lecture-hero h1 {
+                font-size: 1.7rem;
+            }
+
+            .lecture-hero .subtitle {
+                font-size: 1rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            h3 {
+                font-size: 1.15rem;
+            }
+
+            .main-content {
+                padding: 20px 16px 60px;
+            }
+
+            .card {
+                padding: 18px 16px;
+            }
+
+            .quadrant-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .lecture-meta {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .print-btn span {
+                display: none;
+            }
+
+            .header-subtitle {
+                display: none;
+            }
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            .sidebar, .main-header, .back-to-top, .menu-toggle, .theme-toggle, .print-btn, #progress-bar, .sidebar-overlay {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .collapsible-body {
+                max-height: none !important;
+                padding: 20px !important;
+            }
+
+            .card {
+                break-inside: avoid;
+            }
+
+            body {
+                font-size: 11pt;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card, .collapsible, .diagram-container, .equation-box {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* ===== INLINE CODE ===== */
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+        }
+
+        /* ===== STRONG / EMPHASIS ===== */
+        strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        em {
+            color: var(--text-secondary);
+        }
+
+        /* ===== STEP LIST ===== */
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 48px;
+            margin-bottom: 16px;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* Separator */
+        .section-separator {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 48px 0;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Progress Bar -->
+    <div id="progress-bar"></div>
+
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-left">
+            <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">&#9776;</button>
+            <div>
+                <div class="header-title">Lecture 4 <span class="header-subtitle">| Dynamics: Hoist Drives &amp; Fan Drives</span></div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="print-btn" onclick="window.print()" title="Print lecture">
+                &#128424; <span>Print</span>
+            </button>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode"></button>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar / Table of Contents -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-title">Table of Contents</div>
+        <ul class="toc-list" id="toc-list">
+            <li><a href="#hero">Introduction</a></li>
+            <li><a href="#hoist-drives">D) Hoist Drives</a></li>
+            <li><a href="#crane-system" class="toc-sub">The Crane</a></li>
+            <li><a href="#elevator-system" class="toc-sub">The Elevator</a></li>
+            <li><a href="#elevator-counterweight" class="toc-subsub">Counterweight Design</a></li>
+            <li><a href="#motor-types" class="toc-sub">Motor Types (Historical)</a></li>
+            <li><a href="#four-quadrant" class="toc-sub">Four-Quadrant Operation</a></li>
+            <li><a href="#rated-motor-load" class="toc-sub">Rated Motor Load</a></li>
+            <li><a href="#fan-drives">Fan &amp; Pump Drives</a></li>
+            <li><a href="#fan-torque" class="toc-sub">Torque Characteristic</a></li>
+            <li><a href="#centrifugal-pump" class="toc-sub">Centrifugal Pump</a></li>
+            <li><a href="#balloon-tank" class="toc-sub">Balloon / Water Tank</a></li>
+            <li><a href="#practice-problems">Practice Problems</a></li>
+            <li><a href="#problem5" class="toc-sub">Problem 5: Winch Drive</a></li>
+            <li><a href="#problem7" class="toc-sub">Problem 7: Conveyor Belt</a></li>
+            <li><a href="#summary">Lecture Summary</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Hero Section -->
+        <section class="lecture-hero" id="hero">
+            <div class="lecture-number">Lecture 4</div>
+            <h1>Dynamics: Hoist Drives &amp; Fan Drives</h1>
+            <p class="subtitle">Cranes, Elevators, Fans, and Pumps &mdash; the workhorses of industry</p>
+            <p class="arabic-title">ديناميكيات: احمال الرفع ومراوح الدفع</p>
+            <div class="lecture-meta">
+                <span class="meta-item"><span class="meta-icon">&#128218;</span> Electric Drives</span>
+                <span class="meta-item"><span class="meta-icon">&#9201;</span> ~90 min</span>
+                <span class="meta-item"><span class="meta-icon">&#127891;</span> Hoist + Fan Dynamics</span>
+            </div>
+        </section>
+
+        <!-- ==========================================================
+             SECTION: HOIST DRIVES
+             ========================================================== -->
+        <h2 id="hoist-drives"><span class="section-icon">&#9875;</span> D) Hoist Drives (احمال الرفع)</h2>
+
+        <p>
+            Let's now turn our attention to one of the most common and important load types in electrical drives: <strong>hoist drives</strong>. These are loads where the motor's job is to lift or lower something against gravity. Think about it &mdash; every time you step into an elevator, ride a mine car, or watch a crane on a construction site, there's an electric motor doing the heavy lifting (literally).
+        </p>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Why do hoist drives deserve special attention? Because <strong>gravity never takes a break</strong>. Unlike a conveyor belt or a fan, a hoist drive can't just coast to a stop &mdash; if we lose control, the load falls. This makes the dynamics, the motor selection, and the braking strategy absolutely critical. A poorly designed elevator drive isn't just inefficient &mdash; it's dangerous.
+            </p>
+            <p>
+                Real-world examples of hoist drives include: <strong>elevators</strong>, <strong>mine hoists</strong>, <strong>cranes</strong>, <strong>conveyor belts on inclines</strong>, and <strong>winches</strong>. Each of these has gravity as a constant player in the torque equation.
+            </p>
+        </div>
+
+        <!-- === CRANE SYSTEM === -->
+        <h3 id="crane-system">The Crane</h3>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                Picture a construction crane. A motor spins, that spin goes through a gearbox to slow it down and increase torque, and the gearbox turns a drum. A cable wraps around the drum, and at the end of the cable hangs our load. The motor has to produce enough torque not just to overcome friction, but to fight gravity pulling down on that load.
+            </p>
+            <p>
+                The heavier the load, the more torque we need. The faster we want to lift, the more power we need. It's that simple &mdash; but let's see exactly <em>how much</em> power.
+            </p>
+        </div>
+
+        <!-- Crane SVG Diagram -->
+        <div class="diagram-container">
+            <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" style="max-width:750px;">
+                <!-- Motor -->
+                <rect x="30" y="100" width="120" height="80" rx="10" fill="#e3f2fd" stroke="#1565c0" stroke-width="2.5"/>
+                <text x="90" y="135" text-anchor="middle" font-size="13" font-weight="bold" fill="#1565c0">Motor</text>
+                <text x="90" y="155" text-anchor="middle" font-size="11" fill="#1565c0">&#969;<tspan font-size="9" dy="3">m</tspan></text>
+                <!-- Motor shaft -->
+                <line x1="150" y1="140" x2="210" y2="140" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+                <!-- Gearbox -->
+                <rect x="210" y="105" width="100" height="70" rx="8" fill="#fff8e1" stroke="#f57f17" stroke-width="2.5"/>
+                <text x="260" y="137" text-anchor="middle" font-size="13" font-weight="bold" fill="#f57f17">Gearbox</text>
+                <text x="260" y="155" text-anchor="middle" font-size="10" fill="#f57f17">i, &#951;</text>
+                <!-- Gearbox shaft -->
+                <line x1="310" y1="140" x2="370" y2="140" stroke="#333" stroke-width="4" stroke-linecap="round"/>
+                <!-- Drum -->
+                <circle cx="420" cy="140" r="50" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.5"/>
+                <circle cx="420" cy="140" r="12" fill="#a5d6a7" stroke="#2e7d32" stroke-width="2"/>
+                <text x="420" y="145" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">Drum</text>
+                <text x="420" y="98" text-anchor="middle" font-size="11" fill="#2e7d32">R</text>
+                <!-- Cable from drum going down -->
+                <line x1="470" y1="140" x2="550" y2="140" stroke="#555" stroke-width="3" stroke-dasharray="6,3"/>
+                <line x1="550" y1="140" x2="550" y2="235" stroke="#555" stroke-width="3"/>
+                <!-- Pulley at top -->
+                <circle cx="550" cy="130" r="12" fill="#fff" stroke="#333" stroke-width="2"/>
+                <!-- Load -->
+                <rect x="510" y="235" width="80" height="60" rx="6" fill="#fce4ec" stroke="#c62828" stroke-width="2.5"/>
+                <text x="550" y="262" text-anchor="middle" font-size="13" font-weight="bold" fill="#c62828">Load</text>
+                <text x="550" y="280" text-anchor="middle" font-size="11" fill="#c62828">M (kg)</text>
+                <!-- Gravity arrow -->
+                <line x1="550" y1="300" x2="550" y2="310" stroke="#c62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+                <text x="570" y="313" font-size="11" fill="#c62828">Mg</text>
+                <!-- Velocity arrow -->
+                <line x1="600" y1="270" x2="600" y2="240" stroke="#1565c0" stroke-width="2" marker-end="url(#arrowBlue)"/>
+                <text x="615" y="260" font-size="11" fill="#1565c0">V</text>
+                <!-- Arrow markers -->
+                <defs>
+                    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#c62828"/>
+                    </marker>
+                    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#1565c0"/>
+                    </marker>
+                    <marker id="arrowBlack" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#333"/>
+                    </marker>
+                    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#2e7d32"/>
+                    </marker>
+                    <marker id="arrowOrange" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                        <path d="M0,0 L8,4 L0,8 Z" fill="#e65100"/>
+                    </marker>
+                </defs>
+                <!-- Flow arrows -->
+                <text x="180" y="125" font-size="10" fill="#666" text-anchor="middle">&#8594;</text>
+                <text x="340" y="125" font-size="10" fill="#666" text-anchor="middle">&#8594;</text>
+            </svg>
+            <div class="diagram-caption">Figure 4.1 &mdash; Crane hoist drive system: Motor &rarr; Gearbox &rarr; Drum &rarr; Cable &rarr; Load</div>
+        </div>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>Power Equation for a Crane</h4>
+            <p>
+                The rated power at the motor shaft for lifting a mass \(M\) at a linear velocity \(V\) through a drum of radius \(R\) is:
+            </p>
+            <div class="equation-box">
+                <div class="eq-label">Crane Power Equation</div>
+                \[
+                P_r = \frac{F \cdot V}{\eta} = \frac{9.81 \times M \times R \times \omega_{m1}}{\eta}
+                \]
+            </div>
+            <p>Where:</p>
+            <ul>
+                <li>\(M\) = mass of the load (kg)</li>
+                <li>\(R\) = radius of the drum (m)</li>
+                <li>\(\omega_{m1}\) = angular velocity of the motor (rad/s)</li>
+                <li>\(V = R \cdot \omega_{drum}\) = linear velocity of the load (m/s)</li>
+                <li>\(\eta\) = overall efficiency of the gearing system</li>
+                <li>\(F = M \cdot g = 9.81 \times M\) = gravitational force on the load (N)</li>
+            </ul>
+            <p>
+                The linear velocity of the cable (and hence the load) is directly related to the drum speed: \(V = R \times \omega_{drum}\). Through the gear ratio \(i\), we connect motor speed to drum speed: \(\omega_{drum} = \omega_m / i\).
+            </p>
+        </div>
+
+        <div class="card card-takeaway">
+            <div class="card-label">&#127919; Takeaway</div>
+            <p>
+                In a crane system, the motor power depends on <strong>three things</strong>: how heavy the load is (force), how fast we want to lift it (velocity), and how efficient our gears are (losses). A less efficient gearbox means we need a bigger motor.
+            </p>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === ELEVATOR SYSTEM === -->
+        <h3 id="elevator-system">The Elevator</h3>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Elevators are everywhere &mdash; in every apartment building, office tower, hospital, and shopping mall. They run hundreds of times a day, starting and stopping constantly. If we sized the motor to handle the <em>full weight</em> of a loaded cage every single time, we'd need a massive motor consuming enormous amounts of energy. There has to be a smarter way &mdash; and there is. It's called a <strong>counterweight</strong>.
+            </p>
+        </div>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                Think of a seesaw. If one side is much heavier than the other, it takes a lot of effort to move. But if both sides are nearly balanced, just a small push gets things going. That's exactly what a counterweight does for an elevator &mdash; it <strong>balances</strong> the system so the motor only has to handle the <em>difference</em> between the cage+load and the counterweight, not the full weight.
+            </p>
+        </div>
+
+        <!-- Elevator SVG Diagram -->
+        <div class="diagram-container">
+            <svg viewBox="0 0 700 500" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+                <!-- Building shaft -->
+                <rect x="120" y="60" width="460" height="430" rx="0" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="8,4"/>
+                <text x="350" y="50" text-anchor="middle" font-size="13" fill="#666" font-weight="bold">Building Shaft</text>
+
+                <!-- Machine room at top -->
+                <rect x="230" y="68" width="240" height="55" rx="8" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+                <text x="350" y="92" text-anchor="middle" font-size="12" font-weight="bold" fill="#1565c0">Machine Room</text>
+                <text x="350" y="110" text-anchor="middle" font-size="10" fill="#1565c0">Motor + Gearbox + Drum</text>
+
+                <!-- Drum/Sheave -->
+                <circle cx="350" cy="143" r="18" fill="#fff8e1" stroke="#f57f17" stroke-width="2.5"/>
+                <text x="350" y="147" text-anchor="middle" font-size="10" font-weight="bold" fill="#f57f17">D</text>
+
+                <!-- Left cable (to cage) -->
+                <line x1="332" y1="143" x2="230" y2="143" stroke="#555" stroke-width="2.5"/>
+                <line x1="230" y1="143" x2="230" y2="310" stroke="#555" stroke-width="2.5"/>
+
+                <!-- Right cable (to counterweight) -->
+                <line x1="368" y1="143" x2="470" y2="143" stroke="#555" stroke-width="2.5"/>
+                <line x1="470" y1="143" x2="470" y2="280" stroke="#555" stroke-width="2.5"/>
+
+                <!-- Cage -->
+                <rect x="190" y="310" width="80" height="110" rx="6" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.5"/>
+                <text x="230" y="350" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">Cage</text>
+                <text x="230" y="370" text-anchor="middle" font-size="10" fill="#2e7d32">200 kg</text>
+                <!-- People icon -->
+                <text x="230" y="400" text-anchor="middle" font-size="22">&#128101;</text>
+                <text x="230" y="415" text-anchor="middle" font-size="9" fill="#2e7d32">+1000 kg load</text>
+
+                <!-- Counterweight -->
+                <rect x="445" y="280" width="50" height="80" rx="4" fill="#fce4ec" stroke="#c62828" stroke-width="2.5"/>
+                <text x="470" y="315" text-anchor="middle" font-size="10" font-weight="bold" fill="#c62828">CW</text>
+                <text x="470" y="335" text-anchor="middle" font-size="10" fill="#c62828">700</text>
+                <text x="470" y="350" text-anchor="middle" font-size="9" fill="#c62828">kg</text>
+
+                <!-- Up/Down arrows for cage -->
+                <line x1="175" y1="340" x2="175" y2="300" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowGreen)"/>
+                <line x1="175" y1="370" x2="175" y2="410" stroke="#c62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+                <text x="160" y="295" font-size="10" fill="#2e7d32" text-anchor="end">UP</text>
+                <text x="160" y="420" font-size="10" fill="#c62828" text-anchor="end">DOWN</text>
+
+                <!-- Up/Down arrows for counterweight -->
+                <line x1="510" y1="330" x2="510" y2="365" stroke="#c62828" stroke-width="2" marker-end="url(#arrowRed)"/>
+                <line x1="510" y1="310" x2="510" y2="275" stroke="#2e7d32" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+                <!-- Floor indicators -->
+                <line x1="125" y1="420" x2="575" y2="420" stroke="#ccc" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="580" y="424" font-size="10" fill="#999">Ground</text>
+                <line x1="125" y1="160" x2="575" y2="160" stroke="#ccc" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="580" y="164" font-size="10" fill="#999">Top</text>
+
+                <!-- Labels -->
+                <text x="290" y="475" text-anchor="middle" font-size="11" fill="#666" font-style="italic">Cage + Load = 1200 kg</text>
+                <text x="470" y="475" text-anchor="middle" font-size="11" fill="#666" font-style="italic">Counterweight = 700 kg</text>
+            </svg>
+            <div class="diagram-caption">Figure 4.2 &mdash; Elevator system with motor at top, cage on one side, counterweight on the other</div>
+        </div>
+
+        <h4 id="elevator-counterweight">Counterweight Design</h4>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>How do we size the counterweight?</h4>
+            <p>Let's work through a concrete example. Suppose our elevator has:</p>
+            <ul>
+                <li><strong>Load capacity</strong>: 1000 kg (maximum number of people)</li>
+                <li><strong>Empty cage weight</strong>: 200 kg</li>
+            </ul>
+            <p>
+                The counterweight is designed to balance the system at <strong>half load</strong>:
+            </p>
+            <div class="equation-box">
+                <div class="eq-label">Counterweight Formula</div>
+                \[
+                M_{cw} = M_{cage} + \frac{M_{load,max}}{2} = 200 + \frac{1000}{2} = 200 + 500 = 700 \text{ kg}
+                \]
+            </div>
+            <p>
+                <strong>Why half load?</strong> Because this minimizes the <em>maximum</em> imbalance the motor ever has to deal with. Consider the extremes:
+            </p>
+            <ul>
+                <li><strong>Fully loaded cage</strong>: 200 + 1000 = 1200 kg vs. 700 kg counterweight &rarr; Imbalance = 500 kg</li>
+                <li><strong>Empty cage</strong>: 200 kg vs. 700 kg counterweight &rarr; Imbalance = 500 kg</li>
+            </ul>
+            <p>
+                In both worst cases, the motor only handles <strong>500 kg</strong> &mdash; not 1200 kg. The maximum imbalance is the same whether going up fully loaded or going up empty (where the counterweight pulls down harder). This is a beautiful engineering compromise.
+            </p>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Key Insight:</strong> Without a counterweight, the motor would need to handle the full 1200 kg loaded cage. With a counterweight, the motor only handles 500 kg &mdash; less than half! This means a <strong>smaller, cheaper motor</strong> and <strong>much less energy consumption</strong>.
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === MOTOR TYPES === -->
+        <h3 id="motor-types">Motor Types Used in Elevators (Historical Evolution)</h3>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Elevator operation demands precise speed control, smooth starting, and reliable braking. Over the decades, motor technology has evolved dramatically. Let's trace that evolution &mdash; because understanding <em>why</em> each technology was adopted (and later replaced) teaches us a lot about drive requirements.
+            </p>
+        </div>
+
+        <div class="collapsible open">
+            <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                <span>Historical Motor Evolution for Elevators</span>
+                <span class="chevron">&#9660;</span>
+            </button>
+            <div class="collapsible-body">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Era</th>
+                            <th>Motor Type</th>
+                            <th>Why It Was Used</th>
+                            <th>Limitation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Early</strong></td>
+                            <td>DC Motor</td>
+                            <td>Excellent speed control via armature voltage</td>
+                            <td>Brushes wear out, expensive maintenance</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mid</strong></td>
+                            <td>Deep-bar Induction Motor</td>
+                            <td>High starting torque for frequent starts</td>
+                            <td>High starting current, speed steps</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Later</strong></td>
+                            <td>Dual-speed IM (1500/375 rpm)</td>
+                            <td>Reduced starting current, leveling speed</td>
+                            <td>Only two discrete speeds, jerky transition</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Modern</strong></td>
+                            <td>IM + Variable Frequency Inverter</td>
+                            <td>Smooth start/stop, energy recovery, precise control</td>
+                            <td>Higher initial cost (but lowest lifecycle cost)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="card card-intuition" style="margin-top:16px;">
+                    <div class="card-label">&#128161; The Intuition</div>
+                    <p>
+                        The modern approach &mdash; an induction motor with an inverter &mdash; gives us <strong>soft starting</strong> (gradually increasing voltage and frequency during start-up) and <strong>soft braking</strong> (gradually decreasing them during stopping). No jerks, no sudden current spikes, no mechanical stress. The inverter essentially lets us dial in any speed we want, smoothly transitioning from zero to full speed and back.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === FOUR-QUADRANT OPERATION === -->
+        <h3 id="four-quadrant">Four-Quadrant Operation of an Elevator</h3>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Here's something surprising: an elevator motor doesn't always act as a <em>motor</em>. Sometimes it acts as a <strong>generator</strong>! When does this happen, and why should we care? Because understanding the four-quadrant behavior tells us when the motor consumes energy and when it <em>returns</em> energy &mdash; and this has huge implications for energy efficiency and braking design.
+            </p>
+        </div>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                Imagine you're on a seesaw. If the heavier person is going down, you don't need to push them &mdash; gravity does the work. In fact, you'd need to <strong>hold them back</strong>. That "holding back" is regenerative braking, and the motor becomes a generator. The same thing happens in an elevator depending on which side (cage vs. counterweight) is heavier and which direction we're moving.
+            </p>
+        </div>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>The Four Operating Conditions</h4>
+            <p>
+                We need to consider two variables: <strong>direction of motion</strong> (up or down) and <strong>loading condition</strong> (loaded or unloaded). A worm gear in the system provides <strong>self-locking</strong> &mdash; the load cannot backdrive the motor, which is essential for safety.
+            </p>
+        </div>
+
+        <!-- Four-Quadrant SVG Diagram -->
+        <div class="diagram-container">
+            <svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
+                <!-- Axes -->
+                <line x1="300" y1="30" x2="300" y2="470" stroke="#333" stroke-width="2"/>
+                <line x1="30" y1="250" x2="570" y2="250" stroke="#333" stroke-width="2"/>
+                <!-- Axis labels -->
+                <text x="560" y="240" font-size="14" font-weight="bold" fill="#333">+&#969;</text>
+                <text x="40" y="240" font-size="14" font-weight="bold" fill="#333">-&#969;</text>
+                <text x="310" y="45" font-size="14" font-weight="bold" fill="#333">+T</text>
+                <text x="310" y="465" font-size="14" font-weight="bold" fill="#333">-T</text>
+                <!-- Axis descriptions -->
+                <text x="545" y="270" font-size="10" fill="#666">UP</text>
+                <text x="40" y="270" font-size="10" fill="#666">DOWN</text>
+
+                <!-- Quadrant I - Top Right -->
+                <rect x="310" y="40" width="250" height="200" rx="12" fill="rgba(76,175,80,0.12)" stroke="#4caf50" stroke-width="2"/>
+                <text x="435" y="75" text-anchor="middle" font-size="15" font-weight="bold" fill="#2e7d32">Quadrant I</text>
+                <text x="435" y="100" text-anchor="middle" font-size="12" fill="#2e7d32">MOTOR mode</text>
+                <text x="435" y="125" text-anchor="middle" font-size="11" fill="#555">Going UP, Loaded</text>
+                <text x="435" y="148" text-anchor="middle" font-size="10" fill="#555">Cage: 1200 kg &gt; CW: 700 kg</text>
+                <text x="435" y="170" text-anchor="middle" font-size="10" fill="#555">Motor drives load UP</text>
+                <text x="435" y="195" text-anchor="middle" font-size="11" fill="#2e7d32">+T, +&#969;</text>
+                <!-- Elevator icon -->
+                <text x="435" y="225" text-anchor="middle" font-size="20">&#128316;</text>
+
+                <!-- Quadrant II - Top Left -->
+                <rect x="40" y="40" width="250" height="200" rx="12" fill="rgba(33,150,243,0.12)" stroke="#2196f3" stroke-width="2"/>
+                <text x="165" y="75" text-anchor="middle" font-size="15" font-weight="bold" fill="#1565c0">Quadrant II</text>
+                <text x="165" y="100" text-anchor="middle" font-size="12" fill="#1565c0">GENERATOR mode</text>
+                <text x="165" y="125" text-anchor="middle" font-size="11" fill="#555">Going UP, Unloaded</text>
+                <text x="165" y="148" text-anchor="middle" font-size="10" fill="#555">Cage: 200 kg &lt; CW: 700 kg</text>
+                <text x="165" y="170" text-anchor="middle" font-size="10" fill="#555">CW pulls cage up, motor brakes</text>
+                <text x="165" y="195" text-anchor="middle" font-size="11" fill="#1565c0">-T, +&#969;</text>
+                <text x="165" y="225" text-anchor="middle" font-size="20">&#9889;</text>
+
+                <!-- Quadrant III - Bottom Left -->
+                <rect x="40" y="260" width="250" height="200" rx="12" fill="rgba(255,152,0,0.12)" stroke="#ff9800" stroke-width="2"/>
+                <text x="165" y="295" text-anchor="middle" font-size="15" font-weight="bold" fill="#e65100">Quadrant III</text>
+                <text x="165" y="320" text-anchor="middle" font-size="12" fill="#e65100">MOTOR mode</text>
+                <text x="165" y="345" text-anchor="middle" font-size="11" fill="#555">Going DOWN, Unloaded</text>
+                <text x="165" y="368" text-anchor="middle" font-size="10" fill="#555">Cage: 200 kg &lt; CW: 700 kg</text>
+                <text x="165" y="390" text-anchor="middle" font-size="10" fill="#555">Motor drives cage down vs CW</text>
+                <text x="165" y="415" text-anchor="middle" font-size="11" fill="#e65100">-T, -&#969;</text>
+                <text x="165" y="445" text-anchor="middle" font-size="20">&#128317;</text>
+
+                <!-- Quadrant IV - Bottom Right -->
+                <rect x="310" y="260" width="250" height="200" rx="12" fill="rgba(244,67,54,0.12)" stroke="#f44336" stroke-width="2"/>
+                <text x="435" y="295" text-anchor="middle" font-size="15" font-weight="bold" fill="#c62828">Quadrant IV</text>
+                <text x="435" y="320" text-anchor="middle" font-size="12" fill="#c62828">GENERATOR mode</text>
+                <text x="435" y="345" text-anchor="middle" font-size="11" fill="#555">Going DOWN, Loaded</text>
+                <text x="435" y="368" text-anchor="middle" font-size="10" fill="#555">Cage: 1200 kg &gt; CW: 700 kg</text>
+                <text x="435" y="390" text-anchor="middle" font-size="10" fill="#555">Gravity lowers load, motor brakes</text>
+                <text x="435" y="415" text-anchor="middle" font-size="11" fill="#c62828">+T, -&#969;</text>
+                <text x="435" y="445" text-anchor="middle" font-size="20">&#9889;</text>
+            </svg>
+            <div class="diagram-caption">Figure 4.3 &mdash; Four-quadrant operation of an elevator. The motor switches between motoring and generating depending on direction and load.</div>
+        </div>
+
+        <div class="collapsible open">
+            <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                <span>Detailed Quadrant-by-Quadrant Analysis</span>
+                <span class="chevron">&#9660;</span>
+            </button>
+            <div class="collapsible-body">
+                <div class="quadrant-grid">
+                    <div class="quadrant-cell q1">
+                        <h5>Quadrant I: UP + Loaded</h5>
+                        <p><strong>Cage side</strong>: 1200 kg (200 + 1000)</p>
+                        <p><strong>CW side</strong>: 700 kg</p>
+                        <p>Cage is heavier &rarr; Motor must <strong>drive</strong> the load up</p>
+                        <p>Motor acts as <strong>MOTOR</strong>: +T, +&#969;</p>
+                        <p><em>Power flows: Electrical &rarr; Mechanical</em></p>
+                    </div>
+                    <div class="quadrant-cell q2">
+                        <h5>Quadrant II: UP + Empty</h5>
+                        <p><strong>Cage side</strong>: 200 kg</p>
+                        <p><strong>CW side</strong>: 700 kg</p>
+                        <p>CW is heavier &rarr; CW naturally pulls cage up</p>
+                        <p>Motor acts as <strong>GENERATOR</strong>: -T, +&#969;</p>
+                        <p><em>Power flows: Mechanical &rarr; Electrical</em></p>
+                    </div>
+                    <div class="quadrant-cell q3">
+                        <h5>Quadrant III: DOWN + Empty</h5>
+                        <p><strong>Cage side</strong>: 200 kg</p>
+                        <p><strong>CW side</strong>: 700 kg</p>
+                        <p>CW is heavier &rarr; Motor must <strong>drive</strong> cage down</p>
+                        <p>Motor acts as <strong>MOTOR</strong>: -T, -&#969;</p>
+                        <p><em>Power flows: Electrical &rarr; Mechanical</em></p>
+                    </div>
+                    <div class="quadrant-cell q4">
+                        <h5>Quadrant IV: DOWN + Loaded</h5>
+                        <p><strong>Cage side</strong>: 1200 kg</p>
+                        <p><strong>CW side</strong>: 700 kg</p>
+                        <p>Gravity pulls loaded cage down &rarr; Motor <strong>brakes</strong></p>
+                        <p>Motor acts as <strong>GENERATOR</strong>: +T, -&#969;</p>
+                        <p><em>Power flows: Mechanical &rarr; Electrical</em></p>
+                    </div>
+                </div>
+
+                <div class="key-concept">
+                    <span class="key-concept-icon">&#128274;</span>
+                    <div>
+                        <strong>Self-Locking Worm Gear:</strong> The worm gear in the elevator system prevents the load from backdriving the motor. Even if power is lost, the gear's geometry creates enough friction that the cage cannot fall. This is a critical safety feature &mdash; gravity cannot turn the worm gear backwards.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === RATED MOTOR LOAD === -->
+        <h3 id="rated-motor-load">Rated Motor Load</h3>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>How big does the motor need to be?</h4>
+            <p>
+                Thanks to the counterweight, the motor's rated load is based on the <strong>maximum imbalance</strong>, not the total weight:
+            </p>
+            <div class="equation-box">
+                <div class="eq-label">Rated Motor Load</div>
+                \[
+                M_{motor} = M_{cage,full} - M_{cw} = 1200 - 700 = 500 \text{ kg}
+                \]
+            </div>
+            <p>
+                Let's appreciate what the counterweight does for us:
+            </p>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Scenario</th>
+                        <th>Motor Must Handle</th>
+                        <th>Motor Size Required</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Without</strong> counterweight</td>
+                        <td>Full 1200 kg</td>
+                        <td>Very large motor</td>
+                    </tr>
+                    <tr>
+                        <td><strong>With</strong> counterweight (700 kg)</td>
+                        <td>Only 500 kg (difference)</td>
+                        <td>Less than half the size!</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card card-takeaway">
+            <div class="card-label">&#127919; Takeaway</div>
+            <p>
+                The counterweight is one of the most elegant engineering solutions in everyday life. By balancing the system at half-load, we cut the required motor power by more than half, save energy on every trip, and reduce mechanical stress on all components. This is why every elevator has one &mdash; the economics are overwhelming.
+            </p>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- ==========================================================
+             SECTION: FAN DRIVES
+             ========================================================== -->
+        <h2 id="fan-drives"><span class="section-icon">&#127744;</span> Fan &amp; Pump Drives</h2>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Fans and pumps are the <strong>largest consumers of electrical energy in the world</strong>. Seriously &mdash; HVAC systems, industrial ventilation, water pumping stations, cooling systems &mdash; they account for a massive share of global electricity use. Understanding their torque characteristics is essential because even small efficiency improvements translate to enormous energy savings at scale.
+            </p>
+            <p>
+                Unlike hoist drives, fans and pumps generally <strong>don't need to reverse direction</strong>. But they have their own special characteristic: the torque they demand grows with the <em>square</em> of speed. This has profound implications for motor selection and energy optimization.
+            </p>
+        </div>
+
+        <!-- === FAN TORQUE === -->
+        <h3 id="fan-torque">Torque-Speed Characteristic</h3>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                Why does a fan need more torque at higher speed? Think about sticking your hand out of a car window. At low speed, the air resistance is gentle. But at highway speed, your hand gets pushed back <em>hard</em>. Air resistance increases with the square of velocity. A fan blade pushing through air experiences the same thing &mdash; double the speed, quadruple the resistance.
+            </p>
+        </div>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>The Square Law</h4>
+            <p>
+                Fans, blowers, and centrifugal pumps all follow the <strong>square law</strong> torque characteristic:
+            </p>
+            <div class="equation-box">
+                <div class="eq-label">Fan/Pump Torque Law</div>
+                \[
+                T_L = k \cdot \omega^2
+                \]
+            </div>
+            <p>Where:</p>
+            <ul>
+                <li>\(T_L\) = load torque (N&middot;m)</li>
+                <li>\(k\) = a constant depending on the fan/pump geometry and fluid properties</li>
+                <li>\(\omega\) = angular speed (rad/s)</li>
+            </ul>
+            <p>And since power \(P = T \cdot \omega\), we get the <strong>cube law</strong> for power:</p>
+            <div class="equation-box">
+                <div class="eq-label">Fan/Pump Power Law</div>
+                \[
+                P = T_L \cdot \omega = k \cdot \omega^3
+                \]
+            </div>
+            <p>
+                This cube relationship is incredibly important: <strong>reducing fan speed by 20% cuts power consumption by nearly 50%!</strong> (Since \(0.8^3 = 0.512\)). This is why variable-speed drives on fans and pumps offer such dramatic energy savings.
+            </p>
+        </div>
+
+        <!-- Fan Torque-Speed Curve SVG -->
+        <div class="diagram-container">
+            <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
+                <!-- Grid -->
+                <defs>
+                    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#eee" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect x="80" y="30" width="480" height="320" fill="url(#grid)"/>
+
+                <!-- Axes -->
+                <line x1="80" y1="350" x2="560" y2="350" stroke="#333" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                <line x1="80" y1="350" x2="80" y2="30" stroke="#333" stroke-width="2" marker-end="url(#arrowBlack)"/>
+                <text x="560" y="375" text-anchor="end" font-size="14" font-weight="bold" fill="#333">&#969; (rad/s)</text>
+                <text x="40" y="40" font-size="14" font-weight="bold" fill="#333">T</text>
+                <text x="40" y="55" font-size="12" fill="#333">(N&middot;m)</text>
+
+                <!-- T = k*omega^2 curve -->
+                <path d="M 80,350 Q 200,340 280,300 Q 380,220 430,150 Q 470,90 520,50" fill="none" stroke="#e65100" stroke-width="3.5" stroke-linecap="round"/>
+                <text x="530" y="50" font-size="13" font-weight="bold" fill="#e65100">T = k&#969;&#178;</text>
+
+                <!-- P = k*omega^3 curve (dashed) -->
+                <path d="M 80,350 Q 250,345 350,310 Q 420,260 460,170 Q 490,100 510,45" fill="none" stroke="#1565c0" stroke-width="2.5" stroke-dasharray="8,4" stroke-linecap="round"/>
+                <text x="510" y="30" font-size="12" font-weight="bold" fill="#1565c0">P = k&#969;&#179;</text>
+
+                <!-- Reference point -->
+                <circle cx="430" cy="150" r="5" fill="#e65100"/>
+                <line x1="430" y1="150" x2="430" y2="350" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+                <line x1="80" y1="150" x2="430" y2="150" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+                <text x="430" y="365" text-anchor="middle" font-size="11" fill="#666">&#969;<tspan font-size="9" dy="3">rated</tspan></text>
+                <text x="70" y="155" text-anchor="end" font-size="11" fill="#666">T<tspan font-size="9" dy="3">rated</tspan></text>
+
+                <!-- 80% speed point -->
+                <circle cx="345" cy="240" r="4" fill="#2e7d32"/>
+                <line x1="345" y1="240" x2="345" y2="350" stroke="#2e7d32" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="345" y="365" text-anchor="middle" font-size="10" fill="#2e7d32">0.8&#969;<tspan font-size="8" dy="2">r</tspan></text>
+
+                <!-- Annotation -->
+                <rect x="130" y="60" width="200" height="55" rx="8" fill="rgba(46,125,50,0.1)" stroke="#2e7d32" stroke-width="1.5"/>
+                <text x="230" y="80" text-anchor="middle" font-size="11" fill="#2e7d32" font-weight="bold">Energy Savings:</text>
+                <text x="230" y="100" text-anchor="middle" font-size="11" fill="#2e7d32">20% speed reduction</text>
+                <text x="230" y="115" text-anchor="middle" font-size="10" fill="#2e7d32">&asymp; 50% power savings!</text>
+
+                <!-- Legend -->
+                <line x1="100" y1="330" x2="130" y2="330" stroke="#e65100" stroke-width="3"/>
+                <text x="135" y="334" font-size="11" fill="#666">Torque</text>
+                <line x1="200" y1="330" x2="230" y2="330" stroke="#1565c0" stroke-width="2.5" stroke-dasharray="6,3"/>
+                <text x="235" y="334" font-size="11" fill="#666">Power</text>
+            </svg>
+            <div class="diagram-caption">Figure 4.4 &mdash; Fan/pump torque and power vs. speed. Torque follows a square law; power follows a cube law.</div>
+        </div>
+
+        <div class="card card-takeaway">
+            <div class="card-label">&#127919; Takeaway</div>
+            <p>
+                The square-law torque characteristic means that fans and pumps are <strong>easy to start</strong> (low torque at low speed) but consume increasing power at high speed following a <strong>cube law</strong>. This is why variable-speed drives are so valuable for these applications &mdash; even modest speed reductions yield huge energy savings.
+            </p>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === CENTRIFUGAL PUMP === -->
+        <h3 id="centrifugal-pump">Centrifugal Pump</h3>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                A centrifugal pump is beautifully simple. An <strong>impeller</strong> (a spinning disk with curved blades) sits inside a volute casing. When the impeller spins, it flings water outward &mdash; just like clothes in a spinning washing machine get pushed to the outside. This centrifugal force creates pressure that pushes the fluid through the outlet pipe.
+            </p>
+        </div>
+
+        <!-- Centrifugal Pump SVG -->
+        <div class="diagram-container">
+            <svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;">
+                <!-- Volute casing (spiral) -->
+                <path d="M 300,190
+                         C 300,110 400,80 430,130
+                         C 460,180 460,230 430,270
+                         C 400,310 300,290 260,270
+                         C 220,250 180,230 180,190
+                         C 180,150 220,110 260,110
+                         C 280,110 300,130 300,150"
+                      fill="none" stroke="#1565c0" stroke-width="3" stroke-linejoin="round"/>
+
+                <!-- Outlet pipe -->
+                <rect x="440" y="120" width="100" height="30" rx="2" fill="#bbdefb" stroke="#1565c0" stroke-width="2"/>
+                <text x="490" y="140" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565c0">Outlet</text>
+                <!-- Outlet flow arrow -->
+                <line x1="540" y1="135" x2="555" y2="135" stroke="#1565c0" stroke-width="2.5" marker-end="url(#arrowBlue)"/>
+
+                <!-- Inlet pipe (from center) -->
+                <rect x="80" y="175" width="100" height="30" rx="2" fill="#c8e6c9" stroke="#2e7d32" stroke-width="2"/>
+                <text x="130" y="195" text-anchor="middle" font-size="11" font-weight="bold" fill="#2e7d32">Inlet</text>
+                <!-- Inlet flow arrow -->
+                <line x1="100" y1="190" x2="115" y2="190" stroke="#2e7d32" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+                <!-- Impeller -->
+                <circle cx="300" cy="190" r="55" fill="rgba(255,152,0,0.15)" stroke="#e65100" stroke-width="2.5"/>
+                <circle cx="300" cy="190" r="10" fill="#e65100"/>
+
+                <!-- Impeller blades -->
+                <line x1="310" y1="190" x2="345" y2="160" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+                <line x1="310" y1="190" x2="350" y2="200" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+                <line x1="290" y1="190" x2="255" y2="220" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+                <line x1="290" y1="190" x2="250" y2="180" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+                <line x1="300" y1="180" x2="280" y2="140" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+                <line x1="300" y1="200" x2="320" y2="240" stroke="#e65100" stroke-width="3" stroke-linecap="round"/>
+
+                <!-- Rotation arrow -->
+                <path d="M 340,145 A 60,60 0 0,1 360,190" fill="none" stroke="#e65100" stroke-width="2" marker-end="url(#arrowOrange)"/>
+                <text x="370" y="160" font-size="11" fill="#e65100" font-weight="bold">&#969;</text>
+
+                <!-- Flow arrows inside pump -->
+                <path d="M 210,190 C 230,175 260,165 280,155" fill="none" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowBlue)"/>
+                <path d="M 210,190 C 230,205 260,215 280,225" fill="none" stroke="#42a5f5" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowBlue)"/>
+
+                <!-- Labels -->
+                <text x="300" y="280" text-anchor="middle" font-size="12" fill="#e65100" font-weight="bold">Impeller</text>
+
+                <!-- Centrifugal force arrows -->
+                <line x1="340" y1="160" x2="370" y2="140" stroke="#c62828" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrowRed)"/>
+                <line x1="350" y1="200" x2="385" y2="210" stroke="#c62828" stroke-width="1.5" stroke-dasharray="3,2" marker-end="url(#arrowRed)"/>
+                <text x="400" y="140" font-size="10" fill="#c62828">F<tspan font-size="8" dy="3">centrifugal</tspan></text>
+
+                <!-- Description -->
+                <text x="300" y="340" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Fluid enters at center, exits at high pressure from outer edge</text>
+                <text x="300" y="360" text-anchor="middle" font-size="12" fill="#555" font-style="italic">Follows T = k&#969;&#178; torque characteristic</text>
+            </svg>
+            <div class="diagram-caption">Figure 4.5 &mdash; Centrifugal pump: the impeller spins, creating centrifugal force that drives fluid from inlet (center) to outlet (periphery).</div>
+        </div>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>How a Centrifugal Pump Works</h4>
+            <ol class="step-list">
+                <li>
+                    <strong>Fluid enters at the center</strong> (the "eye" of the impeller) through the inlet pipe.
+                </li>
+                <li>
+                    <strong>The impeller spins</strong>, and its curved blades accelerate the fluid outward due to centrifugal force.
+                </li>
+                <li>
+                    <strong>The volute casing</strong> (spiral-shaped housing) collects the high-velocity fluid and converts its kinetic energy into pressure energy.
+                </li>
+                <li>
+                    <strong>High-pressure fluid exits</strong> through the outlet pipe, ready to be delivered to the system.
+                </li>
+            </ol>
+            <p>
+                The key insight: since the pump moves fluid against resistance (pipe friction, elevation, etc.), and that resistance depends on flow velocity (which depends on pump speed), we get the characteristic \(T = k\omega^2\) relationship.
+            </p>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- === BALLOON / WATER TANK === -->
+        <h3 id="balloon-tank">The Importance of a Water Tank (Balloon)</h3>
+
+        <div class="card card-motivation">
+            <div class="card-label">&#127793; The Problem / The Why</div>
+            <p>
+                Here's a practical problem that catches many engineers off guard: if a pump motor turns on and off too frequently, <strong>it burns out</strong>. Why? Because every time a motor starts, it draws a very high <strong>starting current</strong> (often 5-7 times the rated current). This generates enormous heat in the windings. If the motor doesn't run long enough between starts to cool down, the accumulated heat destroys the insulation and the motor fails.
+            </p>
+        </div>
+
+        <div class="card card-intuition">
+            <div class="card-label">&#128161; The Intuition</div>
+            <p>
+                Think of it like sprinting. If you sprint for 10 seconds, rest for 2 seconds, sprint again, rest 2 seconds &mdash; you'll collapse from exhaustion. But if you sprint for 10 seconds and rest for 5 minutes, you'll be fine. A motor is the same way &mdash; it needs adequate rest between starts.
+            </p>
+            <p>
+                The <strong>water tank (balloon)</strong> is the solution. It acts as a <strong>buffer</strong>. When the pump runs, it fills the tank. When the tank is full, the pump shuts off. The system draws water from the tank until it's nearly empty, then the pump starts again. The tank ensures the pump runs long enough each cycle and rests long enough between cycles.
+            </p>
+        </div>
+
+        <div class="card card-deepdive">
+            <div class="card-label">&#128200; The Deep Dive</div>
+            <h4>Motor Duty Cycle with and without Tank</h4>
+
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Without Tank</th>
+                        <th>With Tank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Motor start frequency</td>
+                        <td>Very frequent (every few seconds)</td>
+                        <td>Infrequent (minutes apart)</td>
+                    </tr>
+                    <tr>
+                        <td>Run time per cycle</td>
+                        <td>Very short</td>
+                        <td>Long enough to fill tank</td>
+                    </tr>
+                    <tr>
+                        <td>Rest time per cycle</td>
+                        <td>Very short</td>
+                        <td>Long (tank supplies demand)</td>
+                    </tr>
+                    <tr>
+                        <td>Heat accumulation</td>
+                        <td>Dangerous buildup</td>
+                        <td>Adequate cooling between starts</td>
+                    </tr>
+                    <tr>
+                        <td>Motor lifespan</td>
+                        <td>Short (premature failure)</td>
+                        <td>Normal rated lifetime</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card card-takeaway">
+            <div class="card-label">&#127919; Takeaway</div>
+            <p>
+                A water tank in a pumping system isn't just for water storage &mdash; it's a <strong>motor protection device</strong>. It regulates the on-off cycling of the pump motor, ensuring the motor runs long enough to justify the starting current heat and rests long enough to cool down. Without it, the motor's life is dramatically shortened.
+            </p>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- ==========================================================
+             SECTION: PRACTICE PROBLEMS
+             ========================================================== -->
+        <h2 id="practice-problems"><span class="section-icon">&#9999;</span> Practice Problems (Sheet 01)</h2>
+
+        <p>
+            Let's put our knowledge to work. These problems from Sheet 01 combine everything we've learned about dynamics, gear ratios, equivalent inertia, and load torque calculations.
+        </p>
+
+        <!-- Problem 5 -->
+        <h3 id="problem5">Problem 5: Motor Driving a Winch</h3>
+
+        <div class="collapsible open">
+            <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                <span>Problem 5 &mdash; Winch Drive Through Reduction Gear</span>
+                <span class="chevron">&#9660;</span>
+            </button>
+            <div class="collapsible-body">
+                <div class="card card-example">
+                    <div class="card-label">&#128221; Problem Statement</div>
+                    <p>
+                        A motor drives a winch through a reduction gear with the following parameters:
+                    </p>
+                    <ul>
+                        <li><strong>Gear ratio</strong>: \(i = 0.1\) (reduction, meaning \(\omega_{winch} = 0.1 \times \omega_{motor}\))</li>
+                        <li><strong>Friction torque at winch</strong>: \(T_{f,winch} = 15 \text{ N}\cdot\text{m}\)</li>
+                        <li><strong>Motor speed</strong>: \(n_m = 1500 \text{ rpm}\)</li>
+                        <li><strong>Gear efficiency</strong>: \(\eta = 90\% = 0.9\)</li>
+                    </ul>
+                    <p><strong>Find:</strong> (a) Equivalent moment of inertia referred to motor shaft, (b) Motor torque required.</p>
+                </div>
+
+                <div class="card card-deepdive">
+                    <div class="card-label">&#128200; Solution</div>
+
+                    <h4>Part (a): Equivalent Inertia</h4>
+                    <p>
+                        When we refer the winch inertia to the motor shaft, we multiply by the square of the gear ratio and divide by efficiency:
+                    </p>
+                    <div class="equation-box">
+                        <div class="eq-label">Referred Inertia</div>
+                        \[
+                        J_{eq} = J_{motor} + \frac{i^2 \cdot J_{winch}}{\eta}
+                        \]
+                    </div>
+                    <p>
+                        The gear ratio of 0.1 means the winch turns at 1/10 the motor speed. When we square this ratio (\(0.1^2 = 0.01\)), the winch inertia is dramatically reduced when referred to the motor shaft. This is one of the great advantages of gearing &mdash; it reduces the effective load inertia seen by the motor.
+                    </p>
+
+                    <h4>Part (b): Motor Torque</h4>
+                    <p>
+                        The friction torque at the winch needs to be referred to the motor shaft:
+                    </p>
+                    <div class="equation-box">
+                        <div class="eq-label">Referred Torque</div>
+                        \[
+                        T_{motor} = \frac{i \cdot T_{f,winch}}{\eta} = \frac{0.1 \times 15}{0.9} = \frac{1.5}{0.9} = 1.67 \text{ N}\cdot\text{m}
+                        \]
+                    </div>
+                    <p>
+                        The motor only needs to produce <strong>1.67 N&middot;m</strong> to overcome the 15 N&middot;m friction at the winch. The gear reduction trades speed for torque &mdash; the motor spins fast but with low torque, while the winch turns slowly but with high torque.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Problem 7 -->
+        <h3 id="problem7">Problem 7: Horizontal Conveyor Belt</h3>
+
+        <div class="collapsible open">
+            <button class="collapsible-header" onclick="toggleCollapsible(this)">
+                <span>Problem 7 &mdash; Conveyor Belt Acceleration</span>
+                <span class="chevron">&#9660;</span>
+            </button>
+            <div class="collapsible-body">
+                <div class="card card-example">
+                    <div class="card-label">&#128221; Problem Statement</div>
+                    <p>
+                        A horizontal conveyor belt system has the following specifications:
+                    </p>
+                    <ul>
+                        <li><strong>Belt speed</strong>: \(V = 1.2 \text{ m/s}\)</li>
+                        <li><strong>Throughput</strong>: 100 tonnes/hr</li>
+                        <li><strong>Belt length</strong>: 200 m</li>
+                        <li><strong>Motor speed</strong>: \(n_m = 1200 \text{ rpm}\)</li>
+                        <li><strong>Acceleration time</strong>: \(t_{acc} = 8 \text{ s}\)</li>
+                    </ul>
+                    <p><strong>Find:</strong> (a) Load inertia referred to motor shaft, (b) Motor torque for 8-second acceleration.</p>
+                </div>
+
+                <div class="card card-deepdive">
+                    <div class="card-label">&#128200; Solution Approach</div>
+
+                    <h4>Step 1: Find the mass on the belt</h4>
+                    <p>
+                        At any given moment, the belt holds material in transit. We need to find how much mass is on the 200 m belt:
+                    </p>
+                    <div class="equation-box">
+                        \[
+                        \text{Mass flow rate} = \frac{100{,}000 \text{ kg}}{3600 \text{ s}} = 27.78 \text{ kg/s}
+                        \]
+                    </div>
+                    <p>
+                        Time for material to traverse the belt:
+                    </p>
+                    <div class="equation-box">
+                        \[
+                        t_{traverse} = \frac{L}{V} = \frac{200}{1.2} = 166.7 \text{ s}
+                        \]
+                    </div>
+                    <p>
+                        Mass on belt at any time:
+                    </p>
+                    <div class="equation-box">
+                        \[
+                        M_{belt} = 27.78 \times 166.7 = 4{,}630 \text{ kg} \approx 4.63 \text{ tonnes}
+                        \]
+                    </div>
+
+                    <h4>Step 2: Convert linear motion to rotational</h4>
+                    <p>
+                        Motor speed in rad/s:
+                    </p>
+                    <div class="equation-box">
+                        \[
+                        \omega_m = \frac{2\pi \times 1200}{60} = 125.66 \text{ rad/s}
+                        \]
+                    </div>
+                    <p>
+                        The equivalent inertia of a linearly moving mass referred to a rotating shaft:
+                    </p>
+                    <div class="equation-box">
+                        <div class="eq-label">Linear-to-Rotational Inertia</div>
+                        \[
+                        J_{eq} = M \left(\frac{V}{\omega_m}\right)^2 = 4630 \times \left(\frac{1.2}{125.66}\right)^2 = 4630 \times (0.00955)^2
+                        \]
+                        \[
+                        J_{eq} = 4630 \times 9.12 \times 10^{-5} = 0.422 \text{ kg}\cdot\text{m}^2
+                        \]
+                    </div>
+
+                    <h4>Step 3: Acceleration torque</h4>
+                    <p>
+                        The torque needed to accelerate this inertia from rest to full speed in 8 seconds:
+                    </p>
+                    <div class="equation-box">
+                        <div class="eq-label">Acceleration Torque</div>
+                        \[
+                        T_{acc} = J_{eq} \times \frac{\omega_m}{t_{acc}} = 0.422 \times \frac{125.66}{8} = 0.422 \times 15.71 = 6.63 \text{ N}\cdot\text{m}
+                        \]
+                    </div>
+
+                    <p>
+                        The total motor torque must also include the steady-state load torque (to overcome friction and move material), plus this acceleration torque during startup.
+                    </p>
+                </div>
+
+                <div class="card card-takeaway">
+                    <div class="card-label">&#127919; Takeaway</div>
+                    <p>
+                        For conveyor belts, we convert the <strong>linear mass</strong> to an <strong>equivalent rotational inertia</strong> using the ratio \(V/\omega_m\). The longer the belt and higher the throughput, the more mass is in motion at any time, and the larger the motor needs to be for acceleration.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- ==========================================================
+             SECTION: LECTURE SUMMARY
+             ========================================================== -->
+        <h2 id="summary"><span class="section-icon">&#128203;</span> Lecture Summary</h2>
+
+        <div class="card card-takeaway">
+            <div class="card-label">&#127919; Complete Lecture Takeaway</div>
+
+            <h4>Hoist Drives</h4>
+            <ul>
+                <li><strong>Crane power equation</strong>: \(P_r = \frac{F \cdot V}{\eta} = \frac{9.81 \cdot M \cdot R \cdot \omega_m}{\eta}\)</li>
+                <li><strong>Counterweight</strong> balances the system at half-load, reducing required motor power by more than 50%</li>
+                <li><strong>Counterweight formula</strong>: \(M_{cw} = M_{cage} + M_{load,max}/2\)</li>
+                <li><strong>Four-quadrant operation</strong>: Motor alternates between motoring and generating depending on direction and load</li>
+                <li><strong>Motor evolution</strong>: DC &rarr; Deep-bar IM &rarr; Dual-speed IM &rarr; IM + Inverter</li>
+                <li><strong>Worm gear</strong> provides self-locking for safety (prevents backdriving)</li>
+            </ul>
+
+            <h4>Fan &amp; Pump Drives</h4>
+            <ul>
+                <li><strong>Square-law torque</strong>: \(T = k\omega^2\) &mdash; easy starting, but power grows as \(\omega^3\)</li>
+                <li><strong>Energy savings</strong>: 20% speed reduction &asymp; 50% power reduction</li>
+                <li><strong>Centrifugal pump</strong>: Impeller creates centrifugal force to move fluid from center to outlet</li>
+                <li><strong>Water tank (balloon)</strong>: Protects motor from excessive starting cycles by buffering demand</li>
+                <li><strong>No reversal needed</strong>: Fans and pumps only run in one direction</li>
+            </ul>
+
+            <h4>Key Formulas Summary</h4>
+            <div class="equation-box">
+                \[
+                \begin{aligned}
+                &\text{Crane Power:} & P_r &= \frac{9.81 \cdot M \cdot V}{\eta} \\[8pt]
+                &\text{Counterweight:} & M_{cw} &= M_{cage} + \frac{M_{load}}{2} \\[8pt]
+                &\text{Fan Torque:} & T_L &= k \cdot \omega^2 \\[8pt]
+                &\text{Fan Power:} & P &= k \cdot \omega^3 \\[8pt]
+                &\text{Referred Torque:} & T_{motor} &= \frac{i \cdot T_{load}}{\eta} \\[8pt]
+                &\text{Linear-to-Rotational } J: & J_{eq} &= M \left(\frac{V}{\omega_m}\right)^2
+                \end{aligned}
+                \]
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="lecture-footer">
+            <p>Lecture 4: Dynamics &mdash; Hoist Drives &amp; Fan Drives | Electric Drives Course</p>
+            <div class="footer-nav">
+                <a href="#">&larr; Lecture 3</a>
+                <a href="#">Lecture 5 &rarr;</a>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" onclick="scrollToTop()" aria-label="Back to top">&#8593;</button>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // ===== THEME TOGGLE =====
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('lecture-theme', next);
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('lecture-theme');
+            if (saved) {
+                document.documentElement.setAttribute('data-theme', saved);
+            }
+        })();
+
+        // ===== SIDEBAR TOGGLE =====
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        // Close sidebar on link click (mobile)
+        document.querySelectorAll('.toc-list a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.querySelector('.sidebar-overlay');
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // ===== PROGRESS BAR =====
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // ===== BACK TO TOP =====
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateBackToTop() {
+            const btn = document.getElementById('backToTop');
+            if (window.scrollY > 400) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        }
+
+        // ===== COLLAPSIBLE SECTIONS =====
+        function toggleCollapsible(header) {
+            const collapsible = header.parentElement;
+            collapsible.classList.toggle('open');
+        }
+
+        // ===== ACTIVE TOC HIGHLIGHT =====
+        function updateActiveToc() {
+            const sections = document.querySelectorAll('h2[id], h3[id], h4[id], section[id]');
+            const tocLinks = document.querySelectorAll('.toc-list a');
+            let currentId = '';
+
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= 120) {
+                    currentId = section.id;
+                }
+            });
+
+            tocLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentId) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // ===== SCROLL EVENT HANDLER =====
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateProgress();
+                    updateBackToTop();
+                    updateActiveToc();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // ===== KEYBOARD NAVIGATION =====
+        document.addEventListener('keydown', (e) => {
+            // Escape closes sidebar on mobile
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+            // 't' toggles theme (when not in input)
+            if (e.key === 't' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                const tag = document.activeElement.tagName;
+                if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                    toggleTheme();
+                }
+            }
+        });
+
+        // Initial calls
+        updateProgress();
+        updateBackToTop();
+    </script>
+</body>
+</html>

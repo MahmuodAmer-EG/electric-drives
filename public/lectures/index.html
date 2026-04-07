@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Drives (ELE421) — Interactive Lecture Notes</title>
+
+    <!-- MathJax CDN -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script>
+        (function() {
+            var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js';
+            var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js';
+            var s = document.createElement('script');
+            s.async = true; s.src = primary;
+            s.onerror = function() {
+                var s2 = document.createElement('script');
+                s2.async = true; s2.src = fallback;
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        })();
+    </script>
+
+    <style>
+        /* ========================================
+           CSS CUSTOM PROPERTIES (LIGHT MODE)
+           ======================================== */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f1f3f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: #495057;
+            --text-muted: #868e96;
+            --border-color: #dee2e6;
+            --border-light: #e9ecef;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --accent-hover: #1d4ed8;
+            --accent-light: #dbeafe;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-xl: 0 16px 48px rgba(0,0,0,0.15);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            /* Chapter colors */
+            --ch1-color: #2563eb;
+            --ch1-bg: #eff6ff;
+            --ch1-light: #dbeafe;
+            --ch2-color: #16a34a;
+            --ch2-bg: #f0fdf4;
+            --ch2-light: #dcfce7;
+            --ch3-color: #d97706;
+            --ch3-bg: #fffbeb;
+            --ch3-light: #fef3c7;
+            --ch4-color: #9333ea;
+            --ch4-bg: #faf5ff;
+            --ch4-light: #f3e8ff;
+
+            /* Progress */
+            --progress-bg: #e5e7eb;
+            --progress-fill: #2563eb;
+
+            /* Hero gradient */
+            --hero-from: #1e3a5f;
+            --hero-to: #0f172a;
+            --hero-accent: #60a5fa;
+        }
+
+        /* ========================================
+           DARK MODE
+           ======================================== */
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #1a2332;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --border-light: #1e293b;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #93bbfc;
+            --accent-hover: #93c5fd;
+            --accent-light: #172554;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+            --shadow-xl: 0 16px 48px rgba(0,0,0,0.6);
+
+            --ch1-color: #60a5fa;
+            --ch1-bg: #0c1929;
+            --ch1-light: #172554;
+            --ch2-color: #4ade80;
+            --ch2-bg: #071a0e;
+            --ch2-light: #14532d;
+            --ch3-color: #fbbf24;
+            --ch3-bg: #1c1a0e;
+            --ch3-light: #292415;
+            --ch4-color: #c084fc;
+            --ch4-bg: #1a0a2e;
+            --ch4-light: #2e1065;
+
+            --progress-bg: #334155;
+            --progress-fill: #60a5fa;
+
+            --hero-from: #0f172a;
+            --hero-to: #020617;
+            --hero-accent: #3b82f6;
+        }
+
+        /* ========================================
+           RESET & BASE
+           ======================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ========================================
+           THEME TOGGLE
+           ======================================== */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.2);
+        }
+
+        .scrolled .theme-toggle {
+            border-color: var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* ========================================
+           PROGRESS BAR (top of page)
+           ======================================== */
+        .progress-tracker-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--progress-bg);
+            z-index: 999;
+        }
+
+        .progress-tracker-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ch1-color), var(--ch2-color), var(--ch3-color), var(--ch4-color));
+            transition: width 0.5s ease;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ========================================
+           HERO SECTION
+           ======================================== */
+        .hero {
+            background: linear-gradient(135deg, var(--hero-from), var(--hero-to));
+            color: #fff;
+            padding: 100px 24px 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(147,51,234,0.1) 0%, transparent 50%);
+            animation: heroFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes heroFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, -2%) rotate(1deg); }
+            66% { transform: translate(-1%, 1%) rotate(-1deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 24px;
+            color: #93c5fd;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: #94a3b8;
+            margin-bottom: 32px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero .welcome {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            max-width: 560px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        /* Progress summary in hero */
+        .progress-summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 12px 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-summary .progress-ring {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+
+        .progress-summary .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-summary .progress-ring .ring-bg {
+            stroke: rgba(255,255,255,0.15);
+        }
+
+        .progress-summary .progress-ring .ring-fill {
+            stroke: #60a5fa;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .progress-summary .progress-ring .ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .progress-summary .progress-info {
+            text-align: left;
+        }
+
+        .progress-summary .progress-info .label {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+
+        .progress-summary .progress-info .count {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* ========================================
+           NAV / STICKY HEADER (appears on scroll)
+           ======================================== */
+        .sticky-nav {
+            position: fixed;
+            top: 4px;
+            left: 0;
+            right: 0;
+            z-index: 998;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transform: translateY(-120%);
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: var(--shadow-md);
+        }
+
+        .sticky-nav.visible {
+            transform: translateY(0);
+        }
+
+        .sticky-nav .nav-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .sticky-nav .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sticky-nav .nav-links a {
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .sticky-nav .nav-links a:hover {
+            background: var(--accent-light);
+            color: var(--accent-primary);
+        }
+
+        /* ========================================
+           CONTAINER
+           ======================================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ========================================
+           SECTION HEADINGS
+           ======================================== */
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-header .overline {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        .section-header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ========================================
+           COURSE ROADMAP (SVG)
+           ======================================== */
+        .roadmap-section {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .roadmap-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .roadmap-svg {
+            width: 100%;
+            min-width: 700px;
+            height: auto;
+        }
+
+        .roadmap-svg .node-rect {
+            rx: 10;
+            ry: 10;
+            cursor: pointer;
+            transition: filter 0.2s ease, transform 0.2s ease;
+        }
+
+        .roadmap-svg .node-rect:hover {
+            filter: brightness(1.08) drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+        }
+
+        .roadmap-svg .node-text {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            pointer-events: none;
+        }
+
+        .roadmap-svg .connector {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        .roadmap-svg .arrow-marker {
+            fill: var(--text-muted);
+        }
+
+        /* ========================================
+           LECTURE CARDS GRID
+           ======================================== */
+        .cards-section {
+            padding: 80px 0;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+        }
+
+        .lecture-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lecture-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-accent, var(--accent-primary));
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+
+        .lecture-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--card-accent, var(--accent-primary));
+        }
+
+        .lecture-card .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .lecture-card .card-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .lecture-card .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .lecture-card .badge-lecture {
+            background: var(--card-bg, var(--accent-light));
+            color: var(--card-accent, var(--accent-primary));
+        }
+
+        .lecture-card .badge-chapter {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .lecture-card .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            background: var(--card-bg, var(--accent-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .lecture-card .card-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--card-accent, var(--accent-primary));
+        }
+
+        .lecture-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            line-height: 1.35;
+        }
+
+        .lecture-card .card-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+            flex-grow: 1;
+        }
+
+        .lecture-card .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .lecture-card .tag {
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border-light);
+        }
+
+        .lecture-card .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .lecture-card .read-time {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lecture-card .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--card-accent, var(--accent-primary));
+            background: var(--card-bg, var(--accent-light));
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .lecture-card .card-btn:hover {
+            background: var(--card-accent, var(--accent-primary));
+            color: #fff;
+        }
+
+        .lecture-card .visited-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #16a34a;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.3s ease;
+        }
+
+        .lecture-card.visited .visited-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ========================================
+           CHAPTER OVERVIEW SECTIONS
+           ======================================== */
+        .chapters-section {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+        }
+
+        .chapter-block {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 5px;
+            background: var(--chap-color, var(--accent-primary));
+        }
+
+        .chapter-block .chapter-num {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            background: var(--chap-bg, var(--accent-light));
+            color: var(--chap-color, var(--accent-primary));
+        }
+
+        .chapter-block h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .chapter-block .chapter-desc {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            max-width: 700px;
+            line-height: 1.65;
+        }
+
+        .chapter-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .chapter-learn h4,
+        .chapter-lectures h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .chapter-learn ul {
+            list-style: none;
+        }
+
+        .chapter-learn ul li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.5;
+        }
+
+        .chapter-learn ul li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--chap-color, var(--accent-primary));
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+
+        .chapter-lecture-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .chapter-lecture-link:hover {
+            border-color: var(--chap-color, var(--accent-primary));
+            background: var(--chap-bg, var(--accent-light));
+        }
+
+        .chapter-lecture-link .lec-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--chap-color, var(--accent-primary));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .chapter-lecture-link .lec-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chapter-lecture-link .lec-arrow {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: transform 0.2s ease;
+        }
+
+        .chapter-lecture-link:hover .lec-arrow {
+            transform: translateX(4px);
+            color: var(--chap-color, var(--accent-primary));
+        }
+
+        /* Key equations in chapter blocks */
+        .chapter-equations {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .chapter-equations h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .equation-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            font-size: 0.92rem;
+        }
+
+        .equation-item .eq-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--chap-color, var(--accent-primary));
+            white-space: nowrap;
+        }
+
+        /* ========================================
+           QUICK REFERENCE (COLLAPSIBLE)
+           ======================================== */
+        .reference-section {
+            padding: 80px 0;
+        }
+
+        .reference-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .reference-toggle {
+            width: 100%;
+            padding: 20px 28px;
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .reference-toggle:hover {
+            background: var(--bg-secondary);
+        }
+
+        .reference-toggle .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .reference-toggle.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .reference-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .reference-body.open {
+            max-height: 800px;
+        }
+
+        .reference-body-inner {
+            padding: 0 28px 28px;
+        }
+
+        .ref-group {
+            margin-bottom: 20px;
+        }
+
+        .ref-group h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .ref-equation {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .ref-equation .ref-name {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+            min-width: 140px;
+        }
+
+        .ref-equation .ref-math {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        /* ========================================
+           FOOTER
+           ======================================== */
+        .site-footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 60px 24px 40px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+        }
+
+        .footer-about h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .footer-about p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 12px;
+        }
+
+        .footer-col h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 6px;
+        }
+
+        .footer-col ul li a {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .footer-col ul li a:hover {
+            color: var(--accent-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-bottom .approach-note {
+            margin-top: 8px;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        /* ========================================
+           RESPONSIVE
+           ======================================== */
+        @media (max-width: 900px) {
+            .chapter-content {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .sticky-nav .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero {
+                padding: 80px 16px 60px;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chapter-block {
+                padding: 24px 20px;
+            }
+
+            .ref-equation {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .ref-equation .ref-name {
+                min-width: auto;
+            }
+        }
+
+        /* ========================================
+           ANIMATIONS
+           ======================================== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger children */
+        .stagger > .fade-in:nth-child(1) { transition-delay: 0.05s; }
+        .stagger > .fade-in:nth-child(2) { transition-delay: 0.1s; }
+        .stagger > .fade-in:nth-child(3) { transition-delay: 0.15s; }
+        .stagger > .fade-in:nth-child(4) { transition-delay: 0.2s; }
+        .stagger > .fade-in:nth-child(5) { transition-delay: 0.25s; }
+        .stagger > .fade-in:nth-child(6) { transition-delay: 0.3s; }
+        .stagger > .fade-in:nth-child(7) { transition-delay: 0.35s; }
+        .stagger > .fade-in:nth-child(8) { transition-delay: 0.4s; }
+
+        /* Roadmap node animation */
+        .roadmap-svg .node-group {
+            opacity: 0;
+            animation: nodeAppear 0.4s ease forwards;
+        }
+        .roadmap-svg .node-group:nth-child(1) { animation-delay: 0.1s; }
+        .roadmap-svg .node-group:nth-child(2) { animation-delay: 0.2s; }
+        .roadmap-svg .node-group:nth-child(3) { animation-delay: 0.3s; }
+        .roadmap-svg .node-group:nth-child(4) { animation-delay: 0.4s; }
+        .roadmap-svg .node-group:nth-child(5) { animation-delay: 0.5s; }
+        .roadmap-svg .node-group:nth-child(6) { animation-delay: 0.6s; }
+        .roadmap-svg .node-group:nth-child(7) { animation-delay: 0.7s; }
+        .roadmap-svg .node-group:nth-child(8) { animation-delay: 0.8s; }
+        .roadmap-svg .node-group:nth-child(9) { animation-delay: 0.9s; }
+
+        @keyframes nodeAppear {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .roadmap-svg .connector-line {
+            stroke-dasharray: 500;
+            stroke-dashoffset: 500;
+            animation: drawLine 1s ease forwards;
+        }
+        .roadmap-svg .connector-line:nth-child(1) { animation-delay: 0.3s; }
+        .roadmap-svg .connector-line:nth-child(2) { animation-delay: 0.5s; }
+        .roadmap-svg .connector-line:nth-child(3) { animation-delay: 0.7s; }
+
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* SVG text colors */
+        .roadmap-svg text {
+            fill: var(--text-primary);
+        }
+        .roadmap-svg .subtitle-text {
+            fill: var(--text-secondary);
+        }
+        .roadmap-svg .chapter-label {
+            fill: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress bar -->
+    <div class="progress-tracker-bar" aria-label="Course completion progress">
+        <div class="fill" id="progressFill" style="width: 0%"></div>
+    </div>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+        <span id="themeIcon">&#9790;</span>
+    </button>
+
+    <!-- Sticky nav -->
+    <nav class="sticky-nav" id="stickyNav" aria-label="Quick navigation">
+        <span class="nav-title">ELE421 Electric Drives</span>
+        <div class="nav-links">
+            <a href="#roadmap">Roadmap</a>
+            <a href="#lectures">Lectures</a>
+            <a href="#chapters">Chapters</a>
+            <a href="#reference">Formulas</a>
+        </div>
+    </nav>
+
+    <!-- ========================================
+         HERO SECTION
+         ======================================== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">ELE421 Course Portal</div>
+            <h1>Electric Drives<br><span class="highlight">Interactive Lecture Notes</span></h1>
+            <p class="subtitle">Motivation-First Learning &mdash; from real-world problems to the equations that solve them.</p>
+            <p class="welcome">
+                Welcome to the Electric Drives course. These 8 interactive lectures take you from
+                the fundamentals of motor-load dynamics all the way to DC drive control. Each lecture
+                starts with a motivating question or real scenario, builds your intuition, then
+                dives into the math. Pick up where you left off, or explore any topic that sparks
+                your curiosity.
+            </p>
+
+            <!-- Progress ring -->
+            <div class="progress-summary" id="progressSummary">
+                <div class="progress-ring">
+                    <svg width="48" height="48" viewBox="0 0 48 48">
+                        <circle class="ring-bg" cx="24" cy="24" r="20" fill="none" stroke-width="4"/>
+                        <circle class="ring-fill" cx="24" cy="24" r="20" fill="none" stroke-width="4"
+                                stroke-dasharray="125.66" stroke-dashoffset="125.66" stroke-linecap="round"
+                                id="progressRing"/>
+                    </svg>
+                    <div class="ring-text" id="progressPercent">0%</div>
+                </div>
+                <div class="progress-info">
+                    <div class="label">Your Progress</div>
+                    <div class="count"><span id="progressCount">0</span>/8 lectures visited</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         COURSE ROADMAP
+         ======================================== -->
+    <section class="roadmap-section" id="roadmap">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline">Course Structure</span>
+                <h2>How the Lectures Connect</h2>
+                <p>Follow the path from foundational concepts through dynamics, traction, and into DC motor drives.</p>
+            </div>
+
+            <div class="roadmap-wrapper fade-in">
+                <svg class="roadmap-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                            <polygon points="0 0, 8 3, 0 6" class="arrow-marker" fill="#94a3b8"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Connectors (drawn first, behind nodes) -->
+                    <!-- L1 -> Ch2 branch -->
+                    <path class="connector connector-line" d="M220,65 L280,65 Q300,65 300,85 L300,105"
+                          stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- L1 -> Ch3 branch -->
+                    <path class="connector connector-line" d="M220,65 L430,65 Q450,65 450,85 L450,105"
+                          stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- L1 -> Ch4 branch -->
+                    <path class="connector connector-line" d="M220,65 L680,65 Q700,65 700,85 L700,105"
+                          stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- Ch2: L2 -> L3 -->
+                    <path class="connector connector-line" d="M300,175 L300,195"
+                          stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- Ch2: L3 -> L4 -->
+                    <path class="connector connector-line" d="M300,275 L300,295"
+                          stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- Ch3: L5 -> L6 -->
+                    <path class="connector connector-line" d="M450,175 L450,195"
+                          stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- Ch4: L7 -> L8 -->
+                    <path class="connector connector-line" d="M700,175 L700,195"
+                          stroke="#9333ea" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- ===== NODES ===== -->
+
+                    <!-- Lecture 1: Introduction (root node) -->
+                    <a href="lecture1_introduction.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="30" y="38" width="190" height="54"
+                                  fill="#2563eb" opacity="0.12" stroke="#2563eb" stroke-width="2"/>
+                            <text x="125" y="60" text-anchor="middle" class="node-text" font-size="11" font-weight="700"
+                                  fill="#2563eb">LECTURE 1</text>
+                            <text x="125" y="78" text-anchor="middle" class="node-text subtitle-text" font-size="10"
+                                  fill="#64748b">Introduction to Electric Drives</text>
+                        </g>
+                    </a>
+
+                    <!-- Chapter 2 label -->
+                    <text x="300" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                          font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 2: DYNAMICS</text>
+
+                    <!-- L2 -->
+                    <a href="lecture2_dynamics_part1.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="210" y="130" width="180" height="46"
+                                  fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
+                            <text x="300" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#16a34a">L2: Torque Equation</text>
+                            <text x="300" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Equivalent Parameters</text>
+                        </g>
+                    </a>
+
+                    <!-- L3 -->
+                    <a href="lecture3_fluctuating_loads.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="210" y="210" width="180" height="46"
+                                  fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
+                            <text x="300" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#16a34a">L3: Fluctuating Loads</text>
+                            <text x="300" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Flywheel Design</text>
+                        </g>
+                    </a>
+
+                    <!-- L4 -->
+                    <a href="lecture4_hoist_fan_drives.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="210" y="310" width="180" height="46"
+                                  fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
+                            <text x="300" y="330" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#16a34a">L4: Hoist &amp; Fan Drives</text>
+                            <text x="300" y="346" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Elevator, Centrifugal Loads</text>
+                        </g>
+                    </a>
+
+                    <!-- Chapter 3 label -->
+                    <text x="450" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                          font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 3: TRACTION</text>
+
+                    <!-- L5 -->
+                    <a href="lecture5_electric_traction.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="360" y="130" width="180" height="46"
+                                  fill="#d97706" opacity="0.12" stroke="#d97706" stroke-width="1.5"/>
+                            <text x="450" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#d97706">L5: Electric Traction</text>
+                            <text x="450" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Tractive Effort &amp; Duty Cycle</text>
+                        </g>
+                    </a>
+
+                    <!-- L6 -->
+                    <a href="lecture6_traction_energy.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="360" y="210" width="180" height="46"
+                                  fill="#d97706" opacity="0.12" stroke="#d97706" stroke-width="1.5"/>
+                            <text x="450" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#d97706">L6: Energy Consumption</text>
+                            <text x="450" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">SEC &amp; Regen. Braking</text>
+                        </g>
+                    </a>
+
+                    <!-- Chapter 4 label -->
+                    <text x="700" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                          font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 4: DC DRIVES</text>
+
+                    <!-- L7 -->
+                    <a href="lecture7_dc_drives_single_phase.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="610" y="130" width="180" height="46"
+                                  fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
+                            <text x="700" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#9333ea">L7: Single-Phase Conv.</text>
+                            <text x="700" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">DC Motor Speed Control</text>
+                        </g>
+                    </a>
+
+                    <!-- L8 -->
+                    <a href="lecture8_dc_drives_3phase_choppers.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="610" y="210" width="180" height="46"
+                                  fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
+                            <text x="700" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#9333ea">L8: 3-Phase &amp; Choppers</text>
+                            <text x="700" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Converter &amp; Chopper Drives</text>
+                        </g>
+                    </a>
+
+                    <!-- Legend -->
+                    <g transform="translate(30, 390)">
+                        <text font-size="9" font-weight="600" fill="#64748b">Click any node to open the lecture</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         LECTURE CARDS
+         ======================================== -->
+    <section class="cards-section" id="lectures">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline">All Lectures</span>
+                <h2>Explore the Full Course</h2>
+                <p>Eight lectures covering dynamics, traction, and DC motor drives &mdash; each designed around real engineering problems.</p>
+            </div>
+
+            <div class="cards-grid stagger" id="cardsGrid">
+
+                <!-- LECTURE 1 -->
+                <div class="lecture-card fade-in" data-lecture="1"
+                     style="--card-accent: var(--ch1-color); --card-bg: var(--ch1-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 1</span>
+                            <span class="badge badge-chapter">Chapter 1</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Introduction to Electric Drives</h3>
+                    <p class="card-desc">What makes an electric drive system? From choosing the right motor to understanding the power converter and control loop. Covers drive components, classifications, and selection criteria.</p>
+                    <div class="card-tags">
+                        <span class="tag">Drive Components</span>
+                        <span class="tag">Motor Types</span>
+                        <span class="tag">Power Converters</span>
+                        <span class="tag">Selection Criteria</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~25 min read
+                        </span>
+                        <a href="lecture1_introduction.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 2 -->
+                <div class="lecture-card fade-in" data-lecture="2"
+                     style="--card-accent: var(--ch2-color); --card-bg: var(--ch2-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 2</span>
+                            <span class="badge badge-chapter">Chapter 2</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Dynamics Part 1: Torque Equation &amp; Equivalent Parameters</h3>
+                    <p class="card-desc">The fundamental equation of motion for any drive system. Learn how to reduce complex multi-inertia, multi-speed mechanical systems to a single equivalent model at the motor shaft.</p>
+                    <div class="card-tags">
+                        <span class="tag">Torque Equation</span>
+                        <span class="tag">Moment of Inertia</span>
+                        <span class="tag">Equivalent J</span>
+                        <span class="tag">Gear Ratios</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~35 min read
+                        </span>
+                        <a href="lecture2_dynamics_part1.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 3 -->
+                <div class="lecture-card fade-in" data-lecture="3"
+                     style="--card-accent: var(--ch2-color); --card-bg: var(--ch2-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 3</span>
+                            <span class="badge badge-chapter">Chapter 2</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Dynamics Part 2: Fluctuating Loads &amp; Flywheel</h3>
+                    <p class="card-desc">When the load torque fluctuates cyclically, how do you size the motor and smooth out the demand? Covers flywheel design, constant-power drives, and compressor load profiles.</p>
+                    <div class="card-tags">
+                        <span class="tag">Fluctuating Loads</span>
+                        <span class="tag">Flywheel Design</span>
+                        <span class="tag">Compressor</span>
+                        <span class="tag">RMS Torque</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~30 min read
+                        </span>
+                        <a href="lecture3_fluctuating_loads.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 4 -->
+                <div class="lecture-card fade-in" data-lecture="4"
+                     style="--card-accent: var(--ch2-color); --card-bg: var(--ch2-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 4</span>
+                            <span class="badge badge-chapter">Chapter 2</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="18" rx="1"/><path d="M14 9l3-3 3 3"/><path d="M17 6v12"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Dynamics Part 3: Hoist Drives &amp; Fan Drives</h3>
+                    <p class="card-desc">Elevators go up and down; fans push air against resistance. Both create unique torque-speed demands. Analyze hoist dynamics with counterweights and centrifugal fan load curves.</p>
+                    <div class="card-tags">
+                        <span class="tag">Hoist Drives</span>
+                        <span class="tag">Elevator</span>
+                        <span class="tag">Fan Loads</span>
+                        <span class="tag">Counterweight</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~30 min read
+                        </span>
+                        <a href="lecture4_hoist_fan_drives.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 5 -->
+                <div class="lecture-card fade-in" data-lecture="5"
+                     style="--card-accent: var(--ch3-color); --card-bg: var(--ch3-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 5</span>
+                            <span class="badge badge-chapter">Chapter 3</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 18H3a2 2 0 01-2-2V8a2 2 0 012-2h3.19M15 6h2a2 2 0 012 2v1"/><path d="M21 14v2a2 2 0 01-2 2h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M9 18h6"/><path d="M5 6l2-2h4l2 2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Electric Traction Drives</h3>
+                    <p class="card-desc">From metro trains to high-speed rail, electric traction is everywhere. Study the tractive effort equation, speed-time curves, duty cycles, and the forces acting on a moving vehicle.</p>
+                    <div class="card-tags">
+                        <span class="tag">Traction Types</span>
+                        <span class="tag">Tractive Effort</span>
+                        <span class="tag">Duty Cycle</span>
+                        <span class="tag">Speed-Time Curves</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~35 min read
+                        </span>
+                        <a href="lecture5_electric_traction.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 6 -->
+                <div class="lecture-card fade-in" data-lecture="6"
+                     style="--card-accent: var(--ch3-color); --card-bg: var(--ch3-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 6</span>
+                            <span class="badge badge-chapter">Chapter 3</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Traction: Specific Energy Consumption</h3>
+                    <p class="card-desc">How much energy does a train actually consume per ton-km? Derive the specific energy consumption formula, analyze the impact of gradients, and understand regenerative braking savings.</p>
+                    <div class="card-tags">
+                        <span class="tag">SEC Formula</span>
+                        <span class="tag">Energy Analysis</span>
+                        <span class="tag">Regen. Braking</span>
+                        <span class="tag">Gradient Effects</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~30 min read
+                        </span>
+                        <a href="lecture6_traction_energy.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 7 -->
+                <div class="lecture-card fade-in" data-lecture="7"
+                     style="--card-accent: var(--ch4-color); --card-bg: var(--ch4-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 7</span>
+                            <span class="badge badge-chapter">Chapter 4</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>DC Drives: Single-Phase Converters</h3>
+                    <p class="card-desc">Control a DC motor's speed by controlling its armature voltage. Study single-phase half-wave and full-wave controlled rectifiers, their output waveforms, and drive performance.</p>
+                    <div class="card-tags">
+                        <span class="tag">DC Motor Model</span>
+                        <span class="tag">SCR Converters</span>
+                        <span class="tag">Speed Control</span>
+                        <span class="tag">Firing Angle</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~35 min read
+                        </span>
+                        <a href="lecture7_dc_drives_single_phase.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 8 -->
+                <div class="lecture-card fade-in" data-lecture="8"
+                     style="--card-accent: var(--ch4-color); --card-bg: var(--ch4-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 8</span>
+                            <span class="badge badge-chapter">Chapter 4</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="6" width="22" height="12" rx="2"/><path d="M6 12h.01"/><path d="M10 12h.01"/><path d="M14 12h.01"/><path d="M18 12h.01"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>DC Drives: Three-Phase Converters &amp; Choppers</h3>
+                    <p class="card-desc">Scale up to three-phase converter drives for higher power, then switch to choppers for smooth DC-to-DC control. Covers dual converters, four-quadrant operation, and chopper duty ratios.</p>
+                    <div class="card-tags">
+                        <span class="tag">3-Phase Rectifiers</span>
+                        <span class="tag">Dual Converter</span>
+                        <span class="tag">Chopper Drives</span>
+                        <span class="tag">4-Quadrant</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~35 min read
+                        </span>
+                        <a href="lecture8_dc_drives_3phase_choppers.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+            </div><!-- /cards-grid -->
+        </div>
+    </section>
+
+    <!-- ========================================
+         CHAPTER OVERVIEWS
+         ======================================== -->
+    <section class="chapters-section" id="chapters">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline">Deep Dive</span>
+                <h2>Chapter Overviews</h2>
+                <p>Each chapter groups related lectures and builds toward a specific competency in electric drive engineering.</p>
+            </div>
+
+            <!-- Chapter 1 -->
+            <div class="chapter-block fade-in" style="--chap-color: var(--ch1-color); --chap-bg: var(--ch1-bg);">
+                <span class="chapter-num">Chapter 1</span>
+                <h3>Introduction to Electric Drives</h3>
+                <p class="chapter-desc">
+                    Establishes the big picture: what an electric drive system is, why we need controlled drives, and how the motor, power converter, and controller work together. Sets the vocabulary and framework for everything that follows.
+                </p>
+                <div class="chapter-content">
+                    <div class="chapter-learn">
+                        <h4>What You'll Learn</h4>
+                        <ul>
+                            <li>Components of an electric drive system</li>
+                            <li>Classification of electric drives (AC, DC, stepper)</li>
+                            <li>Choice of motor and converter for a given application</li>
+                            <li>Operating quadrants and braking methods</li>
+                        </ul>
+                    </div>
+                    <div class="chapter-lectures">
+                        <h4>Lectures</h4>
+                        <a href="lecture1_introduction.html" class="chapter-lecture-link">
+                            <span class="lec-num">1</span>
+                            <span class="lec-title">Introduction to Electric Drives</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 2 -->
+            <div class="chapter-block fade-in" style="--chap-color: var(--ch2-color); --chap-bg: var(--ch2-bg);">
+                <span class="chapter-num">Chapter 2</span>
+                <h3>Dynamics of Electrical Drives</h3>
+                <p class="chapter-desc">
+                    The mechanical heart of every drive: the torque equation. Three lectures progressively build from the fundamental equation of motion to handling real-world complexities like fluctuating loads, flywheels, hoists, and fans.
+                </p>
+                <div class="chapter-content">
+                    <div class="chapter-learn">
+                        <h4>What You'll Learn</h4>
+                        <ul>
+                            <li>Fundamental torque equation: \( T - T_L = J \frac{d\omega}{dt} \)</li>
+                            <li>Reducing multi-inertia systems to equivalent single-axis models</li>
+                            <li>Sizing motors for fluctuating and cyclic loads</li>
+                            <li>Flywheel moment of inertia calculation for load smoothing</li>
+                            <li>Hoist drive dynamics with counterweight analysis</li>
+                            <li>Fan and pump load torque-speed characteristics</li>
+                        </ul>
+                    </div>
+                    <div class="chapter-lectures">
+                        <h4>Lectures</h4>
+                        <a href="lecture2_dynamics_part1.html" class="chapter-lecture-link">
+                            <span class="lec-num">2</span>
+                            <span class="lec-title">Torque Equation &amp; Equivalent Parameters</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture3_fluctuating_loads.html" class="chapter-lecture-link">
+                            <span class="lec-num">3</span>
+                            <span class="lec-title">Fluctuating Loads &amp; Flywheel</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture4_hoist_fan_drives.html" class="chapter-lecture-link">
+                            <span class="lec-num">4</span>
+                            <span class="lec-title">Hoist Drives &amp; Fan Drives</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="chapter-equations">
+                    <h4>Key Equations</h4>
+                    <div class="equation-item">
+                        <span class="eq-label">Torque Equation</span>
+                        <span class="ref-math">\( T - T_L = J \frac{d\omega}{dt} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Equivalent Inertia</span>
+                        <span class="ref-math">\( J_{eq} = J_m + J_L \left(\frac{N_m}{N_L}\right)^2 \)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 3 -->
+            <div class="chapter-block fade-in" style="--chap-color: var(--ch3-color); --chap-bg: var(--ch3-bg);">
+                <span class="chapter-num">Chapter 3</span>
+                <h3>Electric Traction</h3>
+                <p class="chapter-desc">
+                    Apply electric drive principles to transportation. Analyze the forces on a train, construct speed-time diagrams, compute energy consumption, and understand how regenerative braking recovers energy.
+                </p>
+                <div class="chapter-content">
+                    <div class="chapter-learn">
+                        <h4>What You'll Learn</h4>
+                        <ul>
+                            <li>Types of electric traction systems (DC, single-phase AC, 3-phase AC)</li>
+                            <li>Tractive effort, adhesion, and train resistance</li>
+                            <li>Speed-time curves and their components</li>
+                            <li>Specific energy consumption (SEC) derivation</li>
+                            <li>Effect of gradients and curves on energy</li>
+                            <li>Regenerative braking energy savings</li>
+                        </ul>
+                    </div>
+                    <div class="chapter-lectures">
+                        <h4>Lectures</h4>
+                        <a href="lecture5_electric_traction.html" class="chapter-lecture-link">
+                            <span class="lec-num">5</span>
+                            <span class="lec-title">Electric Traction Drives</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture6_traction_energy.html" class="chapter-lecture-link">
+                            <span class="lec-num">6</span>
+                            <span class="lec-title">Specific Energy Consumption</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="chapter-equations">
+                    <h4>Key Equations</h4>
+                    <div class="equation-item">
+                        <span class="eq-label">Tractive Effort</span>
+                        <span class="ref-math">\( F_t = 277.8 \cdot M_e \cdot \alpha + 9.81 \cdot M \cdot G + r \cdot M \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Specific Energy</span>
+                        <span class="ref-math">\( \text{SEC} = \frac{E_{in}}{M \cdot D} \)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 4 -->
+            <div class="chapter-block fade-in" style="--chap-color: var(--ch4-color); --chap-bg: var(--ch4-bg);">
+                <span class="chapter-num">Chapter 4</span>
+                <h3>DC Motor Drives</h3>
+                <p class="chapter-desc">
+                    The classic controlled drive: DC motors with power electronic converters. From single-phase SCR bridges to three-phase converters and modern chopper drives, learn to control speed and torque precisely.
+                </p>
+                <div class="chapter-content">
+                    <div class="chapter-learn">
+                        <h4>What You'll Learn</h4>
+                        <ul>
+                            <li>DC motor equivalent circuit and torque-speed characteristics</li>
+                            <li>Armature voltage control and field weakening</li>
+                            <li>Single-phase half-wave and full-wave converter drives</li>
+                            <li>Three-phase fully controlled converter drives</li>
+                            <li>Chopper-fed DC drives and duty ratio control</li>
+                            <li>Four-quadrant operation with dual converters</li>
+                        </ul>
+                    </div>
+                    <div class="chapter-lectures">
+                        <h4>Lectures</h4>
+                        <a href="lecture7_dc_drives_single_phase.html" class="chapter-lecture-link">
+                            <span class="lec-num">7</span>
+                            <span class="lec-title">Single-Phase Converter Drives</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture8_dc_drives_3phase_choppers.html" class="chapter-lecture-link">
+                            <span class="lec-num">8</span>
+                            <span class="lec-title">Three-Phase Converters &amp; Choppers</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="chapter-equations">
+                    <h4>Key Equations</h4>
+                    <div class="equation-item">
+                        <span class="eq-label">DC Motor Voltage</span>
+                        <span class="ref-math">\( V_a = E_g + I_a R_a \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Speed Equation</span>
+                        <span class="ref-math">\( \omega_m = \frac{V_a}{K\phi} - \frac{R_a \cdot T}{(K\phi)^2} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Chopper Output</span>
+                        <span class="ref-math">\( V_a = \delta \cdot V_s \)</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ========================================
+         QUICK REFERENCE (COLLAPSIBLE)
+         ======================================== -->
+    <section class="reference-section" id="reference">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="overline">Quick Reference</span>
+                <h2>Key Formulas at a Glance</h2>
+                <p>The essential equations from all eight lectures, organized by topic.</p>
+            </div>
+
+            <div class="reference-card fade-in">
+                <button class="reference-toggle" id="refToggle" aria-expanded="false" aria-controls="refBody">
+                    <span>Expand All Key Formulas</span>
+                    <span class="toggle-icon">&#9660;</span>
+                </button>
+                <div class="reference-body" id="refBody" role="region" aria-labelledby="refToggle">
+                    <div class="reference-body-inner">
+
+                        <div class="ref-group">
+                            <h4>Drive Dynamics (Chapter 2)</h4>
+                            <div class="ref-equation">
+                                <span class="ref-name">Fundamental Torque Eq.</span>
+                                <span class="ref-math">\( T - T_L = J \frac{d\omega}{dt} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Equivalent Inertia</span>
+                                <span class="ref-math">\( J_{eq} = J_m + \sum J_i \left(\frac{\omega_i}{\omega_m}\right)^2 \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Equivalent Torque</span>
+                                <span class="ref-math">\( T_{L,eq} = \sum T_{L,i} \cdot \frac{\omega_i}{\omega_m} \)</span>
+                            </div>
+                        </div>
+
+                        <div class="ref-group">
+                            <h4>Electric Traction (Chapter 3)</h4>
+                            <div class="ref-equation">
+                                <span class="ref-name">Tractive Effort</span>
+                                <span class="ref-math">\( F_t = 277.8 \cdot M_e \cdot \alpha + 9.81 \cdot M \cdot G + r \cdot M \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Specific Energy Consumption</span>
+                                <span class="ref-math">\( \text{SEC} = \frac{E_{in}}{M \cdot D} \)</span>
+                            </div>
+                        </div>
+
+                        <div class="ref-group">
+                            <h4>DC Motor Drives (Chapter 4)</h4>
+                            <div class="ref-equation">
+                                <span class="ref-name">Motor Voltage Equation</span>
+                                <span class="ref-math">\( V_a = E_g + I_a R_a \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Speed-Torque Relation</span>
+                                <span class="ref-math">\( \omega_m = \frac{V_a}{K\phi} - \frac{R_a \cdot T}{(K\phi)^2} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Chopper Avg. Voltage</span>
+                                <span class="ref-math">\( V_a = \delta \cdot V_s \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">1-Phase Full Conv.</span>
+                                <span class="ref-math">\( V_a = \frac{2V_m}{\pi} \cos\alpha \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">3-Phase Full Conv.</span>
+                                <span class="ref-math">\( V_a = \frac{3V_{m,LL}}{\pi} \cos\alpha \)</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         FOOTER
+         ======================================== -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-about">
+                <h3>ELE421 Electric Drives</h3>
+                <p>
+                    A comprehensive set of interactive lecture notes covering electrical drive systems,
+                    from fundamental dynamics through traction applications to DC motor drive control.
+                    Designed for undergraduate electrical engineering students.
+                </p>
+                <p>
+                    Built with the <strong>Motivation-First</strong> teaching approach: every concept begins
+                    with a real-world question or scenario, builds intuition, then formalizes the mathematics.
+                </p>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#roadmap">Course Roadmap</a></li>
+                    <li><a href="#lectures">All Lectures</a></li>
+                    <li><a href="#chapters">Chapter Overviews</a></li>
+                    <li><a href="#reference">Formula Reference</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>References</h4>
+                <ul>
+                    <li><a href="#">Dubey, G.K. &mdash; Fundamentals of Electrical Drives</a></li>
+                    <li><a href="#">Bose, B.K. &mdash; Modern Power Electronics and AC Drives</a></li>
+                    <li><a href="#">Rashid, M.H. &mdash; Power Electronics Handbook</a></li>
+                    <li><a href="#">Mohan, Undeland, Robbins &mdash; Power Electronics</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>ELE421 Electric Drives &mdash; Interactive Lecture Notes</p>
+            <p class="approach-note">
+                Teaching philosophy: Start with "why does this matter?", build intuition, then formalize.
+                Every section is designed so you understand the purpose before you see the equation.
+            </p>
+        </div>
+    </footer>
+
+    <!-- ========================================
+         JAVASCRIPT
+         ======================================== -->
+    <script>
+    (function() {
+        'use strict';
+
+        // ===== CONSTANTS =====
+        const TOTAL_LECTURES = 8;
+        const STORAGE_KEY_PROGRESS = 'ele421_visited';
+        const STORAGE_KEY_THEME = 'ele421_theme';
+        const LECTURE_FILES = [
+            'lecture1_introduction.html',
+            'lecture2_dynamics_part1.html',
+            'lecture3_fluctuating_loads.html',
+            'lecture4_hoist_fan_drives.html',
+            'lecture5_electric_traction.html',
+            'lecture6_traction_energy.html',
+            'lecture7_dc_drives_single_phase.html',
+            'lecture8_dc_drives_3phase_choppers.html'
+        ];
+
+        // ===== PROGRESS TRACKING =====
+        function getVisited() {
+            try {
+                const data = JSON.parse(localStorage.getItem(STORAGE_KEY_PROGRESS) || '[]');
+                return Array.isArray(data) ? data : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function markVisited(lectureNum) {
+            const visited = getVisited();
+            if (!visited.includes(lectureNum)) {
+                visited.push(lectureNum);
+                localStorage.setItem(STORAGE_KEY_PROGRESS, JSON.stringify(visited));
+            }
+        }
+
+        function updateProgressUI() {
+            const visited = getVisited();
+            const count = visited.length;
+            const pct = Math.round((count / TOTAL_LECTURES) * 100);
+
+            // Progress bar at top
+            const fill = document.getElementById('progressFill');
+            if (fill) fill.style.width = pct + '%';
+
+            // Progress ring in hero
+            const ring = document.getElementById('progressRing');
+            if (ring) {
+                const circumference = 125.66; // 2 * PI * 20
+                ring.style.strokeDashoffset = circumference - (circumference * count / TOTAL_LECTURES);
+            }
+
+            // Text
+            const percentEl = document.getElementById('progressPercent');
+            if (percentEl) percentEl.textContent = pct + '%';
+
+            const countEl = document.getElementById('progressCount');
+            if (countEl) countEl.textContent = count;
+
+            // Mark cards as visited
+            document.querySelectorAll('.lecture-card').forEach(function(card) {
+                const lecNum = parseInt(card.getAttribute('data-lecture'), 10);
+                if (visited.includes(lecNum)) {
+                    card.classList.add('visited');
+                }
+            });
+        }
+
+        // Track clicks on lecture links
+        function trackLectureClicks() {
+            document.querySelectorAll('a[href]').forEach(function(link) {
+                const href = link.getAttribute('href');
+                LECTURE_FILES.forEach(function(file, index) {
+                    if (href === file) {
+                        link.addEventListener('click', function() {
+                            markVisited(index + 1);
+                        });
+                    }
+                });
+            });
+        }
+
+        // Also check referrer on page load (if returning from a lecture)
+        function checkReferrer() {
+            try {
+                var ref = document.referrer;
+                if (ref) {
+                    LECTURE_FILES.forEach(function(file, index) {
+                        if (ref.indexOf(file) !== -1) {
+                            markVisited(index + 1);
+                        }
+                    });
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // ===== THEME =====
+        function getPreferredTheme() {
+            var stored = localStorage.getItem(STORAGE_KEY_THEME);
+            if (stored) return stored;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem(STORAGE_KEY_THEME, theme);
+            var icon = document.getElementById('themeIcon');
+            if (icon) icon.innerHTML = theme === 'dark' ? '&#9788;' : '&#9790;';
+        }
+
+        function toggleTheme() {
+            var current = document.documentElement.getAttribute('data-theme') || 'light';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        // ===== STICKY NAV =====
+        function handleScroll() {
+            var nav = document.getElementById('stickyNav');
+            var hero = document.querySelector('.hero');
+            if (!nav || !hero) return;
+            var heroBottom = hero.getBoundingClientRect().bottom;
+            if (heroBottom < 0) {
+                nav.classList.add('visible');
+            } else {
+                nav.classList.remove('visible');
+            }
+        }
+
+        // ===== INTERSECTION OBSERVER (FADE IN) =====
+        function setupFadeIn() {
+            var elements = document.querySelectorAll('.fade-in');
+            if (!('IntersectionObserver' in window)) {
+                elements.forEach(function(el) { el.classList.add('visible'); });
+                return;
+            }
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+            elements.forEach(function(el) { observer.observe(el); });
+        }
+
+        // ===== COLLAPSIBLE REFERENCE =====
+        function setupReference() {
+            var toggle = document.getElementById('refToggle');
+            var body = document.getElementById('refBody');
+            if (!toggle || !body) return;
+
+            toggle.addEventListener('click', function() {
+                var isOpen = body.classList.contains('open');
+                body.classList.toggle('open');
+                toggle.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', !isOpen);
+                toggle.querySelector('span:first-child').textContent =
+                    isOpen ? 'Expand All Key Formulas' : 'Collapse Key Formulas';
+            });
+        }
+
+        // ===== INIT =====
+        function init() {
+            // Theme
+            applyTheme(getPreferredTheme());
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+            // Progress
+            checkReferrer();
+            updateProgressUI();
+            trackLectureClicks();
+
+            // Scroll
+            window.addEventListener('scroll', handleScroll, { passive: true });
+            handleScroll();
+
+            // Animations
+            setupFadeIn();
+
+            // Reference
+            setupReference();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
+</body>
+</html>

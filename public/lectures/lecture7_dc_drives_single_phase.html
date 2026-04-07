@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 7: DC Drives — Introduction &amp; Single-Phase Converter Drives</title>
+
+<!-- MathJax CDN -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      omega: '\\omega',
+      phi: '\\varphi'
+    }
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script>
+    (function() {
+        var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+        var s = document.createElement('script');
+        s.async = true; s.src = primary;
+        s.onerror = function() {
+            var s2 = document.createElement('script');
+            s2.async = true; s2.src = fallback;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    })();
+</script>
+
+<style>
+/* ============================================================
+   CSS RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Accent colors */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #dbeafe;
+  --accent-blue-border: #93c5fd;
+  --accent-green: #16a34a;
+  --accent-green-light: #dcfce7;
+  --accent-green-border: #86efac;
+  --accent-yellow: #d97706;
+  --accent-yellow-light: #fef3c7;
+  --accent-yellow-border: #fcd34d;
+  --accent-red: #dc2626;
+  --accent-purple: #7c3aed;
+
+  /* Section colors */
+  --motivation-bg: #fffbeb;
+  --motivation-border: #f59e0b;
+  --motivation-text: #92400e;
+  --motivation-icon: #f59e0b;
+
+  --intuition-bg: #eff6ff;
+  --intuition-border: #3b82f6;
+  --intuition-text: #1e40af;
+  --intuition-icon: #3b82f6;
+
+  --deepdive-bg: #f0fdf4;
+  --deepdive-border: #22c55e;
+  --deepdive-text: #166534;
+  --deepdive-icon: #22c55e;
+
+  --takeaway-bg: #faf5ff;
+  --takeaway-border: #a855f7;
+  --takeaway-text: #6b21a8;
+  --takeaway-icon: #a855f7;
+
+  /* Sizing */
+  --sidebar-width: 280px;
+  --content-max: 900px;
+  --progress-height: 4px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-sidebar: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+  --accent-blue: #60a5fa;
+  --accent-blue-light: #1e3a5f;
+  --accent-blue-border: #2563eb;
+  --accent-green: #4ade80;
+  --accent-green-light: #14532d;
+  --accent-green-border: #16a34a;
+  --accent-yellow: #fbbf24;
+  --accent-yellow-light: #451a03;
+  --accent-yellow-border: #d97706;
+
+  --motivation-bg: #1c1207;
+  --motivation-border: #d97706;
+  --motivation-text: #fcd34d;
+  --motivation-icon: #fbbf24;
+
+  --intuition-bg: #0c1929;
+  --intuition-border: #2563eb;
+  --intuition-text: #93c5fd;
+  --intuition-icon: #60a5fa;
+
+  --deepdive-bg: #052e16;
+  --deepdive-border: #16a34a;
+  --deepdive-text: #86efac;
+  --deepdive-icon: #4ade80;
+
+  --takeaway-bg: #1a0533;
+  --takeaway-border: #7c3aed;
+  --takeaway-text: #c4b5fd;
+  --takeaway-icon: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: var(--progress-height);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================
+   TOP HEADER
+   ============================================================ */
+.top-header {
+  position: fixed;
+  top: var(--progress-height);
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 999;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-normal);
+}
+
+.top-header .lecture-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.top-header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Sidebar toggle (mobile) */
+.sidebar-toggle {
+  display: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   SIDEBAR / TABLE OF CONTENTS
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: calc(56px + var(--progress-height));
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - 56px - var(--progress-height));
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 998;
+  transition: transform var(--transition-normal), background var(--transition-normal);
+}
+
+.sidebar h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 7px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.sidebar nav a:hover {
+  background: var(--bg-primary);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+
+.sidebar nav a.active {
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+  background: var(--bg-primary);
+  font-weight: 600;
+}
+
+.sidebar nav a.sub {
+  padding-left: 36px;
+  font-size: 0.8rem;
+}
+
+.sidebar nav a.subsub {
+  padding-left: 50px;
+  font-size: 0.78rem;
+}
+
+/* Sidebar scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: calc(56px + var(--progress-height) + 40px) 48px 80px 48px;
+  max-width: calc(var(--content-max) + var(--sidebar-width) + 96px);
+  transition: margin-left var(--transition-normal);
+}
+
+.content-wrapper {
+  max-width: var(--content-max);
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  margin-bottom: 48px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.hero .lecture-number {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-blue);
+  background: var(--accent-blue-light);
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   SECTION STRUCTURE
+   ============================================================ */
+.section {
+  margin-bottom: 56px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.section-header .collapse-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-normal);
+  width: 24px;
+  text-align: center;
+}
+
+.section-header .collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.section-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Sub-section */
+.subsection {
+  margin: 28px 0;
+}
+
+.subsection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.subsection h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   COLORED BOXES (Motivation, Intuition, Deep Dive, Takeaway)
+   ============================================================ */
+.box {
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 20px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+
+.box .box-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.box.motivation {
+  background: var(--motivation-bg);
+  border-left-color: var(--motivation-border);
+  color: var(--motivation-text);
+}
+.box.motivation .box-label {
+  background: var(--motivation-border);
+  color: #fff;
+}
+
+.box.intuition {
+  background: var(--intuition-bg);
+  border-left-color: var(--intuition-border);
+  color: var(--intuition-text);
+}
+.box.intuition .box-label {
+  background: var(--intuition-border);
+  color: #fff;
+}
+
+.box.deepdive {
+  background: var(--deepdive-bg);
+  border-left-color: var(--deepdive-border);
+  color: var(--deepdive-text);
+}
+.box.deepdive .box-label {
+  background: var(--deepdive-border);
+  color: #fff;
+}
+
+.box.takeaway {
+  background: var(--takeaway-bg);
+  border-left-color: var(--takeaway-border);
+  color: var(--takeaway-text);
+}
+.box.takeaway .box-label {
+  background: var(--takeaway-border);
+  color: #fff;
+}
+
+/* ============================================================
+   EQUATIONS
+   ============================================================ */
+.equation-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.equation-block .eq-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.styled-table th, .styled-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.styled-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.styled-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* ============================================================
+   SVG DIAGRAMS
+   ============================================================ */
+.diagram-container {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ============================================================
+   LISTS
+   ============================================================ */
+.content-list {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.content-list li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   PRACTICE PROBLEMS
+   ============================================================ */
+.problem-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 16px 0;
+}
+
+.problem-card .problem-number {
+  display: inline-block;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.problem-card .solution {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.solution-toggle {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all var(--transition-fast);
+}
+
+.solution-toggle:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.solution-content {
+  display: none;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.solution-content.visible {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+p {
+  margin-bottom: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.highlight {
+  background: var(--accent-yellow-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.text-center { text-align: center; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-content {
+    margin-left: 0;
+    padding: calc(56px + var(--progress-height) + 24px) 20px 60px 20px;
+  }
+  .sidebar-toggle {
+    display: block;
+  }
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.35rem; }
+  .section-header h2 { font-size: 1.25rem; }
+  .box { padding: 16px 18px; }
+}
+
+/* ============================================================
+   SVG THEME OVERRIDES
+   ============================================================ */
+svg text {
+  fill: var(--text-primary);
+}
+[data-theme="dark"] svg .wire { stroke: #94a3b8; }
+[data-theme="dark"] svg .component { stroke: #94a3b8; fill: none; }
+[data-theme="dark"] svg .component-fill { fill: #334155; stroke: #94a3b8; }
+[data-theme="dark"] svg .label { fill: #e2e8f0; }
+[data-theme="dark"] svg .arrow { stroke: #94a3b8; fill: #94a3b8; }
+[data-theme="dark"] svg .axis { stroke: #64748b; }
+[data-theme="dark"] svg .curve1 { stroke: #60a5fa; }
+[data-theme="dark"] svg .curve2 { stroke: #f87171; }
+[data-theme="dark"] svg .curve3 { stroke: #4ade80; }
+[data-theme="dark"] svg .curve4 { stroke: #fbbf24; }
+[data-theme="dark"] svg .region { fill-opacity: 0.15; }
+
+/* Light mode SVG defaults */
+svg .wire { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component-fill { fill: #f1f5f9; stroke: #334155; stroke-width: 2; }
+svg .label { fill: #1e293b; font-size: 13px; font-family: 'Segoe UI', sans-serif; }
+svg .label-sm { fill: #475569; font-size: 11px; font-family: 'Segoe UI', sans-serif; }
+svg .arrow { stroke: #334155; stroke-width: 2; fill: #334155; }
+svg .axis { stroke: #475569; stroke-width: 1.5; }
+svg .curve1 { stroke: #2563eb; stroke-width: 2.5; fill: none; }
+svg .curve2 { stroke: #dc2626; stroke-width: 2.5; fill: none; }
+svg .curve3 { stroke: #16a34a; stroke-width: 2.5; fill: none; }
+svg .curve4 { stroke: #d97706; stroke-width: 2.5; fill: none; }
+svg .region { stroke: none; }
+svg .quadrant-active { fill: #dbeafe; fill-opacity: 0.5; stroke: #2563eb; stroke-width: 1; stroke-dasharray: 4; }
+svg .quadrant-inactive { fill: #f1f5f9; fill-opacity: 0.3; stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; }
+[data-theme="dark"] svg .quadrant-active { fill: #1e3a5f; fill-opacity: 0.5; stroke: #60a5fa; }
+[data-theme="dark"] svg .quadrant-inactive { fill: #1e293b; fill-opacity: 0.3; stroke: #475569; }
+
+/* Scrollbar for main */
+.main-content::-webkit-scrollbar { width: 6px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Top Header -->
+<header class="top-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
+    <span class="lecture-tag">Lecture 7 &mdash; Electric Drives</span>
+  </div>
+  <div class="header-controls">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span id="theme-icon">&#9790;</span>
+      <span id="theme-label" style="font-size:0.8rem;font-weight:600;">Dark</span>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar / TOC -->
+<aside class="sidebar" id="sidebar">
+  <h3>Table of Contents</h3>
+  <nav id="toc-nav">
+    <a href="#hero">Overview</a>
+    <a href="#sec-dc-intro" class="sub">1. DC Motors &mdash; Introduction</a>
+    <a href="#sec-characteristics" class="sub">2. Motor Characteristics</a>
+    <a href="#sec-sep-excited" class="subsub">Separately Excited</a>
+    <a href="#sec-comparison" class="subsub">Type Comparison</a>
+    <a href="#sec-starting" class="sub">3. Starting DC Motors</a>
+    <a href="#sec-speed-control" class="sub">4. Speed Control Methods</a>
+    <a href="#sec-armature-ctrl" class="subsub">Armature Voltage Control</a>
+    <a href="#sec-field-ctrl" class="subsub">Field Control</a>
+    <a href="#sec-combined" class="subsub">Combined Characteristic</a>
+    <a href="#sec-drive-types" class="sub">5. DC Drive Types</a>
+    <a href="#sec-halfwave" class="sub">6. Half-Wave Converter</a>
+    <a href="#sec-semiconverter" class="sub">7. Semi-Converter</a>
+    <a href="#sec-fullconverter" class="sub">8. Full Converter</a>
+    <a href="#sec-dualconverter" class="sub">9. Dual Converter</a>
+    <a href="#sec-summary-converters" class="sub">10. Converter Summary</a>
+    <a href="#sec-example" class="sub">11. Worked Example</a>
+    <a href="#sec-practice" class="sub">12. Practice Problems</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrapper">
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<div class="hero" id="hero">
+  <span class="lecture-number">Lecture 7</span>
+  <h1>DC Drives &mdash; Introduction &amp; Single-Phase Converter Drives</h1>
+  <p class="subtitle">Understanding DC motor fundamentals, speed control strategies, and single-phase power converter topologies for driving DC machines.</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1: DC Motors Introduction
+     ============================================================ -->
+<div class="section" id="sec-dc-intro">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>1. DC Motors &mdash; Introduction</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Before we can build a <em>drive</em>, we need to understand the <em>machine</em> it controls. DC motors have been the workhorse of variable-speed drives for over a century. Even though AC drives are taking over in many areas, DC drives are still everywhere &mdash; in traction systems, rolling mills, cranes, and legacy industrial plants. Understanding DC motor physics is also the single best foundation for understanding <em>any</em> electric drive, because the relationships between voltage, current, flux, torque, and speed are beautifully direct.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of a DC motor like a water wheel. The <strong>armature voltage</strong> is the water pressure pushing the wheel. The <strong>field flux</strong> is how big the wheel's paddles are. The <strong>back-EMF</strong> is the "pushback" the spinning wheel creates against the incoming water. The bigger the paddles (more flux) or the higher the pressure (more voltage), the faster or harder the wheel turns.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; DC Motor Types</span>
+      <p>DC motors are classified by how their field winding is connected relative to the armature:</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Type</th><th>Field Connection</th><th>Key Feature</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Separately Excited</strong></td><td>Independent supply for field</td><td>Best controllability, independent flux &amp; armature control</td></tr>
+          <tr><td><strong>Shunt</strong></td><td>Field in parallel with armature</td><td>Nearly constant speed (like sep. excited when supply is stiff)</td></tr>
+          <tr><td><strong>Series</strong></td><td>Field in series with armature</td><td>High starting torque, speed drops sharply with load (traction)</td></tr>
+          <tr><td><strong>Compound</strong></td><td>Both shunt + series windings</td><td>Intermediate characteristics, cumulative or differential</td></tr>
+          <tr><td><strong>Permanent Magnet</strong></td><td>Magnets replace field winding</td><td>Simple, compact, constant flux (like sep. excited at fixed field)</td></tr>
+        </tbody>
+      </table>
+
+      <p>For drives, the <strong>separately excited motor</strong> is the most important because we can control armature voltage and field current independently &mdash; giving us maximum flexibility.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>DC motors translate between electrical and mechanical domains through a direct, linear relationship involving flux. The separately excited motor is the default "lab rat" of electric drives because it offers independent control knobs for voltage and field.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2: Characteristics of DC Motors
+     ============================================================ -->
+<div class="section" id="sec-characteristics">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>2. Characteristics of DC Motors</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Separately Excited -->
+    <div class="subsection" id="sec-sep-excited">
+      <h3>a) Separately Excited Motor</h3>
+
+      <div class="box motivation">
+        <span class="box-label">The Problem / The Why</span>
+        <p>To control a motor, we need its mathematical "blueprint" &mdash; the equations that link what we can control (voltage, field current) to what we want (speed, torque). Without these, we're driving blind.</p>
+      </div>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Imagine pushing a child on a swing. You push with a force (applied voltage \(V_a\)). Some of that effort is lost to friction at the joints (the \(I_a R_a\) drop). The rest goes into maintaining the swing's motion (the back-EMF \(E_g\)). As the swing goes faster, it "pushes back" harder, and you need to push harder just to maintain speed. That pushback is the back-EMF.</p>
+      </div>
+
+      <!-- Circuit Diagram: Separately Excited Motor -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
+          <!-- Armature circuit -->
+          <text x="20" y="30" class="label" font-weight="bold">Armature Circuit</text>
+          <!-- Va source -->
+          <circle cx="60" cy="120" r="22" class="component"/>
+          <text x="52" y="116" class="label" font-size="11">+</text>
+          <text x="55" y="136" class="label" font-size="11">&minus;</text>
+          <text x="42" y="168" class="label">V<tspan font-size="9" dy="3">a</tspan></text>
+          <!-- Wire from Va+ up and right -->
+          <line x1="60" y1="98" x2="60" y2="60" class="wire"/>
+          <line x1="60" y1="60" x2="130" y2="60" class="wire"/>
+          <!-- Ra resistor -->
+          <rect x="130" y="48" width="50" height="24" rx="3" class="component-fill"/>
+          <text x="143" y="65" class="label" font-size="12">R<tspan font-size="9" dy="2">a</tspan></text>
+          <!-- Wire from Ra to La -->
+          <line x1="180" y1="60" x2="220" y2="60" class="wire"/>
+          <!-- La inductor (coil) -->
+          <path d="M220,60 C225,48 235,48 240,60 C245,48 255,48 260,60 C265,48 275,48 280,60" class="component" fill="none"/>
+          <text x="238" y="44" class="label" font-size="12">L<tspan font-size="9" dy="2">a</tspan></text>
+          <!-- Wire to motor -->
+          <line x1="280" y1="60" x2="340" y2="60" class="wire"/>
+          <!-- Motor circle -->
+          <circle cx="370" cy="120" r="50" class="component"/>
+          <text x="355" y="110" class="label" font-size="16" font-weight="bold">M</text>
+          <!-- Eg inside motor -->
+          <text x="348" y="135" class="label" font-size="11">E<tspan font-size="9" dy="2">g</tspan></text>
+          <!-- Connect top wire to motor -->
+          <line x1="340" y1="60" x2="370" y2="70" class="wire"/>
+          <!-- Bottom wire from motor back to Va- -->
+          <line x1="370" y1="170" x2="370" y2="200" class="wire"/>
+          <line x1="370" y1="200" x2="60" y2="200" class="wire"/>
+          <line x1="60" y1="200" x2="60" y2="142" class="wire"/>
+          <!-- Ia arrow -->
+          <line x1="100" y1="60" x2="120" y2="60" class="wire" stroke-width="1"/>
+          <polygon points="118,56 126,60 118,64" class="arrow"/>
+          <text x="95" y="50" class="label" font-size="12">I<tspan font-size="9" dy="2">a</tspan></text>
+          <!-- Shaft output -->
+          <line x1="420" y1="120" x2="470" y2="120" class="wire" stroke-width="3"/>
+          <polygon points="465,114 478,120 465,126" class="arrow"/>
+          <text x="440" y="108" class="label" font-size="11">&omega;<tspan font-size="9" dy="2">m</tspan></text>
+          <text x="480" y="124" class="label" font-size="11">T</text>
+
+          <!-- Field circuit -->
+          <text x="460" y="30" class="label" font-weight="bold">Field Circuit</text>
+          <!-- Vf source -->
+          <circle cx="530" cy="120" r="22" class="component"/>
+          <text x="522" y="116" class="label" font-size="11">+</text>
+          <text x="525" y="136" class="label" font-size="11">&minus;</text>
+          <text x="512" y="168" class="label">V<tspan font-size="9" dy="3">f</tspan></text>
+          <!-- Field coil -->
+          <line x1="530" y1="98" x2="530" y2="60" class="wire"/>
+          <line x1="530" y1="60" x2="580" y2="60" class="wire"/>
+          <path d="M580,60 C580,72 595,72 595,60 C595,72 610,72 610,60" class="component" fill="none" transform="rotate(90,595,60) translate(535,-535)"/>
+          <rect x="572" y="48" width="16" height="74" rx="3" class="component" fill="none"/>
+          <text x="595" y="90" class="label" font-size="11">I<tspan font-size="9" dy="2">f</tspan></text>
+          <line x1="580" y1="122" x2="580" y2="200" class="wire"/>
+          <line x1="580" y1="200" x2="530" y2="200" class="wire"/>
+          <line x1="530" y1="200" x2="530" y2="142" class="wire"/>
+          <!-- Phi label -->
+          <text x="445" y="160" class="label" font-size="12">&phi;</text>
+        </svg>
+        <p class="diagram-caption">Figure 1: Separately excited DC motor circuit. The armature and field circuits have independent supplies.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Governing Equations</span>
+
+        <p>Let's write down the three fundamental equations of the separately excited DC motor:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Armature Voltage Equation</div>
+          \[ V_a = E_g + I_a R_a \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Back-EMF</div>
+          \[ E_g = K\phi \cdot \omega_m \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Torque Equation</div>
+          \[ T = K\phi \cdot I_a \]
+        </div>
+
+        <p>where:</p>
+        <ul class="content-list">
+          <li>\(V_a\) = armature terminal voltage</li>
+          <li>\(E_g\) = back-EMF (generated voltage)</li>
+          <li>\(I_a\) = armature current</li>
+          <li>\(R_a\) = armature resistance (small, typically a fraction of an ohm)</li>
+          <li>\(K\phi\) = motor constant &times; flux (often written as \(K_\phi\) or simply \(K\))</li>
+          <li>\(\omega_m\) = mechanical angular speed (rad/s)</li>
+          <li>\(T\) = electromagnetic torque (N&middot;m)</li>
+        </ul>
+
+        <p>Combining these, we get the <strong>torque-speed characteristic</strong>:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Torque-Speed Relationship</div>
+          \[ \omega_m = \frac{V_a}{K\phi} - \frac{R_a}{(K\phi)^2} \cdot T \]
+        </div>
+
+        <p>This is a straight line with:</p>
+        <ul class="content-list">
+          <li><strong>No-load speed:</strong> \(\omega_{m0} = \dfrac{V_a}{K\phi}\) &nbsp; (intercept on the speed axis)</li>
+          <li><strong>Speed drop:</strong> \(\Delta\omega_m = \dfrac{R_a}{(K\phi)^2} \cdot T\) &nbsp; (how much speed drops under load)</li>
+        </ul>
+
+        <p>Since \(R_a\) is small, the slope is gentle &mdash; the speed is <em>nearly</em> constant, dropping only slightly under load. This is exactly the behavior we want for most industrial applications.</p>
+      </div>
+
+      <!-- Torque-Speed Curve: Sep Excited -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" style="max-width:440px;">
+          <!-- Axes -->
+          <line x1="60" y1="250" x2="420" y2="250" class="axis"/>
+          <line x1="60" y1="250" x2="60" y2="30" class="axis"/>
+          <polygon points="420,246 430,250 420,254" class="arrow"/>
+          <polygon points="56,30 60,20 64,30" class="arrow"/>
+          <text x="410" y="272" class="label" font-size="13">T</text>
+          <text x="30" y="35" class="label" font-size="13">&omega;<tspan font-size="9" dy="2">m</tspan></text>
+
+          <!-- No-load speed marker -->
+          <line x1="55" y1="70" x2="65" y2="70" class="axis" stroke-dasharray="2"/>
+          <text x="10" y="75" class="label-sm">&omega;<tspan font-size="8" dy="1">m0</tspan></text>
+
+          <!-- Sep. excited / shunt curve (slightly drooping) -->
+          <path d="M60,70 L380,100" class="curve1" stroke-width="3"/>
+          <text x="300" y="88" class="label" font-size="12" fill="#2563eb">Sep. Excited / Shunt</text>
+
+          <!-- Delta omega annotation -->
+          <line x1="250" y1="70" x2="250" y2="87" stroke="#2563eb" stroke-width="1" stroke-dasharray="3"/>
+          <text x="256" y="82" class="label-sm" fill="#2563eb">&Delta;&omega;<tspan font-size="7" dy="1">m</tspan></text>
+
+          <!-- Speed drop annotation -->
+          <text x="120" y="240" class="label-sm">Rated torque</text>
+          <line x1="200" y1="245" x2="200" y2="80" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+        </svg>
+        <p class="diagram-caption">Figure 2: Torque-speed characteristic of a separately excited DC motor &mdash; nearly flat, with a small speed droop.</p>
+      </div>
+    </div>
+
+    <!-- Comparison of Motor Types -->
+    <div class="subsection" id="sec-comparison">
+      <h3>b) Comparison of DC Motor Types</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Different field connections give dramatically different personality traits. A <strong>shunt motor</strong> is like a steady, reliable worker &mdash; nearly constant speed regardless of load. A <strong>series motor</strong> is like a sprinter &mdash; incredible burst of torque at low speeds, but it must <em>never</em> be unloaded or it runs away to dangerously high speeds. A <strong>compound motor</strong> tries to blend both personalities.</p>
+      </div>
+
+      <!-- Torque-Speed Comparison SVG -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 500 340" xmlns="http://www.w3.org/2000/svg" style="max-width:480px;">
+          <!-- Axes -->
+          <line x1="70" y1="290" x2="460" y2="290" class="axis"/>
+          <line x1="70" y1="290" x2="70" y2="30" class="axis"/>
+          <polygon points="460,286 470,290 460,294" class="arrow"/>
+          <polygon points="66,30 70,20 74,30" class="arrow"/>
+          <text x="445" y="310" class="label" font-size="13">T</text>
+          <text x="32" y="35" class="label" font-size="13">&omega;<tspan font-size="9" dy="2">m</tspan></text>
+
+          <!-- Compound Differential (speed increases with load - unstable!) -->
+          <path d="M72,130 Q200,100 400,60" class="curve4" stroke-dasharray="8,4"/>
+          <text x="340" y="52" class="label" font-size="11" fill="#d97706">Differential Compound</text>
+          <text x="340" y="66" class="label-sm" fill="#d97706">(unstable!)</text>
+
+          <!-- Sep excited / Shunt (nearly constant) -->
+          <path d="M72,130 L420,160" class="curve1" stroke-width="2.5"/>
+          <text x="330" y="150" class="label" font-size="11" fill="#2563eb">Sep. Excited / Shunt</text>
+
+          <!-- Cumulative Compound (between shunt and series) -->
+          <path d="M72,130 Q250,170 420,200" class="curve3"/>
+          <text x="330" y="212" class="label" font-size="11" fill="#16a34a">Cumulative Compound</text>
+
+          <!-- Series (dramatic drop) -->
+          <path d="M72,40 Q120,100 180,180 Q280,260 420,275" class="curve2" stroke-width="2.5"/>
+          <text x="300" y="268" class="label" font-size="11" fill="#dc2626">Series</text>
+
+          <!-- Danger zone annotation for series at light load -->
+          <text x="80" y="52" class="label-sm" fill="#dc2626">Runaway!</text>
+          <path d="M108,56 L108,80" stroke="#dc2626" stroke-width="1" stroke-dasharray="3" fill="none"/>
+        </svg>
+        <p class="diagram-caption">Figure 3: Torque-speed characteristics of different DC motor types. Notice how the series motor speed shoots up dangerously at light loads.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Torque vs. Armature Current</span>
+        <p>The relationship between torque and armature current also differs by type:</p>
+        <ul class="content-list">
+          <li><strong>Separately excited / Shunt:</strong> \(T = K\phi \cdot I_a\). Since \(\phi\) is constant, \(T\) is proportional to \(I_a\) &mdash; a straight line.</li>
+          <li><strong>Series:</strong> At low currents (unsaturated), \(\phi \propto I_a\), so \(T = K I_a^2\) &mdash; a parabola. At high currents (saturated), \(\phi \approx \text{const}\) and we're back to a linear relationship.</li>
+          <li><strong>Cumulative compound:</strong> Slightly more than linear because both the series and shunt fields contribute.</li>
+        </ul>
+      </div>
+
+      <!-- T vs Ia curves -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg" style="max-width:440px;">
+          <line x1="60" y1="260" x2="420" y2="260" class="axis"/>
+          <line x1="60" y1="260" x2="60" y2="30" class="axis"/>
+          <polygon points="420,256 430,260 420,264" class="arrow"/>
+          <polygon points="56,30 60,20 64,30" class="arrow"/>
+          <text x="400" y="280" class="label" font-size="13">I<tspan font-size="9" dy="2">a</tspan></text>
+          <text x="35" y="35" class="label" font-size="13">T</text>
+
+          <!-- Shunt: linear -->
+          <line x1="60" y1="260" x2="380" y2="80" class="curve1" stroke-width="2.5"/>
+          <text x="310" y="72" class="label" font-size="11" fill="#2563eb">Shunt / Sep. Excited</text>
+
+          <!-- Compound: slightly curved above linear -->
+          <path d="M60,260 Q180,170 380,55" class="curve3"/>
+          <text x="300" y="48" class="label" font-size="11" fill="#16a34a">Compound</text>
+
+          <!-- Series: parabolic then linear -->
+          <path d="M60,260 Q160,200 250,100 L380,42" class="curve2" stroke-width="2.5"/>
+          <text x="280" y="35" class="label" font-size="11" fill="#dc2626">Series</text>
+
+          <!-- Saturation annotation -->
+          <line x1="250" y1="100" x2="250" y2="265" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+          <text x="230" y="278" class="label-sm">Saturation</text>
+        </svg>
+        <p class="diagram-caption">Figure 4: Torque vs. armature current for different DC motor types.</p>
+      </div>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The separately excited motor gives a nearly flat speed-torque curve &mdash; great for constant-speed applications. The series motor gives huge starting torque but is unstable at light loads. For drives, we almost always work with the separately excited type because its linear, decoupled behavior makes control straightforward.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3: Starting of DC Motors
+     ============================================================ -->
+<div class="section" id="sec-starting">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>3. Starting of DC Motors</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Here's a nasty surprise waiting for anyone who just "switches on" a DC motor. At standstill (\(\omega_m = 0\)), the back-EMF is <em>zero</em>. That means the entire supply voltage appears across the tiny armature resistance. The resulting current can be 10&ndash;20 times the rated value &mdash; enough to destroy the commutator, blow fuses, or damage the power supply. We <em>must</em> limit the starting current.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>It's like trying to push-start a car on a flat road. At first, the car isn't moving (no back-EMF), so you bear the full brunt of your pushing effort against just friction (small \(R_a\)). The current (your effort) is enormous. As the car picks up speed, it starts rolling on its own (back-EMF builds up), and you can ease off. That's why we need to start gently.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+
+      <p>At standstill: \(\omega_m = 0 \implies E_g = K\phi \cdot 0 = 0\)</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Starting Current (no protection)</div>
+        \[ I_{a,\text{start}} = \frac{V_a}{R_a} \gg I_{a,\text{rated}} \]
+      </div>
+
+      <p>For example, if \(V_a = 230\text{ V}\) and \(R_a = 0.1\;\Omega\), then \(I_{a,\text{start}} = 2300\text{ A}\)! If the rated current is, say, 100 A, that's <strong>23 times</strong> the rated current.</p>
+
+      <h4>Solutions:</h4>
+      <ul class="content-list">
+        <li><strong>Starting resistance:</strong> Add a resistor \(R_{\text{start}}\) in series with the armature. As the motor speeds up and \(E_g\) rises, progressively short-circuit sections of this resistor until it's fully removed at operating speed. Simple but wastes energy.</li>
+        <li><strong>Reduced voltage starting:</strong> Use a converter (like the ones we'll study shortly) to apply a low voltage initially and gradually ramp it up. This is the <em>modern</em> approach and wastes no energy in resistors &mdash; and it's precisely what DC drives do.</li>
+      </ul>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Never apply full voltage to a stationary DC motor. The starting current is dangerously high because there's no back-EMF to oppose it. Modern DC drives solve this elegantly by controlling the voltage from zero upward &mdash; which is one of the main reasons drives exist in the first place.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4: Speed Control Methods
+     ============================================================ -->
+<div class="section" id="sec-speed-control">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>4. Speed Control Methods</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Industrial processes need motors that can run at different speeds: a conveyor belt during loading vs. unloading, a crane hoisting a heavy load vs. moving an empty hook. How do we change the speed of a DC motor smoothly and efficiently? There are exactly <strong>two knobs</strong> we can turn, and each one works best in a different speed range.</p>
+    </div>
+
+    <p>Looking at the speed equation \(\omega_m = \frac{V_a}{K\phi} - \frac{R_a}{(K\phi)^2} T\), we see two independent variables we can control: \(V_a\) and \(\phi\).</p>
+
+    <!-- Armature Voltage Control -->
+    <div class="subsection" id="sec-armature-ctrl">
+      <h3>Method 1: Armature Voltage Control (Below Base Speed)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Imagine a garden hose. If we reduce the water pressure (lower \(V_a\)) while keeping the nozzle the same size (same \(\phi\)), the water comes out slower. The motor slows down. Since we haven't changed the "size of the nozzle" (the flux), the motor can still produce the same maximum force (torque) at any speed &mdash; it just can't go as fast.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <p>When we reduce \(V_a\) while keeping \(\phi\) constant (field at rated value):</p>
+        <ul class="content-list">
+          <li>The no-load speed \(\omega_{m0} = V_a / (K\phi)\) decreases proportionally with \(V_a\).</li>
+          <li>The slope of the T-&omega; curve \(\frac{R_a}{(K\phi)^2}\) stays the same &mdash; the curves shift down in parallel.</li>
+          <li><strong>Torque capability:</strong> \(T_{\max} = K\phi \cdot I_{a,\text{max}}\) is <em>unchanged</em> (constant flux, same current limit).</li>
+          <li><strong>Power capability:</strong> \(P = T \cdot \omega_m\) decreases with speed. Less speed = less power, even at full torque.</li>
+        </ul>
+
+        <div class="equation-block">
+          <div class="eq-label">Armature Voltage Control Region</div>
+          \[ \text{For } \omega_m \leq \omega_r: \quad T_{\max} = \text{const}, \quad P_{\max} \propto \omega_m \]
+        </div>
+
+        <p>This is called the <strong>constant torque region</strong>.</p>
+      </div>
+    </div>
+
+    <!-- Field Control -->
+    <div class="subsection" id="sec-field-ctrl">
+      <h3>Method 2: Field Control / Field Weakening (Above Base Speed)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Now we're at full voltage and want to go even faster. We can't increase \(V_a\) beyond rated. But we <em>can</em> reduce the field flux \(\phi\) by reducing \(I_f\). Less flux means less back-EMF per unit speed, so the motor spins faster to "catch up." The trade-off? With weaker flux, each amp of armature current produces less torque. We keep the same power (voltage &times; current), but trade torque for speed &mdash; like shifting to a higher gear in a car.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <p>When we reduce \(\phi\) while \(V_a\) stays at rated value:</p>
+        <ul class="content-list">
+          <li>The no-load speed \(\omega_{m0} = V_a/(K\phi)\) <em>increases</em> as \(\phi\) decreases.</li>
+          <li>Torque capability \(T_{\max} = K\phi \cdot I_{a,\text{max}}\) <em>decreases</em> proportionally.</li>
+          <li>Power capability \(P = V_a \cdot I_a\) remains constant (same voltage, same current limit).</li>
+        </ul>
+
+        <div class="equation-block">
+          <div class="eq-label">Field Weakening Region</div>
+          \[ \text{For } \omega_m \geq \omega_r: \quad P_{\max} = \text{const}, \quad T_{\max} \propto \frac{1}{\omega_m} \]
+        </div>
+
+        <p>This is called the <strong>constant power region</strong>.</p>
+      </div>
+    </div>
+
+    <!-- Combined Characteristic -->
+    <div class="subsection" id="sec-combined">
+      <h3>Combined Characteristic</h3>
+
+      <div class="diagram-container">
+        <svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
+          <!-- Axes -->
+          <line x1="70" y1="270" x2="480" y2="270" class="axis"/>
+          <line x1="70" y1="270" x2="70" y2="30" class="axis"/>
+          <polygon points="480,266 490,270 480,274" class="arrow"/>
+          <polygon points="66,30 70,20 74,30" class="arrow"/>
+          <text x="460" y="290" class="label" font-size="13">&omega;<tspan font-size="9" dy="2">m</tspan></text>
+          <text x="30" y="35" class="label" font-size="13">T, P</text>
+
+          <!-- Base speed line -->
+          <line x1="230" y1="270" x2="230" y2="40" stroke="#94a3b8" stroke-width="1" stroke-dasharray="5"/>
+          <text x="215" y="288" class="label-sm">&omega;<tspan font-size="8" dy="1">r</tspan></text>
+
+          <!-- Constant Torque region (shaded) -->
+          <rect x="70" y="80" width="160" height="60" class="region" fill="#dbeafe" rx="4"/>
+          <text x="110" y="115" class="label" font-size="11" fill="#2563eb">Constant T</text>
+
+          <!-- Torque curve -->
+          <!-- Below base: flat -->
+          <line x1="70" y1="80" x2="230" y2="80" class="curve1" stroke-width="3"/>
+          <!-- Above base: drops as 1/omega -->
+          <path d="M230,80 Q300,110 360,145 Q420,185 470,220" class="curve1" stroke-width="3"/>
+          <text x="420" y="210" class="label" font-size="12" fill="#2563eb">T</text>
+
+          <!-- Power curve -->
+          <!-- Below base: linear rise -->
+          <line x1="70" y1="240" x2="230" y2="140" class="curve2" stroke-width="3"/>
+          <!-- Above base: flat (constant power) -->
+          <line x1="230" y1="140" x2="470" y2="140" class="curve2" stroke-width="3"/>
+          <text x="420" y="132" class="label" font-size="12" fill="#dc2626">P</text>
+
+          <!-- Constant Power region (shaded) -->
+          <rect x="230" y="80" width="240" height="82" class="region" fill="#fee2e2" rx="4"/>
+          <text x="310" y="115" class="label" font-size="11" fill="#dc2626">Constant P</text>
+
+          <!-- Region labels -->
+          <text x="90" y="258" class="label-sm">Armature Voltage</text>
+          <text x="90" y="248" class="label-sm">Control</text>
+          <text x="290" y="258" class="label-sm">Field Weakening</text>
+
+          <!-- Annotations -->
+          <text x="75" y="68" class="label-sm">T<tspan font-size="8" dy="1">rated</tspan></text>
+          <text x="75" y="148" class="label-sm">P<tspan font-size="8" dy="1">rated</tspan></text>
+        </svg>
+        <p class="diagram-caption">Figure 5: Combined speed control characteristic. Below base speed: constant torque (armature voltage control). Above base speed: constant power (field weakening).</p>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>We have two control knobs: <strong>armature voltage</strong> (for speeds from zero to base speed, giving constant torque) and <strong>field weakening</strong> (for speeds above base speed, giving constant power). Together, they give us a wide speed range &mdash; and this is exactly the strategy used in every DC drive system.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 5: DC Drive Types
+     ============================================================ -->
+<div class="section" id="sec-drive-types">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>5. DC Drive Classification</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>We know we need to control the armature voltage. But where does this controlled DC voltage come from? The power grid gives us AC, so we need a <strong>converter</strong> that turns AC into variable DC. The type of converter we choose determines the cost, performance, and capability of the entire drive system.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Classification</span>
+      <p>DC drives are classified by their power converter topology:</p>
+      <table class="styled-table">
+        <thead>
+          <tr><th>Category</th><th>Source</th><th>Key Devices</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Single-Phase Drives</strong></td><td>1-phase AC supply</td><td>Thyristors + Diodes</td></tr>
+          <tr><td><strong>Three-Phase Drives</strong></td><td>3-phase AC supply</td><td>Thyristors (SCRs)</td></tr>
+          <tr><td><strong>Chopper Drives</strong></td><td>DC supply (battery, DC bus)</td><td>IGBTs, MOSFETs</td></tr>
+        </tbody>
+      </table>
+      <p>In this lecture, we focus on <strong>single-phase drives</strong>. These are used for small to medium power applications (up to about 15 kW). Let's explore each converter topology.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 6: Half-Wave Converter Drive
+     ============================================================ -->
+<div class="section" id="sec-halfwave">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>6. Single-Phase Half-Wave Converter Drive</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Let's start with the simplest possible converter. We have a single-phase AC source and we want to produce a controllable DC voltage for a small motor (say, a small fan or pump under 0.5 kW). What's the minimum circuit that gets the job done?</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>A single thyristor acts like a door with a delay timer. It only lets current through during the positive half of the AC cycle, and we can choose <em>when</em> during that half-cycle to open the door (the firing angle \(\alpha\)). The later we open it, the less average voltage (and thus less speed) the motor gets. A freewheeling diode provides a path for the motor current to circulate when the thyristor is off, keeping the current flowing smoothly through the motor's inductance.</p>
+    </div>
+
+    <!-- Half-Wave Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 540 260" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+        <!-- AC Source -->
+        <circle cx="60" cy="130" r="24" class="component"/>
+        <text x="48" y="127" class="label" font-size="10">V<tspan font-size="8" dy="1">s</tspan></text>
+        <text x="54" y="142" class="label" font-size="9">~</text>
+
+        <!-- Top wire from source -->
+        <line x1="60" y1="106" x2="60" y2="60" class="wire"/>
+        <line x1="60" y1="60" x2="150" y2="60" class="wire"/>
+
+        <!-- Thyristor T1 -->
+        <polygon points="150,48 150,72 180,60" class="component-fill"/>
+        <line x1="180" y1="48" x2="180" y2="72" class="wire" stroke-width="2"/>
+        <line x1="180" y1="60" x2="220" y2="60" class="wire"/>
+        <!-- Gate -->
+        <line x1="165" y1="72" x2="165" y2="82" class="wire" stroke-width="1.5"/>
+        <text x="155" y="95" class="label-sm">T<tspan font-size="8" dy="1">1</tspan></text>
+        <!-- Alpha label -->
+        <text x="150" y="42" class="label-sm" fill="#d97706">&alpha;</text>
+
+        <!-- Wire to motor -->
+        <line x1="220" y1="60" x2="290" y2="60" class="wire"/>
+
+        <!-- Freewheeling diode Dm (vertical, across motor) -->
+        <line x1="290" y1="60" x2="290" y2="90" class="wire"/>
+        <polygon points="278,90 302,90 290,120" class="component-fill"/>
+        <line x1="278" y1="120" x2="302" y2="120" class="wire" stroke-width="2"/>
+        <line x1="290" y1="120" x2="290" y2="200" class="wire"/>
+        <text x="298" y="110" class="label-sm">D<tspan font-size="8" dy="1">m</tspan></text>
+
+        <!-- Motor -->
+        <line x1="290" y1="60" x2="380" y2="60" class="wire"/>
+        <line x1="380" y1="60" x2="380" y2="85" class="wire"/>
+
+        <!-- Ra -->
+        <rect x="368" y="85" width="24" height="35" rx="3" class="component-fill"/>
+        <text x="373" y="107" class="label" font-size="10">R<tspan font-size="8" dy="1">a</tspan></text>
+
+        <!-- La -->
+        <line x1="380" y1="120" x2="380" y2="135" class="wire"/>
+        <path d="M380,135 C385,125 393,125 395,135 C397,125 405,125 407,135 C409,125 417,125 420,135" class="component" fill="none" transform="rotate(90,395,135) translate(260,-260)"/>
+        <text x="388" y="155" class="label" font-size="10">L<tspan font-size="8" dy="1">a</tspan></text>
+
+        <!-- Eg -->
+        <line x1="380" y1="160" x2="380" y2="175" class="wire"/>
+        <circle cx="380" cy="186" r="11" class="component"/>
+        <text x="370" y="190" class="label" font-size="9">E<tspan font-size="7" dy="1">g</tspan></text>
+        <line x1="380" y1="197" x2="380" y2="210" class="wire"/>
+
+        <!-- Bottom wire -->
+        <line x1="380" y1="210" x2="290" y2="210" class="wire"/>
+        <line x1="290" y1="200" x2="290" y2="210" class="wire"/>
+        <line x1="290" y1="210" x2="60" y2="210" class="wire"/>
+        <line x1="60" y1="210" x2="60" y2="154" class="wire"/>
+
+        <!-- Ia arrow -->
+        <polygon points="240,56 248,60 240,64" class="arrow"/>
+        <text x="236" y="50" class="label-sm">I<tspan font-size="8" dy="1">a</tspan></text>
+
+        <!-- Va label -->
+        <text x="320" y="50" class="label" font-size="11">V<tspan font-size="9" dy="1">a</tspan></text>
+        <line x1="315" y1="60" x2="315" y2="55" class="wire" stroke-width="1"/>
+        <text x="310" y="48" class="label-sm">+</text>
+        <text x="310" y="218" class="label-sm">&minus;</text>
+      </svg>
+      <p class="diagram-caption">Figure 6: Single-phase half-wave converter drive with thyristor T<sub>1</sub> and freewheeling diode D<sub>m</sub>.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+      <p>The source voltage is \(v_s = V_m \sin(\omega t)\). The thyristor T<sub>1</sub> is fired at angle \(\alpha\) during each positive half-cycle.</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Average Output Voltage</div>
+        \[ V_a = \frac{V_m}{2\pi}(1 + \cos\alpha) \]
+      </div>
+
+      <p><strong>Key properties:</strong></p>
+      <ul class="content-list">
+        <li><strong>Power range:</strong> Up to ~0.5 kW (small loads)</li>
+        <li><strong>Voltage range:</strong> From \(V_m/\pi\) (at \(\alpha = 0\)) down to 0 (at \(\alpha = \pi\))</li>
+        <li><strong>Quadrant operation:</strong> ONE quadrant only</li>
+        <li>The freewheeling diode \(D_m\) carries the motor current during the negative half-cycle when T<sub>1</sub> turns off, preventing negative voltage across the motor</li>
+      </ul>
+    </div>
+
+    <!-- Quadrant Diagram: Half-Wave -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;">
+        <!-- Axes -->
+        <line x1="150" y1="280" x2="150" y2="20" class="axis"/>
+        <line x1="20" y1="150" x2="280" y2="150" class="axis"/>
+        <polygon points="280,146 290,150 280,154" class="arrow"/>
+        <polygon points="146,20 150,10 154,20" class="arrow"/>
+        <text x="262" y="142" class="label" font-size="12">I<tspan font-size="9" dy="1">a</tspan></text>
+        <text x="155" y="28" class="label" font-size="12">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <!-- Quadrant I: Active -->
+        <rect x="155" y="25" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="185" y="85" class="label" font-size="14" font-weight="bold" fill="#2563eb">Q I</text>
+        <text x="175" y="105" class="label-sm" fill="#2563eb">Motoring</text>
+
+        <!-- Quadrant II: Inactive -->
+        <rect x="25" y="25" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="88" class="label-sm" fill="#94a3b8">Q II</text>
+
+        <!-- Quadrant III: Inactive -->
+        <rect x="25" y="155" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="218" class="label-sm" fill="#94a3b8">Q III</text>
+
+        <!-- Quadrant IV: Inactive -->
+        <rect x="155" y="155" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="190" y="218" class="label-sm" fill="#94a3b8">Q IV</text>
+      </svg>
+      <p class="diagram-caption">Figure 7: Half-wave converter operates in Quadrant I only (+V<sub>a</sub>, +I<sub>a</sub>).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The half-wave converter is the simplest topology &mdash; one thyristor, one diode. It gives us variable DC voltage for small motors but is limited to one-quadrant operation (forward motoring only). For anything bigger or more capable, we need a bridge.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 7: Semi-Converter (Half-Controlled Bridge)
+     ============================================================ -->
+<div class="section" id="sec-semiconverter">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>7. Single-Phase Semi-Converter (Half-Controlled Bridge)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>The half-wave converter wastes half the AC cycle and can only handle tiny loads. For medium-power applications (up to 15 kW), we need a bridge rectifier. But full bridges with all thyristors are expensive. Can we get decent performance with a <em>half-and-half</em> approach &mdash; some thyristors, some cheaper diodes?</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of a bridge with two "smart gates" (thyristors T<sub>1</sub>, T<sub>3</sub>) and two "dumb gates" (diodes D<sub>2</sub>, D<sub>4</sub>). The smart gates decide <em>when</em> to start conducting (firing angle \(\alpha\)), while the dumb gates just let current through whenever it wants to flow. This combo uses both halves of the AC cycle but still lets us control the average voltage. And because the diodes provide a freewheeling path inside the bridge, the output voltage is always positive.</p>
+    </div>
+
+    <!-- Semi-Converter Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 310" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+        <!-- AC Source -->
+        <circle cx="50" cy="155" r="22" class="component"/>
+        <text x="38" y="152" class="label" font-size="10">V<tspan font-size="8" dy="1">s</tspan></text>
+        <text x="44" y="167" class="label" font-size="9">~</text>
+
+        <!-- Wires to bridge -->
+        <line x1="50" y1="133" x2="50" y2="80" class="wire"/>
+        <line x1="50" y1="80" x2="140" y2="80" class="wire"/>
+        <line x1="50" y1="177" x2="50" y2="230" class="wire"/>
+        <line x1="50" y1="230" x2="140" y2="230" class="wire"/>
+
+        <!-- Bridge structure -->
+        <!-- Top-left: T1 (thyristor) -->
+        <polygon points="160,58 160,82 190,70" class="component-fill"/>
+        <line x1="190" y1="58" x2="190" y2="82" class="wire" stroke-width="2"/>
+        <line x1="140" y1="80" x2="140" y2="70" class="wire"/>
+        <line x1="140" y1="70" x2="160" y2="70" class="wire"/>
+        <line x1="190" y1="70" x2="250" y2="70" class="wire"/>
+        <line x1="175" y1="82" x2="175" y2="92" class="wire" stroke-width="1.5"/>
+        <text x="165" y="54" class="label-sm">T<tspan font-size="8" dy="1">1</tspan></text>
+
+        <!-- Bottom-left: T3 (thyristor) -->
+        <polygon points="190,218 190,242 160,230" class="component-fill"/>
+        <line x1="160" y1="218" x2="160" y2="242" class="wire" stroke-width="2"/>
+        <line x1="140" y1="230" x2="160" y2="230" class="wire"/>
+        <line x1="190" y1="230" x2="250" y2="230" class="wire"/>
+        <line x1="175" y1="218" x2="175" y2="208" class="wire" stroke-width="1.5"/>
+        <text x="165" y="256" class="label-sm">T<tspan font-size="8" dy="1">3</tspan></text>
+
+        <!-- Top-right: D2 (diode) -->
+        <polygon points="310,58 310,82 340,70" class="component-fill"/>
+        <line x1="340" y1="58" x2="340" y2="82" class="wire" stroke-width="2"/>
+        <line x1="250" y1="70" x2="310" y2="70" class="wire"/>
+        <line x1="340" y1="70" x2="400" y2="70" class="wire"/>
+        <text x="318" y="54" class="label-sm">D<tspan font-size="8" dy="1">2</tspan></text>
+
+        <!-- Bottom-right: D4 (diode) -->
+        <polygon points="340,218 340,242 310,230" class="component-fill"/>
+        <line x1="310" y1="218" x2="310" y2="242" class="wire" stroke-width="2"/>
+        <line x1="250" y1="230" x2="310" y2="230" class="wire"/>
+        <line x1="340" y1="230" x2="400" y2="230" class="wire"/>
+        <text x="318" y="256" class="label-sm">D<tspan font-size="8" dy="1">4</tspan></text>
+
+        <!-- AC connection points -->
+        <circle cx="140" cy="80" r="3" fill="var(--text-primary)"/>
+        <circle cx="140" cy="230" r="3" fill="var(--text-primary)"/>
+        <text x="115" y="75" class="label-sm">a</text>
+        <text x="115" y="238" class="label-sm">b</text>
+
+        <!-- DC bus top/bottom -->
+        <line x1="250" y1="70" x2="250" y2="230" class="wire" stroke-dasharray="0"/>
+        <circle cx="250" cy="70" r="3" fill="var(--text-primary)"/>
+        <circle cx="250" cy="230" r="3" fill="var(--text-primary)"/>
+
+        <!-- Output: top rail -->
+        <line x1="400" y1="70" x2="400" y2="70" class="wire"/>
+        <circle cx="400" cy="70" r="3" fill="var(--text-primary)"/>
+        <line x1="400" y1="70" x2="450" y2="70" class="wire"/>
+
+        <!-- Output: bottom rail -->
+        <circle cx="400" cy="230" r="3" fill="var(--text-primary)"/>
+        <line x1="400" y1="230" x2="450" y2="230" class="wire"/>
+
+        <!-- Motor (simplified) -->
+        <line x1="450" y1="70" x2="450" y2="100" class="wire"/>
+        <rect x="438" y="100" width="24" height="28" rx="3" class="component-fill"/>
+        <text x="443" y="118" class="label" font-size="9">R<tspan font-size="7" dy="1">a</tspan></text>
+        <line x1="450" y1="128" x2="450" y2="140" class="wire"/>
+        <path d="M438,140 C442,132 448,132 450,140 C452,132 458,132 462,140" class="component" fill="none"/>
+        <text x="463" y="142" class="label" font-size="9">L<tspan font-size="7" dy="1">a</tspan></text>
+        <line x1="450" y1="140" x2="450" y2="158" class="wire"/>
+        <circle cx="450" cy="170" r="12" class="component"/>
+        <text x="441" y="174" class="label" font-size="9">E<tspan font-size="7" dy="1">g</tspan></text>
+        <line x1="450" y1="182" x2="450" y2="230" class="wire"/>
+
+        <!-- Va label -->
+        <text x="410" y="60" class="label" font-size="11">+</text>
+        <text x="410" y="245" class="label" font-size="11">&minus;</text>
+        <text x="470" y="155" class="label" font-size="11">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <!-- Ia arrow -->
+        <polygon points="420,66 428,70 420,74" class="arrow"/>
+        <text x="415" y="86" class="label-sm">I<tspan font-size="8" dy="1">a</tspan></text>
+
+        <!-- Conduction labels -->
+        <text x="130" y="108" class="label-sm" fill="#d97706">T1,D4: +ve half</text>
+        <text x="130" y="122" class="label-sm" fill="#d97706">T3,D2: &minus;ve half</text>
+      </svg>
+      <p class="diagram-caption">Figure 8: Single-phase semi-converter (half-controlled bridge). T<sub>1</sub>,D<sub>4</sub> conduct in the positive half; T<sub>3</sub>,D<sub>2</sub> conduct in the negative half.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+
+      <div class="equation-block">
+        <div class="eq-label">Average Output Voltage &mdash; Semi-Converter</div>
+        \[ V_a = \frac{V_m}{\pi}(1 + \cos\alpha) \]
+      </div>
+
+      <p>Compare this with the half-wave: the factor out front is \(V_m/\pi\) instead of \(V_m/(2\pi)\) &mdash; <strong>double the voltage</strong> because we use both half-cycles.</p>
+
+      <p><strong>Key properties:</strong></p>
+      <ul class="content-list">
+        <li><strong>Power range:</strong> Up to ~15 kW</li>
+        <li><strong>Voltage range:</strong> \(V_a\) varies from \(2V_m/\pi\) (at \(\alpha = 0\)) to 0 (at \(\alpha = \pi\))</li>
+        <li><strong>Output voltage is always &ge; 0</strong> (diodes provide freewheeling, clamping voltage to zero)</li>
+        <li><strong>Quadrant operation:</strong> ONE quadrant (+\(V_a\), +\(I_a\)) &mdash; Quadrant I only</li>
+        <li>Cannot reverse voltage, so no regenerative braking</li>
+        <li>Better power factor than full converter at large firing angles because of freewheeling</li>
+      </ul>
+    </div>
+
+    <!-- Quadrant Diagram: Semi-Converter -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;">
+        <line x1="150" y1="280" x2="150" y2="20" class="axis"/>
+        <line x1="20" y1="150" x2="280" y2="150" class="axis"/>
+        <polygon points="280,146 290,150 280,154" class="arrow"/>
+        <polygon points="146,20 150,10 154,20" class="arrow"/>
+        <text x="262" y="142" class="label" font-size="12">I<tspan font-size="9" dy="1">a</tspan></text>
+        <text x="155" y="28" class="label" font-size="12">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <rect x="155" y="25" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="185" y="85" class="label" font-size="14" font-weight="bold" fill="#2563eb">Q I</text>
+        <text x="175" y="105" class="label-sm" fill="#2563eb">Motoring</text>
+
+        <rect x="25" y="25" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="88" class="label-sm" fill="#94a3b8">Q II</text>
+
+        <rect x="25" y="155" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="218" class="label-sm" fill="#94a3b8">Q III</text>
+
+        <rect x="155" y="155" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="190" y="218" class="label-sm" fill="#94a3b8">Q IV</text>
+      </svg>
+      <p class="diagram-caption">Figure 9: Semi-converter operates in Quadrant I only (+V<sub>a</sub>, +I<sub>a</sub>).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The semi-converter doubles the half-wave's voltage capability by using both AC half-cycles, handles up to 15 kW, and is cheaper than a full bridge because it uses only 2 thyristors instead of 4. The trade-off: still limited to one-quadrant operation (forward motoring), no braking capability.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 8: Full Converter (Fully-Controlled Bridge)
+     ============================================================ -->
+<div class="section" id="sec-fullconverter">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>8. Single-Phase Full Converter (Fully-Controlled Bridge)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>One-quadrant operation means we can only accelerate the motor in one direction. What if we need to <em>stop it quickly</em>? In an elevator, a crane, or a machine tool, we often need to brake the motor electrically &mdash; which requires sending energy <em>back</em> to the supply. For that, we need the output voltage to go <em>negative</em> while the current stays positive. The semi-converter can't do this. The full converter can.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Now all four switches in the bridge are thyristors &mdash; all four gates are "smart." When the firing angle is less than 90 degrees, we get positive average voltage (motoring, like before). But here's the magic: when we push \(\alpha\) past 90 degrees, the average voltage flips negative! The motor's back-EMF now drives current back into the supply, acting as a generator. We're braking by <em>regeneration</em> &mdash; recovering energy. Current still flows in the same direction through the motor, but the power flow has reversed.</p>
+    </div>
+
+    <!-- Full Converter Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 310" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+        <!-- AC Source -->
+        <circle cx="50" cy="155" r="22" class="component"/>
+        <text x="38" y="152" class="label" font-size="10">V<tspan font-size="8" dy="1">s</tspan></text>
+        <text x="44" y="167" class="label" font-size="9">~</text>
+
+        <line x1="50" y1="133" x2="50" y2="80" class="wire"/>
+        <line x1="50" y1="80" x2="140" y2="80" class="wire"/>
+        <line x1="50" y1="177" x2="50" y2="230" class="wire"/>
+        <line x1="50" y1="230" x2="140" y2="230" class="wire"/>
+
+        <!-- Top-left: T1 -->
+        <polygon points="160,58 160,82 190,70" class="component-fill"/>
+        <line x1="190" y1="58" x2="190" y2="82" class="wire" stroke-width="2"/>
+        <line x1="140" y1="70" x2="160" y2="70" class="wire"/>
+        <line x1="190" y1="70" x2="250" y2="70" class="wire"/>
+        <line x1="175" y1="82" x2="175" y2="92" class="wire" stroke-width="1.5"/>
+        <text x="165" y="54" class="label-sm">T<tspan font-size="8" dy="1">1</tspan></text>
+
+        <!-- Bottom-left: T4 -->
+        <polygon points="190,218 190,242 160,230" class="component-fill"/>
+        <line x1="160" y1="218" x2="160" y2="242" class="wire" stroke-width="2"/>
+        <line x1="140" y1="230" x2="160" y2="230" class="wire"/>
+        <line x1="190" y1="230" x2="250" y2="230" class="wire"/>
+        <line x1="175" y1="218" x2="175" y2="208" class="wire" stroke-width="1.5"/>
+        <text x="165" y="256" class="label-sm">T<tspan font-size="8" dy="1">4</tspan></text>
+
+        <!-- Top-right: T3 -->
+        <polygon points="310,58 310,82 340,70" class="component-fill"/>
+        <line x1="340" y1="58" x2="340" y2="82" class="wire" stroke-width="2"/>
+        <line x1="250" y1="70" x2="310" y2="70" class="wire"/>
+        <line x1="340" y1="70" x2="400" y2="70" class="wire"/>
+        <line x1="325" y1="82" x2="325" y2="92" class="wire" stroke-width="1.5"/>
+        <text x="318" y="54" class="label-sm">T<tspan font-size="8" dy="1">3</tspan></text>
+
+        <!-- Bottom-right: T2 -->
+        <polygon points="340,218 340,242 310,230" class="component-fill"/>
+        <line x1="310" y1="218" x2="310" y2="242" class="wire" stroke-width="2"/>
+        <line x1="250" y1="230" x2="310" y2="230" class="wire"/>
+        <line x1="340" y1="230" x2="400" y2="230" class="wire"/>
+        <line x1="325" y1="218" x2="325" y2="208" class="wire" stroke-width="1.5"/>
+        <text x="318" y="256" class="label-sm">T<tspan font-size="8" dy="1">2</tspan></text>
+
+        <!-- DC bus connection -->
+        <line x1="140" y1="70" x2="140" y2="80" class="wire"/>
+        <line x1="140" y1="230" x2="140" y2="230" class="wire"/>
+        <circle cx="250" cy="70" r="3" fill="var(--text-primary)"/>
+        <circle cx="250" cy="230" r="3" fill="var(--text-primary)"/>
+
+        <!-- Output -->
+        <line x1="400" y1="70" x2="450" y2="70" class="wire"/>
+        <line x1="400" y1="230" x2="450" y2="230" class="wire"/>
+
+        <!-- Motor -->
+        <line x1="450" y1="70" x2="450" y2="100" class="wire"/>
+        <rect x="438" y="100" width="24" height="28" rx="3" class="component-fill"/>
+        <text x="443" y="118" class="label" font-size="9">R<tspan font-size="7" dy="1">a</tspan></text>
+        <line x1="450" y1="128" x2="450" y2="140" class="wire"/>
+        <path d="M438,140 C442,132 448,132 450,140 C452,132 458,132 462,140" class="component" fill="none"/>
+        <text x="463" y="142" class="label" font-size="9">L<tspan font-size="7" dy="1">a</tspan></text>
+        <line x1="450" y1="140" x2="450" y2="158" class="wire"/>
+        <circle cx="450" cy="170" r="12" class="component"/>
+        <text x="441" y="174" class="label" font-size="9">E<tspan font-size="7" dy="1">g</tspan></text>
+        <line x1="450" y1="182" x2="450" y2="230" class="wire"/>
+
+        <text x="410" y="60" class="label" font-size="11">+</text>
+        <text x="410" y="245" class="label" font-size="11">&minus;</text>
+        <text x="470" y="155" class="label" font-size="11">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <polygon points="420,66 428,70 420,74" class="arrow"/>
+        <text x="415" y="86" class="label-sm">I<tspan font-size="8" dy="1">a</tspan></text>
+
+        <!-- Conduction info -->
+        <text x="120" y="280" class="label-sm" fill="#d97706">T1,T2: +ve half &nbsp; | &nbsp; T3,T4: &minus;ve half</text>
+      </svg>
+      <p class="diagram-caption">Figure 10: Single-phase full converter (fully-controlled bridge). All four devices are thyristors.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+
+      <div class="equation-block">
+        <div class="eq-label">Average Output Voltage &mdash; Full Converter</div>
+        \[ V_a = \frac{2V_m}{\pi}\cos\alpha \]
+      </div>
+
+      <p>This is a <strong>cosine function</strong>! Notice what happens:</p>
+      <ul class="content-list">
+        <li>At \(\alpha = 0\): \(V_a = +2V_m/\pi\) (maximum positive)</li>
+        <li>At \(\alpha = 90°\): \(V_a = 0\)</li>
+        <li>At \(\alpha = 180°\): \(V_a = -2V_m/\pi\) (maximum negative)</li>
+      </ul>
+
+      <p><strong>Key properties:</strong></p>
+      <ul class="content-list">
+        <li><strong>Power range:</strong> Up to ~15 kW</li>
+        <li><strong>TWO quadrant operation:</strong> \(V_a\) can be positive or negative, but \(I_a\) flows in one direction only (through thyristors)</li>
+        <li><strong>Quadrant I (\(\alpha &lt; 90°\)):</strong> +\(V_a\), +\(I_a\) &rarr; Motoring (forward)</li>
+        <li><strong>Quadrant IV (\(\alpha &gt; 90°\)):</strong> &minus;\(V_a\), +\(I_a\) &rarr; Regenerative braking (energy returned to supply)</li>
+        <li>No freewheeling diode &mdash; current must always flow through thyristor pairs</li>
+      </ul>
+    </div>
+
+    <!-- Quadrant Diagram: Full Converter -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;">
+        <line x1="150" y1="280" x2="150" y2="20" class="axis"/>
+        <line x1="20" y1="150" x2="280" y2="150" class="axis"/>
+        <polygon points="280,146 290,150 280,154" class="arrow"/>
+        <polygon points="146,20 150,10 154,20" class="arrow"/>
+        <text x="262" y="142" class="label" font-size="12">I<tspan font-size="9" dy="1">a</tspan></text>
+        <text x="155" y="28" class="label" font-size="12">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <!-- Q I: Active -->
+        <rect x="155" y="25" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="185" y="75" class="label" font-size="14" font-weight="bold" fill="#2563eb">Q I</text>
+        <text x="170" y="95" class="label-sm" fill="#2563eb">Motoring</text>
+        <text x="172" y="110" class="label-sm" fill="#2563eb">(&alpha; &lt; 90&deg;)</text>
+
+        <!-- Q II: Inactive -->
+        <rect x="25" y="25" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="88" class="label-sm" fill="#94a3b8">Q II</text>
+
+        <!-- Q III: Inactive -->
+        <rect x="25" y="155" width="120" height="120" class="quadrant-inactive" rx="6"/>
+        <text x="65" y="218" class="label-sm" fill="#94a3b8">Q III</text>
+
+        <!-- Q IV: Active -->
+        <rect x="155" y="155" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="185" y="205" class="label" font-size="14" font-weight="bold" fill="#2563eb">Q IV</text>
+        <text x="163" y="225" class="label-sm" fill="#2563eb">Regen. Braking</text>
+        <text x="172" y="240" class="label-sm" fill="#2563eb">(&alpha; &gt; 90&deg;)</text>
+      </svg>
+      <p class="diagram-caption">Figure 11: Full converter operates in Quadrants I and IV (+I<sub>a</sub>, &plusmn;V<sub>a</sub>).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The full converter is the first topology that gives us <strong>two-quadrant operation</strong>. By pushing the firing angle past 90 degrees, we reverse the voltage and enable regenerative braking &mdash; the motor becomes a generator and pumps energy back to the grid. This is critical for applications like cranes and elevators where we need controlled deceleration.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 9: Dual Converter
+     ============================================================ -->
+<div class="section" id="sec-dualconverter">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>9. Single-Phase Dual Converter</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>The full converter gave us two quadrants &mdash; forward motoring and regenerative braking. But what about <em>reverse</em>? If we need the motor to run in both directions (think of a reversing rolling mill, a positioning table, or a bidirectional winch), we need all four quadrants: forward/reverse and motoring/braking in each direction. A single bridge can't reverse the current direction. So we use <em>two</em> bridges.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Picture two full converters connected "back-to-back" (anti-parallel) across the motor. Converter 1 pushes current in one direction (forward), and Converter 2 pushes current in the opposite direction (reverse). At any moment, only one converter is active. When we want to switch direction, we smoothly hand off from one converter to the other. The key constraint: if one converter has firing angle \(\alpha_1\), the other must have \(\alpha_2 = \pi - \alpha_1\) to ensure both produce the same average voltage magnitude (just with opposite signs), preventing a short circuit between them.</p>
+    </div>
+
+    <!-- Dual Converter Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
+        <!-- AC source -->
+        <circle cx="300" cy="30" r="20" class="component"/>
+        <text x="288" y="28" class="label" font-size="10">V<tspan font-size="8" dy="1">s</tspan></text>
+        <text x="294" y="42" class="label" font-size="9">~</text>
+
+        <!-- Supply wires splitting -->
+        <line x1="280" y1="30" x2="100" y2="30" class="wire"/>
+        <line x1="100" y1="30" x2="100" y2="70" class="wire"/>
+        <line x1="320" y1="30" x2="500" y2="30" class="wire"/>
+        <line x1="500" y1="30" x2="500" y2="70" class="wire"/>
+
+        <!-- Second supply wire -->
+        <line x1="300" y1="50" x2="300" y2="60" class="wire"/>
+        <line x1="300" y1="60" x2="160" y2="60" class="wire"/>
+        <line x1="160" y1="60" x2="160" y2="70" class="wire"/>
+        <line x1="300" y1="60" x2="440" y2="60" class="wire"/>
+        <line x1="440" y1="60" x2="440" y2="70" class="wire"/>
+
+        <!-- Converter 1 Box -->
+        <rect x="70" y="70" width="120" height="80" rx="6" class="component-fill" stroke-width="2.5"/>
+        <text x="88" y="100" class="label" font-size="12" font-weight="bold">Converter 1</text>
+        <text x="95" y="120" class="label-sm">&alpha;<tspan font-size="8" dy="1">1</tspan></text>
+        <text x="88" y="140" class="label-sm" fill="#2563eb">Full Bridge</text>
+
+        <!-- Converter 2 Box -->
+        <rect x="410" y="70" width="120" height="80" rx="6" class="component-fill" stroke-width="2.5"/>
+        <text x="428" y="100" class="label" font-size="12" font-weight="bold">Converter 2</text>
+        <text x="435" y="120" class="label-sm">&alpha;<tspan font-size="8" dy="1">2</tspan></text>
+        <text x="428" y="140" class="label-sm" fill="#dc2626">Full Bridge</text>
+
+        <!-- Outputs converging on motor -->
+        <!-- Converter 1 output -->
+        <line x1="130" y1="150" x2="130" y2="200" class="wire"/>
+        <line x1="130" y1="200" x2="230" y2="200" class="wire"/>
+
+        <line x1="130" y1="150" x2="130" y2="170" class="wire"/>
+        <line x1="100" y1="150" x2="100" y2="260" class="wire"/>
+        <line x1="100" y1="260" x2="230" y2="260" class="wire"/>
+
+        <!-- Converter 2 output -->
+        <line x1="470" y1="150" x2="470" y2="200" class="wire"/>
+        <line x1="470" y1="200" x2="370" y2="200" class="wire"/>
+
+        <line x1="500" y1="150" x2="500" y2="260" class="wire"/>
+        <line x1="500" y1="260" x2="370" y2="260" class="wire"/>
+
+        <!-- Motor in center -->
+        <line x1="230" y1="200" x2="300" y2="200" class="wire"/>
+        <line x1="370" y1="200" x2="300" y2="200" class="wire"/>
+        <line x1="230" y1="260" x2="300" y2="260" class="wire"/>
+        <line x1="370" y1="260" x2="300" y2="260" class="wire"/>
+
+        <circle cx="300" cy="230" r="30" class="component" stroke-width="2.5"/>
+        <text x="287" y="225" class="label" font-size="16" font-weight="bold">M</text>
+        <text x="286" y="244" class="label" font-size="10">DC</text>
+
+        <!-- Connection points -->
+        <circle cx="300" cy="200" r="3" fill="var(--text-primary)"/>
+        <circle cx="300" cy="260" r="3" fill="var(--text-primary)"/>
+
+        <!-- Current arrows -->
+        <polygon points="180,196 188,200 180,204" class="arrow" fill="#2563eb" stroke="#2563eb"/>
+        <text x="172" y="190" class="label-sm" fill="#2563eb">I<tspan font-size="8" dy="1">a1</tspan></text>
+
+        <polygon points="420,196 412,200 420,204" class="arrow" fill="#dc2626" stroke="#dc2626"/>
+        <text x="410" y="190" class="label-sm" fill="#dc2626">I<tspan font-size="8" dy="1">a2</tspan></text>
+
+        <!-- Constraint equation -->
+        <text x="195" y="310" class="label" font-size="13" font-weight="bold">&alpha;<tspan font-size="10" dy="1">1</tspan><tspan dy="-1"> + </tspan>&alpha;<tspan font-size="10" dy="1">2</tspan><tspan dy="-1"> = &pi;</tspan></text>
+
+        <!-- Labels -->
+        <text x="240" y="195" class="label" font-size="10">+</text>
+        <text x="240" y="272" class="label" font-size="10">&minus;</text>
+      </svg>
+      <p class="diagram-caption">Figure 12: Single-phase dual converter &mdash; two full bridges connected anti-parallel to the motor. The constraint &alpha;<sub>1</sub> + &alpha;<sub>2</sub> = &pi; prevents circulating currents.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+
+      <p>The dual converter consists of two full converters connected in anti-parallel. The firing angles are <strong>complementary</strong>:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Complementary Firing Constraint</div>
+        \[ \alpha_1 + \alpha_2 = \pi \]
+      </div>
+
+      <p>This ensures both converters produce the same magnitude of average voltage:</p>
+      <div class="equation-block">
+        \[ V_{a1} = \frac{2V_m}{\pi}\cos\alpha_1, \quad V_{a2} = \frac{2V_m}{\pi}\cos\alpha_2 = -V_{a1} \]
+      </div>
+
+      <p><strong>Four-quadrant operation:</strong></p>
+      <table class="styled-table">
+        <thead>
+          <tr><th>Quadrant</th><th>V<sub>a</sub></th><th>I<sub>a</sub></th><th>Operation</th><th>Active Converter</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>I</strong></td><td>+</td><td>+</td><td>Forward motoring</td><td>Converter 1 (&alpha;<sub>1</sub> &lt; 90&deg;)</td></tr>
+          <tr><td><strong>II</strong></td><td>&minus;</td><td>+</td><td>Forward regen. braking</td><td>Converter 1 (&alpha;<sub>1</sub> &gt; 90&deg;)</td></tr>
+          <tr><td><strong>III</strong></td><td>&minus;</td><td>&minus;</td><td>Reverse motoring</td><td>Converter 2 (&alpha;<sub>2</sub> &lt; 90&deg;)</td></tr>
+          <tr><td><strong>IV</strong></td><td>+</td><td>&minus;</td><td>Reverse regen. braking</td><td>Converter 2 (&alpha;<sub>2</sub> &gt; 90&deg;)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>Key properties:</strong></p>
+      <ul class="content-list">
+        <li><strong>Power range:</strong> Up to ~15 kW</li>
+        <li><strong>FOUR quadrant operation:</strong> Full speed and direction control with regeneration</li>
+        <li>Most expensive single-phase topology (8 thyristors total)</li>
+        <li>Requires careful coordination to prevent circulating current between converters</li>
+      </ul>
+    </div>
+
+    <!-- Quadrant Diagram: Dual Converter -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" style="max-width:260px;">
+        <line x1="150" y1="280" x2="150" y2="20" class="axis"/>
+        <line x1="20" y1="150" x2="280" y2="150" class="axis"/>
+        <polygon points="280,146 290,150 280,154" class="arrow"/>
+        <polygon points="146,20 150,10 154,20" class="arrow"/>
+        <text x="262" y="142" class="label" font-size="12">I<tspan font-size="9" dy="1">a</tspan></text>
+        <text x="155" y="28" class="label" font-size="12">V<tspan font-size="9" dy="1">a</tspan></text>
+
+        <!-- All four quadrants active -->
+        <rect x="155" y="25" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="185" y="72" class="label" font-size="13" font-weight="bold" fill="#2563eb">Q I</text>
+        <text x="168" y="92" class="label-sm" fill="#2563eb">Fwd Motor</text>
+
+        <rect x="25" y="25" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="52" y="72" class="label" font-size="13" font-weight="bold" fill="#2563eb">Q II</text>
+        <text x="35" y="92" class="label-sm" fill="#2563eb">Fwd Regen</text>
+
+        <rect x="25" y="155" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="48" y="202" class="label" font-size="13" font-weight="bold" fill="#2563eb">Q III</text>
+        <text x="35" y="222" class="label-sm" fill="#2563eb">Rev Motor</text>
+
+        <rect x="155" y="155" width="120" height="120" class="quadrant-active" rx="6"/>
+        <text x="180" y="202" class="label" font-size="13" font-weight="bold" fill="#2563eb">Q IV</text>
+        <text x="163" y="222" class="label-sm" fill="#2563eb">Rev Regen</text>
+      </svg>
+      <p class="diagram-caption">Figure 13: Dual converter operates in ALL four quadrants &mdash; full bidirectional speed and torque control.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The dual converter is the "full package" &mdash; four-quadrant operation means we can run the motor in any direction and brake regeneratively from any direction. The price is complexity and cost (two full bridges). For applications demanding full reversing capability up to 15 kW on a single-phase supply, this is the go-to topology.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 10: Converter Summary
+     ============================================================ -->
+<div class="section" id="sec-summary-converters">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>10. Converter Comparison Summary</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Complete Comparison</span>
+
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Topology</th>
+            <th>V<sub>a</sub> Formula</th>
+            <th>Quadrants</th>
+            <th>Power</th>
+            <th>Devices</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Half-Wave</strong></td>
+            <td>\(\frac{V_m}{2\pi}(1+\cos\alpha)\)</td>
+            <td>I only</td>
+            <td>&le; 0.5 kW</td>
+            <td>1 SCR + 1 Diode</td>
+          </tr>
+          <tr>
+            <td><strong>Semi-Converter</strong></td>
+            <td>\(\frac{V_m}{\pi}(1+\cos\alpha)\)</td>
+            <td>I only</td>
+            <td>&le; 15 kW</td>
+            <td>2 SCR + 2 Diodes</td>
+          </tr>
+          <tr>
+            <td><strong>Full Converter</strong></td>
+            <td>\(\frac{2V_m}{\pi}\cos\alpha\)</td>
+            <td>I &amp; IV</td>
+            <td>&le; 15 kW</td>
+            <td>4 SCRs</td>
+          </tr>
+          <tr>
+            <td><strong>Dual Converter</strong></td>
+            <td>\(\pm\frac{2V_m}{\pi}\cos\alpha\)</td>
+            <td>I, II, III &amp; IV</td>
+            <td>&le; 15 kW</td>
+            <td>8 SCRs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>The pattern:</strong> As we add more thyristors, we gain more quadrants of operation. Each step up in capability comes with more cost and complexity. The choice depends on what the application demands.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Think of it as a progression: half-wave (simplest, one quadrant) &rarr; semi-converter (two devices more, same one quadrant but higher power and better waveform) &rarr; full converter (all thyristors, two quadrants with regen braking) &rarr; dual converter (two bridges, all four quadrants). Each step trades cost for capability.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 11: Worked Example
+     ============================================================ -->
+<div class="section" id="sec-example">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>11. Worked Example</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="problem-card">
+      <span class="problem-number">Worked Example</span>
+      <p><strong>Problem:</strong> A separately excited DC motor rated at 230 V drives a constant load torque below full load. It draws 100 A at 500 rpm. The armature resistance is \(R_a = 0.1\;\Omega\). Find:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li>The back-EMF at this operating point</li>
+        <li>The motor constant \(K\phi\)</li>
+        <li>The electromagnetic torque</li>
+      </ol>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Find the back-EMF</strong></p>
+        <p>From the armature voltage equation:</p>
+        \[ V_a = E_g + I_a R_a \]
+        \[ 230 = E_g + 100 \times 0.1 \]
+        \[ E_g = 230 - 10 = 220 \text{ V} \]
+
+        <p class="mt-2"><strong>Step 2: Find \(K\phi\)</strong></p>
+        <p>Convert speed to rad/s: \(\omega_m = \frac{2\pi \times 500}{60} = 52.36\) rad/s</p>
+        <p>From the back-EMF equation:</p>
+        \[ E_g = K\phi \cdot \omega_m \]
+        \[ 220 = K\phi \times 52.36 \]
+        \[ K\phi = \frac{220}{52.36} = 4.2 \text{ V&middot;s/rad} \]
+
+        <p class="mt-2"><strong>Step 3: Find the torque</strong></p>
+        \[ T = K\phi \cdot I_a = 4.2 \times 100 = 420 \text{ N&middot;m} \]
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>Notice how small the \(I_a R_a\) voltage drop is (only 10 V out of 230 V). This confirms that most of the applied voltage goes into producing back-EMF, and the speed is primarily determined by \(V_a/(K\phi)\) as we discussed. The motor is working well below its full-load capacity since the torque is below rated.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 12: Practice Problems
+     ============================================================ -->
+<div class="section" id="sec-practice">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>12. Practice Problems (Sheet 3)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 1</span>
+      <p>A separately excited DC motor runs at 1000 rpm with \(V_a = 200\) V, \(I_a = 100\) A, and \(R_a = 0.1\;\Omega\). The load torque is proportional to speed squared (\(T \propto \omega^2\)). The armature voltage is reduced to 100 V. Find the new steady-state speed and armature current.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Find \(K\phi\) from initial conditions</strong></p>
+        <p>\(\omega_1 = \frac{2\pi \times 1000}{60} = 104.72\) rad/s</p>
+        <p>Back-EMF: \(E_{g1} = V_a - I_a R_a = 200 - 100(0.1) = 190\) V</p>
+        <p>\(K\phi = E_{g1}/\omega_1 = 190/104.72 = 1.814\) V&middot;s/rad</p>
+
+        <p class="mt-2"><strong>Step 2: Find initial torque</strong></p>
+        <p>\(T_1 = K\phi \cdot I_a = 1.814 \times 100 = 181.4\) N&middot;m</p>
+
+        <p class="mt-2"><strong>Step 3: Use the load characteristic</strong></p>
+        <p>Since \(T \propto \omega^2\): \(T_1 = k_L \omega_1^2\)</p>
+        <p>\(k_L = 181.4 / 104.72^2 = 0.01654\)</p>
+        <p>At the new speed: \(T_2 = k_L \omega_2^2 = 0.01654\;\omega_2^2\)</p>
+        <p>Also: \(T_2 = K\phi \cdot I_{a2} = 1.814\;I_{a2}\)</p>
+        <p>And: \(V_{a2} = E_{g2} + I_{a2} R_a = K\phi\;\omega_2 + I_{a2}(0.1)\)</p>
+        <p>\(100 = 1.814\;\omega_2 + 0.1\;I_{a2}\)</p>
+
+        <p class="mt-2"><strong>Step 4: Solve simultaneously</strong></p>
+        <p>From the torque relationship: \(I_{a2} = \frac{0.01654\;\omega_2^2}{1.814} = 0.009117\;\omega_2^2\)</p>
+        <p>Substituting into the voltage equation:</p>
+        <p>\(100 = 1.814\;\omega_2 + 0.1 \times 0.009117\;\omega_2^2\)</p>
+        <p>\(100 = 1.814\;\omega_2 + 0.0009117\;\omega_2^2\)</p>
+
+        <p>Since the \(R_a\) term is very small, we can approximate:</p>
+        <p>\(\omega_2 \approx 100/1.814 = 55.13\) rad/s \(\approx 526\) rpm</p>
+        <p>\(I_{a2} = 0.009117 \times 55.13^2 = 27.7\) A</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Verification</span>
+          <p>Check: \(V_a = 1.814 \times 55.13 + 27.7 \times 0.1 = 99.8 + 2.77 = 102.6\) V. Close to 100 V (the approximation introduced a small error). Iterating would refine this, but the answer is approximately <strong>526 rpm</strong> and <strong>27.7 A</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 3</span>
+      <p>A separately excited DC motor runs at 500 rpm with \(V_a = 220\) V, \(I_a = 20\) A, and \(R_a = 1\;\Omega\). The load torque is proportional to speed (\(T \propto \omega\)). Find the resistance to add in series with the armature to reduce speed to 250 rpm.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Find \(K\phi\) from initial conditions</strong></p>
+        <p>\(\omega_1 = 2\pi \times 500/60 = 52.36\) rad/s</p>
+        <p>\(E_{g1} = 220 - 20(1) = 200\) V</p>
+        <p>\(K\phi = 200/52.36 = 3.819\) V&middot;s/rad</p>
+
+        <p class="mt-2"><strong>Step 2: Load relationship</strong></p>
+        <p>\(T_1 = K\phi \cdot I_a = 3.819 \times 20 = 76.39\) N&middot;m</p>
+        <p>Since \(T \propto \omega\): \(k_L = T_1/\omega_1 = 76.39/52.36 = 1.459\)</p>
+
+        <p class="mt-2"><strong>Step 3: New operating point at 250 rpm</strong></p>
+        <p>\(\omega_2 = 2\pi \times 250/60 = 26.18\) rad/s</p>
+        <p>\(T_2 = k_L \omega_2 = 1.459 \times 26.18 = 38.19\) N&middot;m</p>
+        <p>\(I_{a2} = T_2/(K\phi) = 38.19/3.819 = 10\) A</p>
+        <p>\(E_{g2} = K\phi \cdot \omega_2 = 3.819 \times 26.18 = 100\) V</p>
+
+        <p class="mt-2"><strong>Step 4: Find the total resistance</strong></p>
+        <p>\(V_a = E_{g2} + I_{a2}(R_a + R_{\text{ext}})\)</p>
+        <p>\(220 = 100 + 10(1 + R_{\text{ext}})\)</p>
+        <p>\(120 = 10 + 10 R_{\text{ext}}\)</p>
+        <p>\(R_{\text{ext}} = 110/10 = \mathbf{11\;\Omega}\)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>Adding 11 &Omega; in series is a lot &mdash; and it wastes \(I_{a2}^2 R_{\text{ext}} = 100 \times 11 = 1100\) W as heat! This illustrates exactly why armature resistance control is inefficient and why power electronic converters (which adjust \(V_a\) directly) are preferred in modern drives.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 4</span>
+      <p>A DC shunt motor runs at 1000 rpm with \(I_a = 100\) A and a constant load torque. The source voltage is halved. Find the new speed and armature current. Assume \(R_a\) is small enough to neglect.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Key insight for a shunt motor:</strong> When we halve the supply voltage, <em>both</em> the armature voltage and the field voltage are halved (since they share the same supply). This means \(\phi\) also drops (though not exactly by half due to the nonlinear B-H curve &mdash; but let's assume linear operation for simplicity, so \(\phi \propto V_f \propto V_s\)).</p>
+
+        <p class="mt-2"><strong>Analysis (neglecting \(R_a\)):</strong></p>
+        <p>Speed: \(\omega_m \approx V_a/(K\phi)\)</p>
+        <p>If both \(V_a\) and \(\phi\) are halved: \(\omega_2 = (V_a/2)/(K \cdot \phi/2) = V_a/(K\phi) = \omega_1\)</p>
+        <p>So the speed stays approximately the same: <strong>\(\omega_2 \approx 1000\) rpm</strong></p>
+
+        <p class="mt-2">For the current: Since torque is constant and \(T = K\phi \cdot I_a\):</p>
+        <p>\(T_1 = K\phi \cdot 100\)</p>
+        <p>\(T_2 = K(\phi/2) \cdot I_{a2} = T_1\)</p>
+        <p>\(I_{a2} = \frac{K\phi \cdot 100}{K \cdot \phi/2} = 200\) A</p>
+
+        <p><strong>New armature current: 200 A</strong> (doubles!)</p>
+
+        <div class="box motivation mt-2">
+          <span class="box-label">Warning</span>
+          <p>This is a dangerous situation! The current doubled because the flux halved &mdash; the motor needs more current to maintain the same torque with weaker flux. If the motor was already running near rated current, halving the voltage on a shunt motor with constant torque load could cause overcurrent. This is why shunt motors need careful protection and why separately excited motors (where we control \(V_a\) and \(\phi\) independently) are preferred for drives.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     FINAL LECTURE SUMMARY
+     ============================================================ -->
+<div class="section" id="sec-final">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>Lecture Summary</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="box takeaway">
+      <span class="box-label">Big Picture</span>
+      <p>In this lecture, we built up the complete picture of DC drives from the ground up:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li><strong>DC motor fundamentals:</strong> Three simple equations (\(V_a = E_g + I_aR_a\), \(E_g = K\phi\omega_m\), \(T = K\phi I_a\)) govern everything.</li>
+        <li><strong>Starting problem:</strong> Never apply full voltage to a stopped motor &mdash; current will be dangerously high.</li>
+        <li><strong>Speed control:</strong> Two methods &mdash; armature voltage (constant torque, below base speed) and field weakening (constant power, above base speed).</li>
+        <li><strong>Single-phase converters:</strong> A family of topologies offering progressively more capability:
+          <ul class="content-list">
+            <li>Half-wave: simplest, one quadrant, small loads</li>
+            <li>Semi-converter: one quadrant, medium power, better waveform</li>
+            <li>Full converter: two quadrants with regeneration</li>
+            <li>Dual converter: four quadrants, full reversing capability</li>
+          </ul>
+        </li>
+      </ol>
+      <p>Next lecture, we'll extend these ideas to three-phase converters, which handle much higher power levels and form the backbone of industrial DC drive systems.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content-wrapper -->
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ===========================================
+// THEME TOGGLE
+// ===========================================
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (theme === 'dark') {
+    icon.textContent = '\u2600'; // sun
+    label.textContent = 'Light';
+  } else {
+    icon.textContent = '\u263E'; // moon
+    label.textContent = 'Dark';
+  }
+}
+
+// Initialize theme
+(function() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+
+// ===========================================
+// SIDEBAR TOGGLE (mobile)
+// ===========================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar when clicking a link (mobile)
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+});
+
+// ===========================================
+// COLLAPSIBLE SECTIONS
+// ===========================================
+function toggleSection(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    icon.classList.remove('collapsed');
+    setTimeout(function() { content.style.maxHeight = 'none'; }, 500);
+  } else {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    requestAnimationFrame(function() {
+      content.classList.add('collapsed');
+      icon.classList.add('collapsed');
+    });
+  }
+}
+
+// Initialize all sections as expanded
+document.querySelectorAll('.section-content').forEach(function(el) {
+  el.style.maxHeight = 'none';
+});
+
+// ===========================================
+// SOLUTION TOGGLE
+// ===========================================
+function toggleSolution(btn) {
+  const content = btn.nextElementSibling;
+  content.classList.toggle('visible');
+  btn.textContent = content.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+  // Re-render MathJax in the revealed content
+  if (content.classList.contains('visible') && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([content]);
+  }
+}
+
+// ===========================================
+// PROGRESS BAR
+// ===========================================
+function updateProgress() {
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+// ===========================================
+// ACTIVE TOC HIGHLIGHT
+// ===========================================
+function updateActiveTOC() {
+  var sections = document.querySelectorAll('.section[id], .subsection[id], .hero[id]');
+  var links = document.querySelectorAll('.sidebar nav a');
+  var scrollPos = window.pageYOffset + 120;
+  var activeId = '';
+
+  sections.forEach(function(section) {
+    if (section.offsetTop <= scrollPos) {
+      activeId = section.id;
+    }
+  });
+
+  links.forEach(function(link) {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + activeId) {
+      link.classList.add('active');
+    }
+  });
+}
+
+// Throttle scroll events
+var scrollTicking = false;
+window.addEventListener('scroll', function() {
+  if (!scrollTicking) {
+    requestAnimationFrame(function() {
+      updateProgress();
+      updateActiveTOC();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
+});
+
+// Initial call
+updateProgress();
+updateActiveTOC();
+</script>
+
+</body>
+</html>
