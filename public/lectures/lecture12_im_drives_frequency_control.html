@@ -1,0 +1,2685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 12: IM Drives &mdash; Frequency Control &amp; Rotor Resistance Control</title>
+
+<!-- MathJax CDN -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      omega: '\\omega',
+      phi: '\\varphi'
+    }
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script>
+    (function() {
+        var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+        var s = document.createElement('script');
+        s.async = true; s.src = primary;
+        s.onerror = function() {
+            var s2 = document.createElement('script');
+            s2.async = true; s2.src = fallback;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    })();
+</script>
+
+<style>
+/* ============================================================
+   CSS RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Accent colors */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #dbeafe;
+  --accent-blue-border: #93c5fd;
+  --accent-green: #16a34a;
+  --accent-green-light: #dcfce7;
+  --accent-green-border: #86efac;
+  --accent-yellow: #d97706;
+  --accent-yellow-light: #fef3c7;
+  --accent-yellow-border: #fcd34d;
+  --accent-red: #dc2626;
+  --accent-purple: #7c3aed;
+
+  /* Section colors */
+  --motivation-bg: #fffbeb;
+  --motivation-border: #f59e0b;
+  --motivation-text: #92400e;
+  --motivation-icon: #f59e0b;
+
+  --intuition-bg: #eff6ff;
+  --intuition-border: #3b82f6;
+  --intuition-text: #1e40af;
+  --intuition-icon: #3b82f6;
+
+  --deepdive-bg: #f0fdf4;
+  --deepdive-border: #22c55e;
+  --deepdive-text: #166534;
+  --deepdive-icon: #22c55e;
+
+  --takeaway-bg: #faf5ff;
+  --takeaway-border: #a855f7;
+  --takeaway-text: #6b21a8;
+  --takeaway-icon: #a855f7;
+
+  /* Sizing */
+  --sidebar-width: 280px;
+  --content-max: 900px;
+  --progress-height: 4px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-sidebar: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+  --accent-blue: #60a5fa;
+  --accent-blue-light: #1e3a5f;
+  --accent-blue-border: #2563eb;
+  --accent-green: #4ade80;
+  --accent-green-light: #14532d;
+  --accent-green-border: #16a34a;
+  --accent-yellow: #fbbf24;
+  --accent-yellow-light: #451a03;
+  --accent-yellow-border: #d97706;
+
+  --motivation-bg: #1c1207;
+  --motivation-border: #d97706;
+  --motivation-text: #fcd34d;
+  --motivation-icon: #fbbf24;
+
+  --intuition-bg: #0c1929;
+  --intuition-border: #2563eb;
+  --intuition-text: #93c5fd;
+  --intuition-icon: #60a5fa;
+
+  --deepdive-bg: #052e16;
+  --deepdive-border: #16a34a;
+  --deepdive-text: #86efac;
+  --deepdive-icon: #4ade80;
+
+  --takeaway-bg: #1a0533;
+  --takeaway-border: #7c3aed;
+  --takeaway-text: #c4b5fd;
+  --takeaway-icon: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: var(--progress-height);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================
+   TOP HEADER
+   ============================================================ */
+.top-header {
+  position: fixed;
+  top: var(--progress-height);
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 999;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-normal);
+}
+
+.top-header .lecture-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.top-header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Sidebar toggle (mobile) */
+.sidebar-toggle {
+  display: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   SIDEBAR / TABLE OF CONTENTS
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: calc(56px + var(--progress-height));
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - 56px - var(--progress-height));
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 998;
+  transition: transform var(--transition-normal), background var(--transition-normal);
+}
+
+.sidebar h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 7px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.sidebar nav a:hover {
+  background: var(--bg-primary);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+
+.sidebar nav a.active {
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+  background: var(--bg-primary);
+  font-weight: 600;
+}
+
+.sidebar nav a.sub {
+  padding-left: 36px;
+  font-size: 0.8rem;
+}
+
+.sidebar nav a.subsub {
+  padding-left: 50px;
+  font-size: 0.78rem;
+}
+
+/* Sidebar scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: calc(56px + var(--progress-height) + 40px) 48px 80px 48px;
+  max-width: calc(var(--content-max) + var(--sidebar-width) + 96px);
+  transition: margin-left var(--transition-normal);
+}
+
+.content-wrapper {
+  max-width: var(--content-max);
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  margin-bottom: 48px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.hero .lecture-number {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-blue);
+  background: var(--accent-blue-light);
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   SECTION STRUCTURE
+   ============================================================ */
+.section {
+  margin-bottom: 56px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.section-header .collapse-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-normal);
+  width: 24px;
+  text-align: center;
+}
+
+.section-header .collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.section-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Sub-section */
+.subsection {
+  margin: 28px 0;
+}
+
+.subsection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.subsection h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   COLORED BOXES (Motivation, Intuition, Deep Dive, Takeaway)
+   ============================================================ */
+.box {
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 20px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+
+.box .box-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.box.motivation {
+  background: var(--motivation-bg);
+  border-left-color: var(--motivation-border);
+  color: var(--motivation-text);
+}
+.box.motivation .box-label {
+  background: var(--motivation-border);
+  color: #fff;
+}
+
+.box.intuition {
+  background: var(--intuition-bg);
+  border-left-color: var(--intuition-border);
+  color: var(--intuition-text);
+}
+.box.intuition .box-label {
+  background: var(--intuition-border);
+  color: #fff;
+}
+
+.box.deepdive {
+  background: var(--deepdive-bg);
+  border-left-color: var(--deepdive-border);
+  color: var(--deepdive-text);
+}
+.box.deepdive .box-label {
+  background: var(--deepdive-border);
+  color: #fff;
+}
+
+.box.takeaway {
+  background: var(--takeaway-bg);
+  border-left-color: var(--takeaway-border);
+  color: var(--takeaway-text);
+}
+.box.takeaway .box-label {
+  background: var(--takeaway-border);
+  color: #fff;
+}
+
+/* ============================================================
+   EQUATIONS
+   ============================================================ */
+.equation-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.equation-block .eq-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.styled-table th, .styled-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.styled-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.styled-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* ============================================================
+   SVG DIAGRAMS
+   ============================================================ */
+.diagram-container {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ============================================================
+   LISTS
+   ============================================================ */
+.content-list {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.content-list li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   PRACTICE PROBLEMS
+   ============================================================ */
+.problem-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 16px 0;
+}
+
+.problem-card .problem-number {
+  display: inline-block;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.problem-card .solution {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.solution-toggle {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all var(--transition-fast);
+}
+
+.solution-toggle:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.solution-content {
+  display: none;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.solution-content.visible {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+p {
+  margin-bottom: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.highlight {
+  background: var(--accent-yellow-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.text-center { text-align: center; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-content {
+    margin-left: 0;
+    padding: calc(56px + var(--progress-height) + 24px) 20px 60px 20px;
+  }
+  .sidebar-toggle {
+    display: block;
+  }
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.35rem; }
+  .section-header h2 { font-size: 1.25rem; }
+  .box { padding: 16px 18px; }
+}
+
+/* ============================================================
+   SVG THEME OVERRIDES
+   ============================================================ */
+svg text {
+  fill: var(--text-primary);
+}
+[data-theme="dark"] svg .wire { stroke: #94a3b8; }
+[data-theme="dark"] svg .component { stroke: #94a3b8; fill: none; }
+[data-theme="dark"] svg .component-fill { fill: #334155; stroke: #94a3b8; }
+[data-theme="dark"] svg .label { fill: #e2e8f0; }
+[data-theme="dark"] svg .arrow { stroke: #94a3b8; fill: #94a3b8; }
+[data-theme="dark"] svg .axis { stroke: #64748b; }
+[data-theme="dark"] svg .curve1 { stroke: #60a5fa; }
+[data-theme="dark"] svg .curve2 { stroke: #f87171; }
+[data-theme="dark"] svg .curve3 { stroke: #4ade80; }
+[data-theme="dark"] svg .curve4 { stroke: #fbbf24; }
+[data-theme="dark"] svg .region { fill-opacity: 0.15; }
+
+/* Light mode SVG defaults */
+svg .wire { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component-fill { fill: #f1f5f9; stroke: #334155; stroke-width: 2; }
+svg .label { fill: #1e293b; font-size: 13px; font-family: 'Segoe UI', sans-serif; }
+svg .label-sm { fill: #475569; font-size: 11px; font-family: 'Segoe UI', sans-serif; }
+svg .arrow { stroke: #334155; stroke-width: 2; fill: #334155; }
+svg .axis { stroke: #475569; stroke-width: 1.5; }
+svg .curve1 { stroke: #2563eb; stroke-width: 2.5; fill: none; }
+svg .curve2 { stroke: #dc2626; stroke-width: 2.5; fill: none; }
+svg .curve3 { stroke: #16a34a; stroke-width: 2.5; fill: none; }
+svg .curve4 { stroke: #d97706; stroke-width: 2.5; fill: none; }
+svg .region { stroke: none; }
+svg .quadrant-active { fill: #dbeafe; fill-opacity: 0.5; stroke: #2563eb; stroke-width: 1; stroke-dasharray: 4; }
+svg .quadrant-inactive { fill: #f1f5f9; fill-opacity: 0.3; stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; }
+[data-theme="dark"] svg .quadrant-active { fill: #1e3a5f; fill-opacity: 0.5; stroke: #60a5fa; }
+[data-theme="dark"] svg .quadrant-inactive { fill: #1e293b; fill-opacity: 0.3; stroke: #475569; }
+
+/* Scrollbar for main */
+.main-content::-webkit-scrollbar { width: 6px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
+
+/* ============================================================
+   FLASHCARD STYLES
+   ============================================================ */
+.flashcard-deck {
+  margin: 32px 0;
+}
+
+.flashcard-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.flashcard-controls button {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flashcard-controls button:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.flashcard-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.flashcard-counter {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.flashcard-scene {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  min-height: 280px;
+}
+
+.flashcard {
+  width: 100%;
+  min-height: 280px;
+  position: relative;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flashcard.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 280px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 14px;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.flashcard-face--front {
+  background: var(--intuition-bg);
+  border-left: 5px solid var(--intuition-border);
+}
+
+.flashcard-face--back {
+  background: var(--deepdive-bg);
+  border-left: 5px solid var(--deepdive-border);
+  transform: rotateY(180deg);
+}
+
+.flashcard-face .card-label {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.flashcard-face--front .card-label {
+  background: var(--intuition-border);
+}
+
+.flashcard-face--back .card-label {
+  background: var(--deepdive-border);
+}
+
+.flashcard-face p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 600px;
+}
+
+.flashcard-face--front p {
+  color: var(--intuition-text);
+  font-weight: 600;
+}
+
+.flashcard-face--back p {
+  color: var(--deepdive-text);
+}
+
+.flashcard-hint {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.flashcard-progress-bar {
+  width: 100%;
+  max-width: 700px;
+  margin: 16px auto 0;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.flashcard-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 600px) {
+  .flashcard-face {
+    padding: 24px 20px;
+    min-height: 240px;
+  }
+  .flashcard-scene {
+    min-height: 240px;
+  }
+  .flashcard {
+    min-height: 240px;
+  }
+  .flashcard-controls button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Top Header -->
+<header class="top-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
+    <span class="lecture-tag">Lecture 12 &mdash; Electric Drives</span>
+  </div>
+  <div class="header-controls">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span id="theme-icon">&#9790;</span>
+      <span id="theme-label" style="font-size:0.8rem;font-weight:600;">Dark</span>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar / TOC -->
+<aside class="sidebar" id="sidebar">
+  <h3>Table of Contents</h3>
+  <nav id="toc-nav">
+    <a href="#hero">Overview</a>
+    <a href="#sec-freq-intro" class="sub">1. Frequency Control &mdash; Introduction</a>
+    <a href="#sec-vf-principle" class="sub">2. Constant V/F Principle</a>
+    <a href="#sec-torque-vf" class="subsub">Torque Under V/F Control</a>
+    <a href="#sec-three-regions" class="sub">3. Three Operating Regions</a>
+    <a href="#sec-const-torque" class="subsub">Constant Torque Region</a>
+    <a href="#sec-const-power" class="subsub">Constant Power Region</a>
+    <a href="#sec-breakdown" class="subsub">Breakdown Torque Region</a>
+    <a href="#sec-stator-impedance" class="sub">4. Effect of Stator Impedance</a>
+    <a href="#sec-vf-sources" class="sub">5. Variable Frequency Sources</a>
+    <a href="#sec-rotor-resistance" class="sub">6. Rotor Resistance Control</a>
+    <a href="#sec-static-rotor" class="subsub">Static Rotor Resistance</a>
+    <a href="#sec-slip-recovery" class="sub">7. Slip Power Recovery</a>
+    <a href="#sec-kramer" class="subsub">Kramer Drive</a>
+    <a href="#sec-scherbius" class="subsub">Scherbius Drive</a>
+    <a href="#sec-dfim" class="sub">8. Doubly-Fed Induction Machine</a>
+    <a href="#sec-summary" class="sub">9. Lecture Summary</a>
+    <a href="#sec-examples" class="sub">10. Worked Examples</a>
+    <a href="#sec-practice" class="sub">11. Practice Problems</a>
+    <a href="#sec-flashcards" class="sub">12. Flashcards</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrapper">
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<div class="hero" id="hero">
+  <span class="lecture-number">Lecture 12</span>
+  <h1>IM Drives &mdash; Frequency Control &amp; Rotor Resistance Control</h1>
+  <p class="subtitle">Exploring scalar V/F control of induction motors, the three operating regions, rotor resistance methods for wound-rotor machines, and slip power recovery drives.</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1: Frequency Control Introduction
+     ============================================================ -->
+<div class="section" id="sec-freq-intro">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>1. Frequency Control &mdash; Introduction</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>An induction motor's synchronous speed is \(N_s = 120f/P\). If we want to change speed smoothly and efficiently, the most powerful lever we have is the supply <strong>frequency</strong>. Unlike rotor resistance or voltage control, frequency control does not waste energy as heat &mdash; it directly changes where the motor "wants" to run. This is why virtually every modern industrial drive is a variable-frequency drive (VFD).</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of an induction motor like a runner on a treadmill. The <strong>supply frequency</strong> sets the treadmill speed (synchronous speed). The runner always lags a little behind (slip). If you want the runner to go faster, you speed up the treadmill &mdash; that's frequency control. But if you just speed up the treadmill without adjusting the incline (voltage), the runner will stumble (flux drops, motor weakens). That's why we keep V/f constant.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Two Categories of Frequency Control</span>
+      <p>Once we decide to control frequency, there are two fundamentally different philosophies:</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Method</th><th>Principle</th><th>Complexity</th><th>Performance</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Scalar (V/F) Control</strong></td>
+            <td>Adjust voltage and frequency magnitudes together, maintaining V/f ratio</td>
+            <td>Simple</td>
+            <td>Good for steady-state, fans, pumps</td>
+          </tr>
+          <tr>
+            <td><strong>Vector (Field-Oriented) Control</strong></td>
+            <td>Decompose stator current into flux &amp; torque components, control independently &mdash; like a DC motor</td>
+            <td>Complex (requires rotor position/flux estimation)</td>
+            <td>Excellent dynamic response, servo applications</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>This lecture focuses on <strong>scalar V/F control</strong>. Vector control will be covered in future lectures. Scalar control is simpler and sufficient for a huge range of applications &mdash; any load where you don't need fast torque transients (fans, pumps, conveyors, compressors).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Frequency control is the most efficient and most widely used speed control method for induction motors. Scalar V/F control keeps things simple by maintaining the voltage-to-frequency ratio, preserving airgap flux and torque capability across a wide speed range.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2: Constant V/F Principle
+     ============================================================ -->
+<div class="section" id="sec-vf-principle">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>2. The Constant V/F Principle</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>If we just change the frequency without touching the voltage, the airgap flux changes &mdash; and with it, the motor's entire torque capability. At low frequency with full voltage, the core saturates and draws excessive magnetizing current. At high frequency with the same voltage, the flux drops and the motor becomes weak. We need a rule that keeps the motor "healthy" across all frequencies.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>The back-EMF of the motor is like the "voltage used to maintain the magnetic field." The back-EMF equation is \(E = 4.44 \cdot f \cdot T_{ph} \cdot k_w \cdot \Phi_m\). If we want to keep the flux \(\Phi_m\) constant (and therefore keep the motor's torque capability constant), then as \(f\) changes, \(E\) must change proportionally. Since \(V \approx E\) (neglecting stator impedance), we get the <strong>constant V/f rule</strong>.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; The Math Behind V/F</span>
+      <p>Starting from the back-EMF equation:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Back-EMF Equation</div>
+        \[E = 4.44 \cdot f \cdot T_{ph} \cdot k_w \cdot \Phi_m\]
+      </div>
+
+      <p>Since \(T_{ph}\) (turns per phase) and \(k_w\) (winding factor) are fixed machine parameters:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Constant Flux Condition</div>
+        \[\frac{E}{f} = 4.44 \cdot T_{ph} \cdot k_w \cdot \Phi_m = \text{constant}\]
+      </div>
+
+      <p>This means: <strong>if we keep E/f constant, the airgap flux stays constant</strong>. And since \(V \approx E\) when stator impedance is small, the practical rule becomes <strong>keep V/f constant</strong>.</p>
+
+      <p>Now consider the referred rotor current in the equivalent circuit:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Rotor Current (Referred to Stator)</div>
+        \[I'_r = \frac{E}{\sqrt{(R'_r/s)^2 + X'^2_r}}\]
+      </div>
+
+      <p>where \(X'_r = 2\pi f L'_r\) is the rotor leakage reactance. Notice that \(X'_r\) also depends on frequency, but the <em>slip frequency</em> is what matters for the rotor circuit, and the ratio works out.</p>
+    </div>
+
+    <!-- Torque under V/F -->
+    <div class="subsection" id="sec-torque-vf">
+      <h3>Torque Expression Under V/F Control</h3>
+
+      <div class="box motivation">
+        <span class="box-label">The Problem / The Why</span>
+        <p>We've established the flux rule, but what does it actually do for the torque? We need a torque expression that shows how frequency control affects the torque-speed curve &mdash; and crucially, whether the maximum torque is preserved.</p>
+      </div>
+
+      <p>The developed torque of an induction motor (per phase, three-phase total) is:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Developed Torque (Stator Impedance Neglected)</div>
+        \[T_d = \frac{3E_{\text{base}}^2 \cdot (R'_r/s)}{\omega_s \left[(R'_r/s)^2 + X'^2_r\right]}\]
+      </div>
+
+      <p>where \(\omega_s = 2\pi f\) is the synchronous angular frequency and \(E_{\text{base}}\) is the back-EMF at the operating frequency (which scales with \(f\) when V/f is maintained).</p>
+
+      <p>Setting \(dT_d/ds = 0\) to find the slip at maximum torque:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Slip at Maximum Torque (Rs Neglected)</div>
+        \[s_m = \frac{R'_r}{X'_r}\]
+      </div>
+
+      <p>And the maximum torque itself:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Maximum Torque</div>
+        \[T_{\max} = \frac{3E_{\text{base}}^2}{2\omega_s X'_r}\]
+      </div>
+
+      <div class="box intuition">
+        <span class="box-label">The Key Insight</span>
+        <p>Look carefully at \(T_{\max}\). Both \(E_{\text{base}}^2\) and \(\omega_s \cdot X'_r\) are proportional to \(f^2\) and \(f \cdot f\) respectively when V/f is held constant. The \(f\) dependences cancel out! This means <strong>\(T_{\max}\) stays constant regardless of frequency</strong> &mdash; as long as V/f is maintained. This is the whole point of V/F control.</p>
+      </div>
+
+      <p>We can express the torque in a convenient normalized form:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Normalized Torque</div>
+        \[\frac{T_d}{T_{\max}} = \frac{2 \cdot s \cdot s_m}{s^2 + s_m^2}\]
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>Under constant V/f control (with stator impedance neglected), the maximum torque \(T_{\max}\) is independent of frequency. The entire family of torque-speed curves at different frequencies has the same peak torque value &mdash; the curves just shift along the speed axis. This gives us constant torque capability from zero up to rated speed.</p>
+      </div>
+    </div>
+
+    <!-- SVG: Family of T-omega curves -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" style="max-width:640px;">
+        <!-- Axes -->
+        <line x1="80" y1="340" x2="640" y2="340" class="axis"/>
+        <line x1="80" y1="340" x2="80" y2="30" class="axis"/>
+        <!-- Axis arrows -->
+        <polygon points="640,336 650,340 640,344" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+        <!-- Labels -->
+        <text x="360" y="375" class="label" text-anchor="middle">Speed (rpm)</text>
+        <text x="30" y="185" class="label" text-anchor="middle" transform="rotate(-90,30,185)">Torque</text>
+
+        <!-- Tmax dashed line -->
+        <line x1="80" y1="80" x2="620" y2="80" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="625" y="84" class="label-sm">T<tspan font-size="9" dy="2">max</tspan></text>
+
+        <!-- Curve at f1 (lowest freq) -->
+        <path d="M80,340 Q110,280 130,180 Q140,110 150,80 Q160,65 175,80 Q200,130 220,200 Q240,260 260,300 Q275,325 290,340" class="curve1" stroke-width="2.5"/>
+        <text x="150" y="55" class="label-sm" fill="#2563eb" font-weight="600">f<tspan font-size="9" dy="2">1</tspan></text>
+
+        <!-- Curve at f2 -->
+        <path d="M80,340 Q130,310 180,240 Q220,140 250,80 Q265,60 285,80 Q310,130 340,200 Q370,270 400,310 Q420,330 440,340" class="curve2" stroke-width="2.5"/>
+        <text x="260" y="55" class="label-sm" fill="#dc2626" font-weight="600">f<tspan font-size="9" dy="2">2</tspan></text>
+
+        <!-- Curve at f3 (rated) -->
+        <path d="M80,340 Q170,320 260,260 Q340,160 390,80 Q410,55 435,80 Q460,130 490,200 Q520,270 550,310 Q570,330 590,340" class="curve3" stroke-width="2.5"/>
+        <text x="400" y="55" class="label-sm" fill="#16a34a" font-weight="600">f<tspan font-size="9" dy="2">rated</tspan></text>
+
+        <!-- Curve at f4 (above rated - weaker) -->
+        <path d="M80,340 Q200,330 320,290 Q420,210 480,140 Q510,110 535,120 Q555,140 575,180 Q595,230 610,270 Q625,310 635,340" class="curve4" stroke-width="2.5"/>
+        <text x="500" y="100" class="label-sm" fill="#d97706" font-weight="600">f<tspan font-size="9" dy="2">4</tspan> > f<tspan font-size="9" dy="2">rated</tspan></text>
+
+        <!-- Annotation: constant V/f region -->
+        <text x="200" y="380" class="label-sm" text-anchor="middle">f<tspan font-size="9" dy="2">1</tspan> &lt; f<tspan font-size="9" dy="2">2</tspan> &lt; f<tspan font-size="9" dy="2">rated</tspan> : V/f = const</text>
+      </svg>
+      <p class="diagram-caption">Figure 1: Family of torque-speed curves under V/F control. Below rated frequency, T<sub>max</sub> remains constant. Above rated frequency, T<sub>max</sub> decreases (flux weakening).</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3: Three Operating Regions
+     ============================================================ -->
+<div class="section" id="sec-three-regions">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>3. Three Operating Regions</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>A motor doesn't operate the same way at all speeds. Below rated speed, we can freely boost both voltage and frequency. Above rated speed, the voltage hits its ceiling (the inverter or supply can't go higher). This creates distinct operating regions, each with its own rules for torque, power, and flux. Understanding these regions is essential for sizing a drive and predicting motor behavior.</p>
+    </div>
+
+    <!-- Region 1 -->
+    <div class="subsection" id="sec-const-torque">
+      <h3>Region 1: Constant Torque (f &le; f<sub>rated</sub>)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>In this region, we're below the motor's rated frequency. We increase speed by increasing \(f\), and we increase \(V\) proportionally to keep V/f constant. Since flux is constant and current can be at rated value, the motor can produce its full rated torque at any speed in this region.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <ul class="content-list">
+          <li><strong>Voltage:</strong> Increases linearly with frequency (\(V/f = \text{const}\))</li>
+          <li><strong>Flux:</strong> Constant (maintained by V/f ratio)</li>
+          <li><strong>Maximum torque:</strong> Constant (independent of frequency)</li>
+          <li><strong>Power:</strong> Increases linearly with speed, since \(P = T \cdot \omega\) and \(T\) is constant</li>
+          <li><strong>Current:</strong> Can be at rated value</li>
+        </ul>
+        <p>At low frequencies, voltage boost is needed to compensate for stator resistance (discussed in Section 4).</p>
+      </div>
+    </div>
+
+    <!-- Region 2 -->
+    <div class="subsection" id="sec-const-power">
+      <h3>Region 2: Constant Power (f &gt; f<sub>rated</sub>)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Now the motor is above its rated speed. We've run out of voltage &mdash; the inverter can't supply more than rated voltage. So we keep increasing \(f\) while voltage stays at \(V_{\text{rated}}\). The V/f ratio drops, meaning flux weakens. It's exactly like field weakening in a DC motor. The motor can still produce rated power, but since \(\omega\) is increasing, the torque must decrease: \(T = P/\omega\).</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <ul class="content-list">
+          <li><strong>Voltage:</strong> Stays at \(V_{\text{rated}}\) (can't exceed)</li>
+          <li><strong>Frequency:</strong> Increases above \(f_{\text{rated}}\)</li>
+          <li><strong>Flux:</strong> Decreases (V/f drops, so \(\Phi \propto V/f\) falls)</li>
+          <li><strong>Current:</strong> Maintained at rated value</li>
+          <li><strong>Power:</strong> Approximately constant (\(P = V \cdot I \approx \text{const}\))</li>
+          <li><strong>Torque:</strong> Decreases inversely with speed: \(T \propto 1/\omega\)</li>
+          <li><strong>Slip:</strong> Increases gradually as frequency rises</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Region 3 -->
+    <div class="subsection" id="sec-breakdown">
+      <h3>Region 3: Breakdown Torque Region (High Frequency)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Push the frequency high enough in the flux-weakening region, and eventually the slip reaches its maximum value \(s_m\). The motor is now operating at the tip of its torque-speed curve. Any further increase in frequency causes the torque to drop even faster &mdash; the motor can no longer sustain constant power.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <ul class="content-list">
+          <li><strong>Slip:</strong> At maximum value \(s_m\)</li>
+          <li><strong>Torque:</strong> Equals breakdown torque, which decreases as frequency increases further</li>
+          <li><strong>Power:</strong> No longer constant &mdash; decreases with increasing frequency</li>
+          <li><strong>Practical limit:</strong> This region is usually avoided in normal operation; drives are sized so the load torque stays within Regions 1 and 2</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SVG: Three Regions Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+        <!-- Axes -->
+        <line x1="80" y1="350" x2="660" y2="350" class="axis"/>
+        <line x1="80" y1="350" x2="80" y2="30" class="axis"/>
+        <polygon points="660,346 670,350 660,354" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+        <text x="370" y="400" class="label" text-anchor="middle">Speed / Frequency</text>
+        <text x="25" y="190" class="label" text-anchor="middle" transform="rotate(-90,25,190)">Torque / Power</text>
+
+        <!-- Region boundaries -->
+        <line x1="320" y1="350" x2="320" y2="40" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+        <line x1="510" y1="350" x2="510" y2="40" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+
+        <!-- Region labels -->
+        <rect x="120" y="38" width="140" height="22" rx="4" class="quadrant-active"/>
+        <text x="190" y="54" class="label-sm" text-anchor="middle" font-weight="600">Region 1: Const T</text>
+
+        <rect x="345" y="38" width="140" height="22" rx="4" class="quadrant-active"/>
+        <text x="415" y="54" class="label-sm" text-anchor="middle" font-weight="600">Region 2: Const P</text>
+
+        <rect x="530" y="38" width="120" height="22" rx="4" class="quadrant-active"/>
+        <text x="590" y="54" class="label-sm" text-anchor="middle" font-weight="600">Region 3</text>
+
+        <!-- f_rated label -->
+        <text x="320" y="370" class="label-sm" text-anchor="middle">f<tspan font-size="9" dy="2">rated</tspan></text>
+
+        <!-- Torque curve (blue) -->
+        <path d="M80,120 L310,120 Q320,120 330,130 Q380,180 420,210 Q460,240 510,270 Q550,300 590,320 Q620,335 650,345" class="curve1" stroke-width="3"/>
+        <text x="92" y="110" class="label-sm" fill="#2563eb" font-weight="600">Torque</text>
+
+        <!-- Power curve (red) -->
+        <path d="M80,320 Q120,300 160,270 Q200,230 240,190 Q280,150 310,120 Q320,112 330,112 L500,112 Q510,112 520,120 Q550,150 580,190 Q610,240 640,290" class="curve2" stroke-width="3"/>
+        <text x="345" y="105" class="label-sm" fill="#dc2626" font-weight="600">Power</text>
+
+        <!-- Voltage curve (green dashed) -->
+        <path d="M80,320 Q120,300 160,270 Q200,230 240,190 Q280,150 310,120 Q320,115 330,115 L640,115" class="curve3" stroke-width="2" stroke-dasharray="8,4"/>
+        <text x="635" y="108" class="label-sm" fill="#16a34a" font-weight="600">V</text>
+
+        <!-- T proportional to 1/omega annotation -->
+        <text x="440" y="250" class="label-sm" fill="#2563eb" transform="rotate(-25,440,250)">T ~ 1/&omega;</text>
+      </svg>
+      <p class="diagram-caption">Figure 2: The three operating regions of V/F control. Region 1: constant torque (power rises). Region 2: constant power (torque falls). Region 3: both torque and power decrease.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Below rated speed, the motor operates at constant torque (V/f maintained). Above rated speed, voltage is capped at rated value, flux weakens, and the motor transitions to constant power operation. This dual-region behavior &mdash; constant torque below base speed, constant power above &mdash; is identical in concept to DC motor armature voltage + field weakening control.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4: Effect of Stator Impedance
+     ============================================================ -->
+<div class="section" id="sec-stator-impedance">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>4. Effect of Stator Impedance</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>So far we assumed \(V \approx E\), ignoring the voltage drop across the stator resistance \(R_s\) and leakage reactance \(X_s\). At rated frequency, this drop is a small fraction of the supply voltage. But at <em>low</em> frequencies, the supply voltage is low (because V/f = const), while the stator resistance drop \(R_s \cdot I_s\) stays the same. A 5 V drop that's negligible at 200 V supply becomes very significant at 20 V supply. This kills the flux and torque at low speeds.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Imagine you're filling a swimming pool through a long hose. At high water pressure (high frequency/voltage), the friction in the hose is a minor loss. But at low pressure (low frequency/voltage), that same friction can reduce the flow to a trickle. The stator resistance is the "hose friction" &mdash; at low frequencies, it steals a disproportionate share of the voltage, starving the airgap of flux.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Voltage Boost Strategies</span>
+      <p>The actual terminal voltage must be:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Voltage with Boost Compensation</div>
+        \[V = \left(\frac{V}{f}\right) \cdot f + \Delta V\]
+      </div>
+
+      <p>where \(\Delta V\) is the <strong>boost voltage</strong> added to compensate for the stator impedance drop.</p>
+
+      <p>Different boost strategies exist:</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Strategy</th><th>Description</th><th>Pros/Cons</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Constant Boost</strong></td>
+            <td>Add a fixed \(\Delta V\) at all frequencies below a threshold</td>
+            <td>Simple to implement; can cause excessive flux at light load / low speed</td>
+          </tr>
+          <tr>
+            <td><strong>Linear Boost</strong></td>
+            <td>\(\Delta V\) decreases linearly with frequency, zero at rated \(f\)</td>
+            <td>Better match; still a compromise</td>
+          </tr>
+          <tr>
+            <td><strong>Nonlinear / Current-Dependent Boost</strong></td>
+            <td>\(\Delta V = R_s \cdot I_s\) (measured or estimated)</td>
+            <td>Best accuracy; requires current feedback</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG: V/f with boost diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;">
+        <!-- Axes -->
+        <line x1="80" y1="290" x2="540" y2="290" class="axis"/>
+        <line x1="80" y1="290" x2="80" y2="30" class="axis"/>
+        <polygon points="540,286 550,290 540,294" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+        <text x="310" y="330" class="label" text-anchor="middle">Frequency (Hz)</text>
+        <text x="30" y="160" class="label" text-anchor="middle" transform="rotate(-90,30,160)">Voltage (V)</text>
+
+        <!-- f_rated marker -->
+        <line x1="440" y1="290" x2="440" y2="70" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="440" y="308" class="label-sm" text-anchor="middle">f<tspan font-size="9" dy="2">rated</tspan></text>
+
+        <!-- V_rated marker -->
+        <line x1="80" y1="70" x2="540" y2="70" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="555" y="75" class="label-sm">V<tspan font-size="9" dy="2">rated</tspan></text>
+
+        <!-- Ideal V/f line (dashed) -->
+        <line x1="80" y1="290" x2="440" y2="70" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="5,5"/>
+        <text x="220" y="150" class="label-sm" fill="#64748b" transform="rotate(-31,220,150)">Ideal V/f</text>
+
+        <!-- Actual V/f with boost (solid blue) -->
+        <path d="M80,248 Q100,240 130,225 Q180,195 230,170 Q300,130 360,100 Q400,82 440,70 L540,70" class="curve1" stroke-width="3"/>
+        <text x="155" y="205" class="label-sm" fill="#2563eb" font-weight="600">With boost</text>
+
+        <!-- Boost voltage annotation -->
+        <line x1="80" y1="290" x2="80" y2="248" class="curve2" stroke-width="2"/>
+        <text x="48" y="270" class="label-sm" fill="#dc2626">&Delta;V</text>
+
+        <!-- Above rated: constant V -->
+        <text x="490" y="60" class="label-sm">V = V<tspan font-size="9" dy="2">rated</tspan></text>
+      </svg>
+      <p class="diagram-caption">Figure 3: V/f characteristic with voltage boost at low frequencies. Above rated frequency, voltage is capped at V<sub>rated</sub>.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>At low frequencies, stator resistance drop is significant relative to the supply voltage, causing flux and torque to sag. Voltage boost compensates for this. The best approach uses current-dependent boost (\(\Delta V = R_s I_s\)), but even a simple fixed or linear boost greatly improves low-speed torque.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 5: Variable Frequency Sources
+     ============================================================ -->
+<div class="section" id="sec-vf-sources">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>5. Variable Frequency Sources</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>The V/F control principle requires a three-phase AC source with adjustable voltage and frequency. The utility grid provides fixed 50 or 60 Hz. We need power electronic converters to bridge this gap. The choice of converter topology affects cost, performance, harmonics, and the motor's operating behavior.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Converter Topologies</span>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Topology</th><th>How It Works</th><th>Characteristics</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Voltage Source Inverter (VSI)</strong></td>
+            <td>Rectifier &rarr; DC bus (with capacitor) &rarr; 3-phase inverter using IGBTs/MOSFETs</td>
+            <td>Most common. PWM controls both voltage and frequency. Stiff DC bus voltage. Good harmonic performance with high switching frequency.</td>
+          </tr>
+          <tr>
+            <td><strong>Current Source Inverter (CSI)</strong></td>
+            <td>Controlled rectifier &rarr; DC link inductor &rarr; thyristor inverter</td>
+            <td>Stiff DC link current. Used in high-power applications. Inherent regeneration capability. Needs commutation capacitors.</td>
+          </tr>
+          <tr>
+            <td><strong>Cycloconverter</strong></td>
+            <td>Direct AC-to-AC conversion using thyristors (no DC link)</td>
+            <td>Output frequency limited to ~1/3 of input. Used for very high power, low speed (cement mills, ship propulsion). Less common today.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SVG: VSI Block Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+        <!-- 3-phase AC source -->
+        <rect x="20" y="60" width="100" height="100" rx="8" class="component-fill"/>
+        <text x="70" y="100" class="label" text-anchor="middle" font-weight="bold">3-Phase</text>
+        <text x="70" y="120" class="label" text-anchor="middle" font-weight="bold">AC</text>
+        <text x="70" y="140" class="label" text-anchor="middle">50/60 Hz</text>
+
+        <!-- Arrow -->
+        <line x1="120" y1="110" x2="165" y2="110" class="wire"/>
+        <polygon points="160,106 170,110 160,114" class="arrow"/>
+
+        <!-- Rectifier -->
+        <rect x="170" y="60" width="110" height="100" rx="8" class="component-fill"/>
+        <text x="225" y="100" class="label" text-anchor="middle" font-weight="bold">Rectifier</text>
+        <text x="225" y="120" class="label-sm" text-anchor="middle">(AC &rarr; DC)</text>
+
+        <!-- Arrow -->
+        <line x1="280" y1="110" x2="325" y2="110" class="wire"/>
+        <polygon points="320,106 330,110 320,114" class="arrow"/>
+
+        <!-- DC Bus label -->
+        <text x="305" y="80" class="label-sm" text-anchor="middle">DC Bus</text>
+
+        <!-- Capacitor symbol -->
+        <line x1="303" y1="92" x2="303" y2="130" stroke="var(--text-muted)" stroke-width="1.5"/>
+        <line x1="298" y1="105" x2="308" y2="105" stroke="var(--text-muted)" stroke-width="2"/>
+        <line x1="298" y1="115" x2="308" y2="115" stroke="var(--text-muted)" stroke-width="2"/>
+
+        <!-- Inverter -->
+        <rect x="330" y="60" width="110" height="100" rx="8" class="component-fill"/>
+        <text x="385" y="100" class="label" text-anchor="middle" font-weight="bold">Inverter</text>
+        <text x="385" y="120" class="label-sm" text-anchor="middle">(DC &rarr; AC)</text>
+
+        <!-- Arrow -->
+        <line x1="440" y1="110" x2="485" y2="110" class="wire"/>
+        <polygon points="480,106 490,110 480,114" class="arrow"/>
+
+        <!-- Motor -->
+        <circle cx="545" cy="110" r="50" class="component"/>
+        <text x="530" y="105" class="label" font-size="16" font-weight="bold">IM</text>
+        <text x="525" y="125" class="label-sm">Var f, V</text>
+
+        <!-- PWM Controller -->
+        <rect x="290" y="180" width="200" height="32" rx="6" class="component-fill"/>
+        <text x="390" y="201" class="label-sm" text-anchor="middle" font-weight="600">PWM Controller (V/f or FOC)</text>
+        <line x1="385" y1="180" x2="385" y2="160" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      </svg>
+      <p class="diagram-caption">Figure 4: Voltage Source Inverter (VSI) drive block diagram. The most common variable frequency drive topology.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The Voltage Source Inverter (VSI) is by far the most common topology for modern VFDs. It converts grid AC to DC (rectifier), smooths it (DC bus capacitor), then synthesizes variable-frequency, variable-voltage AC using PWM switching (inverter). This gives complete control over both voltage and frequency.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 6: Rotor Resistance Control
+     ============================================================ -->
+<div class="section" id="sec-rotor-resistance">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>6. Rotor Resistance Control (Wound Rotor IM)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Not all induction motors are squirrel-cage. Wound-rotor induction motors have accessible rotor windings brought out through slip rings. This gives us a unique control handle: we can add external resistance in the rotor circuit. While inefficient (slip power is dissipated as heat), this method is simple, well-proven, and still used in applications like cranes, hoists, and some industrial drives where starting torque requirements are severe.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Adding resistance to the rotor circuit is like adding drag to the runner on our treadmill. The runner (rotor) slows down more relative to the treadmill (synchronous speed), meaning higher slip. Crucially, the <em>maximum force</em> the runner can exert doesn't change &mdash; it just happens at a lower speed. The torque-speed curve slides to the left, but the peak doesn't shrink.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Mathematical Analysis</span>
+
+      <p>With external resistance \(R'_e\) added to the rotor circuit (referred to stator), the slip at maximum torque becomes:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Slip at Maximum Torque with External Resistance</div>
+        \[s_m = \frac{R'_r + R'_e}{\sqrt{R_s^2 + (X_s + X'_r)^2}}\]
+      </div>
+
+      <p>If stator resistance \(R_s\) is neglected:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Simplified</div>
+        \[s_m = \frac{R'_r + R'_e}{X_s + X'_r}\]
+      </div>
+
+      <p>Key observations:</p>
+      <ul class="content-list">
+        <li>Adding \(R'_e\) <strong>increases \(s_m\)</strong> &mdash; the peak torque shifts to higher slip (lower speed)</li>
+        <li>The <strong>value of \(T_{\max}\) is unchanged</strong> &mdash; it depends only on the machine parameters, not on rotor resistance</li>
+        <li>The speed range for a given load torque widens with more resistance</li>
+        <li>At \(s_m = 1\) (standstill), maximum starting torque is obtained</li>
+      </ul>
+
+      <p>When referring external resistance to the stator side (important for calculations with turns ratio):</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Referred Resistance with Turns Ratio</div>
+        \[R'_e = a^2 \cdot R_{e,\text{actual}}\]
+      </div>
+
+      <p>where \(a = N_{\text{stator}} / N_{\text{rotor}}\) is the stator-to-rotor turns ratio.</p>
+    </div>
+
+    <!-- SVG: T-omega curves with different rotor resistances -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 640 380" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
+        <!-- Axes -->
+        <line x1="80" y1="320" x2="600" y2="320" class="axis"/>
+        <line x1="80" y1="320" x2="80" y2="30" class="axis"/>
+        <polygon points="600,316 610,320 600,324" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+        <text x="340" y="360" class="label" text-anchor="middle">Speed (rpm)</text>
+        <text x="30" y="175" class="label" text-anchor="middle" transform="rotate(-90,30,175)">Torque</text>
+
+        <!-- Ns marker -->
+        <line x1="560" y1="320" x2="560" y2="310" class="axis"/>
+        <text x="560" y="340" class="label-sm" text-anchor="middle">N<tspan font-size="9" dy="2">s</tspan></text>
+
+        <!-- Tmax line -->
+        <line x1="80" y1="80" x2="580" y2="80" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="6,4"/>
+        <text x="590" y="84" class="label-sm">T<tspan font-size="9" dy="2">max</tspan></text>
+
+        <!-- Curve: R'r only (highest speed peak) -->
+        <path d="M80,310 Q150,290 250,240 Q350,140 420,80 Q445,63 470,80 Q500,120 520,180 Q540,240 555,290 Q558,310 560,320" class="curve1" stroke-width="2.5"/>
+        <text x="445" y="55" class="label-sm" fill="#2563eb" font-weight="600">R'<tspan font-size="9" dy="2">r</tspan></text>
+
+        <!-- Curve: R'r + R'e1 (medium) -->
+        <path d="M80,290 Q130,270 200,230 Q260,170 300,110 Q320,80 340,75 Q360,80 380,110 Q420,180 460,250 Q500,300 540,315 Q555,320 560,320" class="curve2" stroke-width="2.5"/>
+        <text x="330" y="55" class="label-sm" fill="#dc2626" font-weight="600">R'<tspan font-size="9" dy="2">r</tspan>+R'<tspan font-size="9" dy="2">e1</tspan></text>
+
+        <!-- Curve: R'r + R'e2 (largest, peak at start) -->
+        <path d="M80,200 Q100,160 130,110 Q155,80 180,72 Q200,78 230,110 Q280,180 340,250 Q400,295 480,315 Q530,320 560,320" class="curve3" stroke-width="2.5"/>
+        <text x="175" y="55" class="label-sm" fill="#16a34a" font-weight="600">R'<tspan font-size="9" dy="2">r</tspan>+R'<tspan font-size="9" dy="2">e2</tspan></text>
+
+        <!-- Annotation -->
+        <text x="200" y="380" class="label-sm">R'<tspan font-size="9" dy="2">e2</tspan> > R'<tspan font-size="9" dy="2">e1</tspan> > 0 : T<tspan font-size="9" dy="2">max</tspan> unchanged</text>
+      </svg>
+      <p class="diagram-caption">Figure 5: Effect of external rotor resistance on the torque-speed curve. The peak shifts to higher slip (lower speed), but T<sub>max</sub> remains the same.</p>
+    </div>
+
+    <!-- Static Rotor Resistance -->
+    <div class="subsection" id="sec-static-rotor">
+      <h3>Static Rotor Resistance Control</h3>
+
+      <div class="box motivation">
+        <span class="box-label">The Problem / The Why</span>
+        <p>Traditional rotor resistance control uses bulky three-phase variable resistors (rheostats). These are difficult to adjust precisely and continuously. Modern static rotor resistance control replaces them with a diode bridge rectifier, a DC chopper, and a single DC resistance &mdash; giving smooth, electronically controlled resistance variation.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Static Circuit</span>
+
+        <p>The rotor three-phase AC is rectified by a 3-phase diode bridge into DC. A DC chopper (transistor switch) controls the effective resistance seen by the DC side:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Equivalent External Resistance Per Phase</div>
+          \[R_e = \frac{1}{2} R \cdot (1 - k)\]
+        </div>
+
+        <p>where \(R\) is the DC resistance and \(k\) is the duty ratio of the DC chopper (0 to 1).</p>
+
+        <ul class="content-list">
+          <li>\(k = 0\): Chopper always off &rarr; \(R_e = R/2\) (maximum resistance, lowest speed)</li>
+          <li>\(k = 1\): Chopper always on &rarr; \(R_e = 0\) (zero external resistance, normal operation, highest speed)</li>
+        </ul>
+
+        <p>The relationship between DC link current \(I_d\) and AC rotor current \(I_r\):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">DC to AC Current Relationship</div>
+          \[I_d = \sqrt{\frac{3}{2}} \cdot I_r\]
+        </div>
+
+        <p>Advantages over mechanical rheostats:</p>
+        <ul class="content-list">
+          <li>Continuously variable (smooth speed control)</li>
+          <li>More precise and repeatable</li>
+          <li>Can be used in closed-loop control systems</li>
+          <li>No moving contacts (longer life, less maintenance)</li>
+          <li>Faster response</li>
+        </ul>
+      </div>
+
+      <!-- SVG: Static Rotor Resistance Block Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+          <!-- Rotor windings -->
+          <text x="30" y="30" class="label" font-weight="bold">Rotor</text>
+          <text x="30" y="48" class="label-sm">(Slip Rings)</text>
+
+          <!-- 3-phase lines from rotor -->
+          <line x1="100" y1="70" x2="100" y2="100" class="wire"/>
+          <line x1="140" y1="70" x2="140" y2="100" class="wire"/>
+          <line x1="180" y1="70" x2="180" y2="100" class="wire"/>
+          <text x="90" y="66" class="label-sm">a</text>
+          <text x="130" y="66" class="label-sm">b</text>
+          <text x="170" y="66" class="label-sm">c</text>
+
+          <!-- Diode Bridge Rectifier -->
+          <rect x="60" y="100" width="160" height="70" rx="8" class="component-fill"/>
+          <text x="140" y="130" class="label" text-anchor="middle" font-weight="bold">3-Phase</text>
+          <text x="140" y="148" class="label" text-anchor="middle" font-weight="bold">Diode Bridge</text>
+          <text x="140" y="162" class="label-sm" text-anchor="middle">(Rectifier)</text>
+
+          <!-- DC link wires -->
+          <line x1="220" y1="120" x2="300" y2="120" class="wire"/>
+          <line x1="220" y1="155" x2="300" y2="155" class="wire"/>
+          <text x="260" y="112" class="label-sm">+</text>
+          <text x="260" y="170" class="label-sm">&minus;</text>
+          <text x="260" y="195" class="label-sm" text-anchor="middle">I<tspan font-size="9" dy="2">d</tspan></text>
+
+          <!-- DC Chopper -->
+          <rect x="300" y="100" width="130" height="70" rx="8" class="component-fill"/>
+          <text x="365" y="130" class="label" text-anchor="middle" font-weight="bold">DC Chopper</text>
+          <text x="365" y="150" class="label-sm" text-anchor="middle">(duty ratio k)</text>
+
+          <!-- Wires to resistance -->
+          <line x1="430" y1="120" x2="500" y2="120" class="wire"/>
+          <line x1="430" y1="155" x2="500" y2="155" class="wire"/>
+
+          <!-- DC Resistance -->
+          <rect x="500" y="108" width="80" height="58" rx="6" class="component-fill"/>
+          <text x="540" y="135" class="label" text-anchor="middle" font-weight="bold">R</text>
+          <text x="540" y="155" class="label-sm" text-anchor="middle">(DC)</text>
+
+          <!-- Connect bottom of R back -->
+          <line x1="580" y1="137" x2="620" y2="137" class="wire"/>
+          <line x1="620" y1="137" x2="620" y2="200" class="wire"/>
+          <line x1="620" y1="200" x2="500" y2="200" class="wire"/>
+          <line x1="500" y1="155" x2="500" y2="200" class="wire" stroke-width="1"/>
+
+          <!-- Duty ratio annotation -->
+          <text x="365" y="210" class="label-sm" text-anchor="middle">k = 0: max R<tspan font-size="9" dy="2">e</tspan> &bull; k = 1: R<tspan font-size="9" dy="2">e</tspan> = 0</text>
+        </svg>
+        <p class="diagram-caption">Figure 6: Static rotor resistance control. 3-phase diode bridge rectifies rotor current; DC chopper controls effective resistance.</p>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>Static rotor resistance control replaces bulky rheostats with a diode bridge + chopper + DC resistance. The duty ratio \(k\) provides smooth, continuous control of the equivalent rotor resistance: \(R_e = 0.5R(1-k)\). This is much more precise and suitable for closed-loop control than mechanical rheostats.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 7: Slip Power Recovery
+     ============================================================ -->
+<div class="section" id="sec-slip-recovery">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>7. Slip Power Recovery Control</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Rotor resistance control wastes energy. The slip power \(P_{\text{slip}} = s \cdot P_{\text{airgap}}\) is dissipated as heat in the external resistance. At high slip (low speed), this can be a huge fraction of the total power. What if we could <em>recover</em> that slip power and put it to useful work instead of wasting it? That's exactly what slip power recovery drives do.</p>
+    </div>
+
+    <!-- Kramer Drive -->
+    <div class="subsection" id="sec-kramer">
+      <h3>Kramer Drive (Static Kramer)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Instead of burning the slip power in a resistor, the Kramer drive routes it to a DC motor that is mechanically coupled to the induction motor shaft. The DC motor converts the electrical slip power back into useful mechanical power, adding its torque to the shaft. The total mechanical output is IM torque + DC motor torque, and the speed is controlled by adjusting the DC motor's field current.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <ul class="content-list">
+          <li>Rotor AC power is rectified to DC by a diode bridge</li>
+          <li>DC power feeds a DC motor coupled to the IM shaft</li>
+          <li>Total shaft torque = IM torque + DC motor torque</li>
+          <li>Speed controlled by the DC motor's field current</li>
+          <li><strong>Advantage:</strong> Slip power is recovered as useful mechanical work, not wasted as heat</li>
+          <li><strong>Drawback:</strong> Requires an auxiliary DC motor (extra cost, maintenance, inertia)</li>
+        </ul>
+      </div>
+
+      <!-- SVG: Kramer Drive Block Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+          <!-- AC Supply -->
+          <rect x="20" y="30" width="80" height="50" rx="6" class="component-fill"/>
+          <text x="60" y="55" class="label-sm" text-anchor="middle" font-weight="600">3-Phase</text>
+          <text x="60" y="70" class="label-sm" text-anchor="middle">AC Supply</text>
+
+          <!-- IM Motor -->
+          <circle cx="200" cy="55" r="40" class="component"/>
+          <text x="187" y="50" class="label" font-weight="bold">IM</text>
+          <text x="183" y="68" class="label-sm">(WR)</text>
+          <line x1="100" y1="55" x2="160" y2="55" class="wire"/>
+          <polygon points="155,51 163,55 155,59" class="arrow"/>
+
+          <!-- Slip rings down to rectifier -->
+          <line x1="200" y1="95" x2="200" y2="140" class="wire"/>
+          <text x="215" y="120" class="label-sm">Rotor</text>
+          <text x="215" y="134" class="label-sm">Power</text>
+
+          <!-- Diode Bridge -->
+          <rect x="140" y="140" width="120" height="50" rx="6" class="component-fill"/>
+          <text x="200" y="165" class="label-sm" text-anchor="middle" font-weight="600">Diode Bridge</text>
+          <text x="200" y="180" class="label-sm" text-anchor="middle">(Rectifier)</text>
+
+          <!-- DC link to DC motor -->
+          <line x1="260" y1="165" x2="380" y2="165" class="wire"/>
+          <polygon points="375,161 383,165 375,169" class="arrow"/>
+          <text x="320" y="155" class="label-sm" text-anchor="middle">DC Power</text>
+
+          <!-- DC Motor -->
+          <circle cx="430" cy="165" r="40" class="component"/>
+          <text x="417" y="160" class="label" font-weight="bold">DC</text>
+          <text x="412" y="178" class="label-sm">Motor</text>
+
+          <!-- Mechanical coupling from IM to DC -->
+          <line x1="240" y1="55" x2="320" y2="55" class="wire" stroke-width="3"/>
+          <line x1="320" y1="55" x2="320" y2="165" class="wire" stroke-width="3"/>
+          <line x1="320" y1="165" x2="390" y2="165" class="wire" stroke-width="3" stroke-dasharray="8,4"/>
+          <text x="345" y="45" class="label-sm" font-weight="600">Mechanical Shaft</text>
+
+          <!-- Shaft output -->
+          <line x1="470" y1="165" x2="550" y2="165" class="wire" stroke-width="3"/>
+          <polygon points="545,159 558,165 545,171" class="arrow"/>
+          <text x="510" y="155" class="label-sm">Load</text>
+
+          <!-- Field control -->
+          <rect x="390" y="230" width="80" height="35" rx="4" class="component-fill"/>
+          <text x="430" y="252" class="label-sm" text-anchor="middle">Field Ctrl</text>
+          <line x1="430" y1="205" x2="430" y2="230" stroke="var(--text-muted)" stroke-width="1.5" stroke-dasharray="4,3"/>
+        </svg>
+        <p class="diagram-caption">Figure 7: Kramer drive. Slip power from rotor is rectified and feeds a DC motor coupled to the same shaft.</p>
+      </div>
+    </div>
+
+    <!-- Scherbius Drive -->
+    <div class="subsection" id="sec-scherbius">
+      <h3>Scherbius Drive (Static Scherbius)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>The Scherbius drive takes the idea further: instead of feeding slip power to a DC motor, it inverts the DC back to AC and feeds it <em>back to the grid</em> through a transformer. No auxiliary motor needed &mdash; the slip power is simply returned to the electrical supply. This is more elegant and requires less hardware than the Kramer approach.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive</span>
+        <ul class="content-list">
+          <li>Rotor AC &rarr; diode bridge &rarr; DC link &rarr; line-commutated inverter &rarr; transformer &rarr; grid</li>
+          <li>Slip power is recovered to the supply mains (not wasted)</li>
+          <li>No auxiliary DC motor needed (simpler, lighter, less maintenance)</li>
+          <li>With diode bridge on rotor side: only works for speeds <em>below</em> synchronous (sub-synchronous only)</li>
+          <li>Replace diode bridge with fully-controlled thyristor bridge &rarr; extends to <em>above</em> synchronous speed</li>
+          <li>This becomes the <strong>doubly-fed induction machine (DFIM)</strong></li>
+        </ul>
+      </div>
+
+      <!-- SVG: Scherbius Drive Block Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 750 260" xmlns="http://www.w3.org/2000/svg" style="max-width:700px;">
+          <!-- AC Supply -->
+          <rect x="20" y="30" width="80" height="50" rx="6" class="component-fill"/>
+          <text x="60" y="55" class="label-sm" text-anchor="middle" font-weight="600">3-Phase</text>
+          <text x="60" y="70" class="label-sm" text-anchor="middle">AC Supply</text>
+
+          <!-- IM Motor -->
+          <circle cx="200" cy="55" r="40" class="component"/>
+          <text x="187" y="50" class="label" font-weight="bold">IM</text>
+          <text x="183" y="68" class="label-sm">(WR)</text>
+          <line x1="100" y1="55" x2="160" y2="55" class="wire"/>
+          <polygon points="155,51 163,55 155,59" class="arrow"/>
+
+          <!-- Shaft output -->
+          <line x1="240" y1="55" x2="310" y2="55" class="wire" stroke-width="3"/>
+          <polygon points="305,49 318,55 305,61" class="arrow"/>
+          <text x="275" y="42" class="label-sm">Load</text>
+
+          <!-- Slip rings down -->
+          <line x1="200" y1="95" x2="200" y2="130" class="wire"/>
+
+          <!-- Diode Bridge -->
+          <rect x="140" y="130" width="120" height="45" rx="6" class="component-fill"/>
+          <text x="200" y="155" class="label-sm" text-anchor="middle" font-weight="600">Diode Bridge</text>
+
+          <!-- DC link -->
+          <line x1="260" y1="152" x2="350" y2="152" class="wire"/>
+          <polygon points="345,148 353,152 345,156" class="arrow"/>
+          <text x="305" y="142" class="label-sm" text-anchor="middle">DC Link</text>
+
+          <!-- Inverter -->
+          <rect x="350" y="130" width="130" height="45" rx="6" class="component-fill"/>
+          <text x="415" y="150" class="label-sm" text-anchor="middle" font-weight="600">Line-Commutated</text>
+          <text x="415" y="166" class="label-sm" text-anchor="middle">Inverter</text>
+
+          <!-- to transformer -->
+          <line x1="480" y1="152" x2="540" y2="152" class="wire"/>
+          <polygon points="535,148 543,152 535,156" class="arrow"/>
+
+          <!-- Transformer -->
+          <rect x="540" y="130" width="80" height="45" rx="6" class="component-fill"/>
+          <text x="580" y="157" class="label-sm" text-anchor="middle" font-weight="600">Xfmr</text>
+
+          <!-- Back to grid -->
+          <line x1="620" y1="152" x2="690" y2="152" class="wire"/>
+          <line x1="690" y1="152" x2="690" y2="55" class="wire"/>
+          <line x1="690" y1="55" x2="640" y2="55" class="wire"/>
+          <polygon points="645,51 637,55 645,59" class="arrow"/>
+
+          <!-- Grid label at return -->
+          <text x="665" y="42" class="label-sm" font-weight="600">Grid</text>
+
+          <!-- Power flow annotation -->
+          <text x="415" y="210" class="label-sm" text-anchor="middle">Slip power recovered to supply</text>
+        </svg>
+        <p class="diagram-caption">Figure 8: Scherbius drive. Slip power is rectified, inverted, and fed back to the grid through a transformer.</p>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>Slip power recovery drives (Kramer and Scherbius) address the fundamental inefficiency of rotor resistance control. The Kramer drive converts slip power to useful mechanical work via a DC motor. The Scherbius drive is more elegant, feeding slip power back to the grid. With a fully-controlled converter on the rotor side, the Scherbius concept evolves into the doubly-fed induction machine.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 8: Doubly-Fed Induction Machine
+     ============================================================ -->
+<div class="section" id="sec-dfim">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>8. Doubly-Fed Induction Machine (DFIM)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>The Scherbius drive with a diode rectifier only works below synchronous speed. What if we need operation above <em>and</em> below synchronous speed? And what if we want the machine to behave like a synchronous machine &mdash; running at a speed independent of load? The doubly-fed induction machine (DFIM) achieves this by using a bidirectional AC/DC/AC converter between the rotor and the grid.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of the DFIM as an induction motor with a "speed tuner" connected to its rotor. By injecting power into the rotor at the right frequency and phase, we can make the rotor's magnetic field rotate at whatever speed we need to keep the stator field synchronized with the grid. Below synchronous speed, we extract power from the rotor. Above synchronous speed, we inject power into the rotor. Either way, the machine speed can be controlled independently of the load.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive</span>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Operating Mode</th><th>Speed</th><th>Rotor Power Flow</th><th>Slip</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Sub-synchronous</strong></td>
+            <td>\(N &lt; N_s\)</td>
+            <td>Power extracted from rotor &rarr; grid</td>
+            <td>\(s > 0\)</td>
+          </tr>
+          <tr>
+            <td><strong>Synchronous</strong></td>
+            <td>\(N = N_s\)</td>
+            <td>DC excitation (zero rotor frequency)</td>
+            <td>\(s = 0\)</td>
+          </tr>
+          <tr>
+            <td><strong>Super-synchronous</strong></td>
+            <td>\(N > N_s\)</td>
+            <td>Power injected into rotor from grid</td>
+            <td>\(s < 0\)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Key features of the DFIM:</p>
+      <ul class="content-list">
+        <li>The converter handles only <strong>slip power</strong> (a fraction of total power), so it can be much smaller than a full-rated converter</li>
+        <li>Acts like a synchronous machine: speed is independent of load torque</li>
+        <li>Widely used in <strong>wind turbines</strong> (Type 3 wind turbine generator)</li>
+        <li>Allows variable-speed operation with reduced converter rating (typically &plusmn;30% of rated power)</li>
+        <li>Can control both active and reactive power independently</li>
+      </ul>
+    </div>
+
+    <!-- SVG: DFIM Configuration -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="max-width:660px;">
+        <!-- Grid -->
+        <rect x="20" y="30" width="80" height="50" rx="6" class="component-fill"/>
+        <text x="60" y="55" class="label-sm" text-anchor="middle" font-weight="600">Grid</text>
+        <text x="60" y="70" class="label-sm" text-anchor="middle">50/60 Hz</text>
+
+        <!-- Stator connection -->
+        <line x1="100" y1="55" x2="170" y2="55" class="wire"/>
+        <polygon points="165,51 173,55 165,59" class="arrow"/>
+        <text x="135" y="45" class="label-sm">Stator</text>
+
+        <!-- IM -->
+        <circle cx="220" cy="55" r="45" class="component"/>
+        <text x="200" y="50" class="label" font-weight="bold">DFIM</text>
+        <text x="200" y="70" class="label-sm">(WR IM)</text>
+
+        <!-- Shaft to load -->
+        <line x1="265" y1="55" x2="340" y2="55" class="wire" stroke-width="3"/>
+        <polygon points="335,49 348,55 335,61" class="arrow"/>
+        <text x="302" y="42" class="label-sm">Load / Turbine</text>
+
+        <!-- Rotor down -->
+        <line x1="220" y1="100" x2="220" y2="150" class="wire"/>
+        <text x="240" y="130" class="label-sm">Rotor</text>
+
+        <!-- Rotor-side converter -->
+        <rect x="160" y="150" width="120" height="50" rx="6" class="component-fill"/>
+        <text x="220" y="175" class="label-sm" text-anchor="middle" font-weight="600">Rotor-Side</text>
+        <text x="220" y="190" class="label-sm" text-anchor="middle">Converter</text>
+
+        <!-- DC link -->
+        <line x1="280" y1="175" x2="350" y2="175" class="wire"/>
+        <text x="315" y="165" class="label-sm" text-anchor="middle">DC</text>
+
+        <!-- Grid-side converter -->
+        <rect x="350" y="150" width="120" height="50" rx="6" class="component-fill"/>
+        <text x="410" y="175" class="label-sm" text-anchor="middle" font-weight="600">Grid-Side</text>
+        <text x="410" y="190" class="label-sm" text-anchor="middle">Converter</text>
+
+        <!-- Back to grid via transformer -->
+        <line x1="470" y1="175" x2="540" y2="175" class="wire"/>
+
+        <rect x="540" y="155" width="60" height="40" rx="4" class="component-fill"/>
+        <text x="570" y="179" class="label-sm" text-anchor="middle">Xfmr</text>
+
+        <line x1="600" y1="175" x2="650" y2="175" class="wire"/>
+        <line x1="650" y1="175" x2="650" y2="55" class="wire"/>
+        <line x1="650" y1="55" x2="600" y2="55" class="wire"/>
+        <polygon points="605,51 597,55 605,59" class="arrow"/>
+        <text x="625" y="42" class="label-sm">Grid</text>
+
+        <!-- Bidirectional power annotation -->
+        <text x="315" y="230" class="label-sm" text-anchor="middle">Bidirectional: AC/DC/AC</text>
+        <text x="315" y="248" class="label-sm" text-anchor="middle">Handles only slip power (~30% rated)</text>
+
+        <!-- Power flow arrows -->
+        <line x1="190" y1="260" x2="250" y2="260" class="curve1" stroke-width="1.5"/>
+        <polygon points="247,256 255,260 247,264" fill="#2563eb"/>
+        <text x="280" y="264" class="label-sm" fill="#2563eb">Sub-sync: power out</text>
+
+        <line x1="250" y1="278" x2="190" y2="278" class="curve2" stroke-width="1.5"/>
+        <polygon points="193,274 185,278 193,282" fill="#dc2626"/>
+        <text x="280" y="282" class="label-sm" fill="#dc2626">Super-sync: power in</text>
+      </svg>
+      <p class="diagram-caption">Figure 9: Doubly-fed induction machine. A partial-rated bidirectional converter connects rotor to grid, enabling variable-speed operation both below and above synchronous speed.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The DFIM is the natural evolution of the Scherbius drive. By using a bidirectional AC/DC/AC converter on the rotor, it can operate above and below synchronous speed, acting like a variable-speed synchronous machine. Since the converter only handles slip power (a fraction of total), it's smaller and cheaper than a full-rated converter. This makes the DFIM the dominant choice for modern wind turbines and some high-power industrial drives.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 9: Lecture Summary
+     ============================================================ -->
+<div class="section" id="sec-summary">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>9. Lecture Summary</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="box takeaway">
+      <span class="box-label">Big Picture</span>
+      <p>In this lecture, we covered the major speed control techniques for induction motors beyond simple voltage control:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li><strong>V/F (Scalar) Control:</strong> The workhorse of modern drives. By maintaining constant V/f, we preserve airgap flux and keep \(T_{\max}\) constant across a wide speed range. Three operating regions emerge: constant torque (below base speed), constant power (above base speed), and breakdown torque (very high frequencies).</li>
+        <li><strong>Stator Impedance Effects:</strong> At low frequencies, \(R_s I_s\) drop is significant &mdash; voltage boost is needed to maintain flux and torque.</li>
+        <li><strong>Variable Frequency Sources:</strong> The VSI (voltage source inverter) is the dominant topology, using a rectifier + DC bus + PWM inverter.</li>
+        <li><strong>Rotor Resistance Control:</strong> For wound-rotor motors. Adding external resistance shifts \(T_{\max}\) to lower speeds without changing its value. Static control (diode bridge + chopper) is more precise than rheostats.</li>
+        <li><strong>Slip Power Recovery:</strong>
+          <ul class="content-list">
+            <li>Kramer drive: slip power feeds a DC motor on the same shaft</li>
+            <li>Scherbius drive: slip power returned to the grid via an inverter</li>
+          </ul>
+        </li>
+        <li><strong>DFIM:</strong> The ultimate evolution &mdash; bidirectional converter on rotor enables variable-speed operation above and below synchronous speed with a partial-rated converter. The backbone of modern wind energy.</li>
+      </ol>
+      <p>Next, we will explore <strong>vector (field-oriented) control</strong>, which takes the sophistication one step further by decoupling torque and flux control, achieving DC-motor-like dynamic performance from an AC induction machine.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 10: Worked Examples
+     ============================================================ -->
+<div class="section" id="sec-examples">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>10. Worked Examples</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Example 1 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 1 &mdash; V/F Control: Finding Speed at Reduced Frequency</span>
+      <p>A 3-phase, 4-pole, 50 Hz induction motor has a rated slip of 4%. The motor is controlled by a V/F drive. Find the motor speed when the supply frequency is reduced to 30 Hz, assuming the same slip.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Find synchronous speed at rated frequency</strong></p>
+        <p>\(N_{s1} = \frac{120 \times 50}{4} = 1500 \text{ rpm}\)</p>
+
+        <p class="mt-2"><strong>Step 2: Find rated motor speed</strong></p>
+        <p>\(N_{r1} = N_{s1}(1 - s) = 1500(1 - 0.04) = 1440 \text{ rpm}\)</p>
+
+        <p class="mt-2"><strong>Step 3: Find synchronous speed at 30 Hz</strong></p>
+        <p>\(N_{s2} = \frac{120 \times 30}{4} = 900 \text{ rpm}\)</p>
+
+        <p class="mt-2"><strong>Step 4: Find motor speed at 30 Hz (same slip)</strong></p>
+        <p>Under constant V/f control, if the load torque is the same, the slip remains approximately the same:</p>
+        <p>\(N_{r2} = N_{s2}(1 - s) = 900(1 - 0.04) = \mathbf{864 \text{ rpm}}\)</p>
+
+        <div class="box intuition mt-2">
+          <span class="box-label">Why Same Slip?</span>
+          <p>With V/f constant, the entire torque-speed curve shifts proportionally. If the load torque hasn't changed, the operating slip stays the same. The motor just "tracks" the new synchronous speed with the same percentage lag.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 2 &mdash; Maximum Torque Under V/F Control</span>
+      <p>A 3-phase, 60 Hz, 6-pole induction motor has the following equivalent circuit parameters (referred to stator): \(R'_r = 0.3\;\Omega\), \(X'_r = 1.2\;\Omega\), \(X_s = 1.0\;\Omega\). The rated line voltage is 460 V. Neglect \(R_s\) and magnetizing branch. Calculate: (a) The slip at maximum torque. (b) The maximum torque at rated frequency. (c) Whether \(T_{\max}\) changes when the frequency is reduced to 40 Hz with V/f maintained.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Slip at maximum torque</strong></p>
+        <p>With \(R_s\) neglected:</p>
+        <p>\(s_m = \frac{R'_r}{X_s + X'_r} = \frac{0.3}{1.0 + 1.2} = \frac{0.3}{2.2} = \mathbf{0.1364}\) (13.64%)</p>
+
+        <p class="mt-2"><strong>(b) Maximum torque at 60 Hz</strong></p>
+        <p>The synchronous speed: \(\omega_s = 2\pi \times 60 = 376.99\) rad/s (electrical), or mechanically \(\omega_{s,mech} = 376.99 / (P/2) = 376.99/3 = 125.66\) rad/s</p>
+        <p>Phase voltage: \(V_{ph} = 460/\sqrt{3} = 265.6\) V</p>
+        <p>Since we neglect \(R_s\): \(E \approx V_{ph} = 265.6\) V</p>
+        <p>\(T_{\max} = \frac{3 E^2}{2 \omega_{s,mech} (X_s + X'_r)}\)</p>
+        <p>\(T_{\max} = \frac{3 \times 265.6^2}{2 \times 125.66 \times 2.2} = \frac{3 \times 70543}{552.9} = \frac{211630}{552.9} = \mathbf{382.8 \text{ N}\cdot\text{m}}\)</p>
+
+        <p class="mt-2"><strong>(c) Does \(T_{\max}\) change at 40 Hz?</strong></p>
+        <p>At 40 Hz with V/f maintained:</p>
+        <ul class="content-list">
+          <li>New voltage: \(V_{40} = V_{60} \times (40/60) = 460 \times 2/3 = 306.7\) V (line), \(V_{ph} = 177.1\) V</li>
+          <li>New synchronous speed: \(\omega_{s,mech,40} = 2\pi \times 40 / 3 = 83.78\) rad/s</li>
+          <li>New reactances: \(X_{s,40} = 1.0 \times (40/60) = 0.667\;\Omega\), \(X'_{r,40} = 1.2 \times (40/60) = 0.8\;\Omega\)</li>
+        </ul>
+        <p>\(T_{\max,40} = \frac{3 \times 177.1^2}{2 \times 83.78 \times (0.667 + 0.8)} = \frac{3 \times 31364}{2 \times 83.78 \times 1.467} = \frac{94093}{245.8} = \mathbf{382.8 \text{ N}\cdot\text{m}}\)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Verification</span>
+          <p>The maximum torque is <strong>identical</strong> at 40 Hz and 60 Hz! This confirms the key V/F control principle: when E/f is maintained constant, \(T_{\max}\) is preserved. The \(f^2\) in the numerator (from \(E^2 \propto f^2\)) cancels with the \(f^2\) in the denominator (from \(\omega_s \cdot X \propto f \cdot f\)).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 3 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 3 &mdash; Rotor Resistance Control: Finding External Resistance for Target Speed</span>
+      <p>A 3-phase, 4-pole, 50 Hz wound-rotor induction motor has \(R'_r = 0.5\;\Omega\) (referred to stator) and drives a constant-torque load. At rated conditions, the motor runs at 1440 rpm. Find the external resistance (referred to stator) needed to reduce the speed to 1200 rpm. Neglect stator impedance.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Synchronous speed and rated slip</strong></p>
+        <p>\(N_s = 120 \times 50 / 4 = 1500\) rpm</p>
+        <p>\(s_1 = (1500 - 1440)/1500 = 60/1500 = 0.04\)</p>
+
+        <p class="mt-2"><strong>Step 2: New slip at target speed</strong></p>
+        <p>\(s_2 = (1500 - 1200)/1500 = 300/1500 = 0.2\)</p>
+
+        <p class="mt-2"><strong>Step 3: Use the constant-torque condition</strong></p>
+        <p>For constant torque, and neglecting stator impedance, the rotor current must remain the same. From the torque equation:</p>
+        <p>\(T = \frac{3V^2(R'_r + R'_e)/s}{\omega_s[(R'_r + R'_e)/s]^2 + (X_s + X'_r)^2]}\)</p>
+        <p>For small slip (operating below \(s_m\)), the torque is approximately proportional to \(s/(R'_r + R'_e)\). For constant torque:</p>
+        <p>\(\frac{s_1}{R'_r} = \frac{s_2}{R'_r + R'_e}\)</p>
+
+        <p class="mt-2"><strong>Step 4: Solve for \(R'_e\)</strong></p>
+        <p>\(R'_r + R'_e = R'_r \times \frac{s_2}{s_1} = 0.5 \times \frac{0.2}{0.04} = 0.5 \times 5 = 2.5\;\Omega\)</p>
+        <p>\(R'_e = 2.5 - 0.5 = \mathbf{2.0\;\Omega}\) (referred to stator)</p>
+
+        <div class="box motivation mt-2">
+          <span class="box-label">Physical Check</span>
+          <p>We needed to increase the total rotor resistance by a factor of 5 (from 0.5 to 2.5) to increase the slip by a factor of 5 (from 0.04 to 0.20). This makes physical sense: for constant torque, the slip is proportional to the total rotor resistance.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 4 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 4 &mdash; Rotor Resistance with Turns Ratio</span>
+      <p>The wound-rotor motor in Example 3 has a stator-to-rotor turns ratio of \(a = 2\). Find the actual external resistance per phase to be connected to the rotor slip rings.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p>We found \(R'_e = 2.0\;\Omega\) (referred to stator). To find the actual rotor-side resistance:</p>
+
+        <div class="equation-block">
+          \[R'_e = a^2 \cdot R_{e,\text{actual}}\]
+        </div>
+
+        <p>\(R_{e,\text{actual}} = \frac{R'_e}{a^2} = \frac{2.0}{2^2} = \frac{2.0}{4} = \mathbf{0.5\;\Omega \text{ per phase}}\)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Key Point</span>
+          <p>Always be careful about which side a resistance is referred to. The equivalent circuit uses stator-referred values, but physical resistors are connected on the rotor side. The conversion uses \(a^2\), which can make a big difference when the turns ratio is not unity.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 5 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 5 &mdash; Static Rotor Resistance: Finding Duty Ratio</span>
+      <p>A wound-rotor IM uses static rotor resistance control with a DC resistance \(R = 8\;\Omega\). The motor requires an equivalent external resistance of \(R_e = 2\;\Omega\) per phase for a desired speed. Find the required duty ratio \(k\).</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p>Using the static resistance formula:</p>
+        <p>\(R_e = \frac{1}{2} R (1 - k)\)</p>
+        <p>\(2 = \frac{1}{2} \times 8 \times (1 - k)\)</p>
+        <p>\(2 = 4(1 - k)\)</p>
+        <p>\(1 - k = 0.5\)</p>
+        <p>\(k = \mathbf{0.5}\) (50% duty ratio)</p>
+
+        <div class="box deepdive mt-2">
+          <span class="box-label">Verification</span>
+          <p>At \(k = 0.5\): \(R_e = 0.5 \times 8 \times (1 - 0.5) = 0.5 \times 8 \times 0.5 = 2\;\Omega\). Correct.</p>
+          <p>Limits: At \(k = 0\), \(R_e = 4\;\Omega\) (max). At \(k = 1\), \(R_e = 0\;\Omega\) (normal). Our value of 2 is right in the middle, consistent with 50% duty.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 6 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 6 &mdash; Voltage Boost Calculation</span>
+      <p>A V/F controlled IM has \(R_s = 2\;\Omega\) and draws rated current \(I_s = 10\) A. The rated V/f ratio is 460 V / 60 Hz = 7.67 V/Hz. Find the required terminal voltage at 5 Hz to maintain rated flux.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Ideal voltage at 5 Hz (no boost)</strong></p>
+        <p>\(V_{\text{ideal}} = (V/f) \times f = 7.67 \times 5 = 38.3\) V (line)</p>
+
+        <p class="mt-2"><strong>Step 2: Stator resistance voltage drop</strong></p>
+        <p>\(\Delta V = R_s \cdot I_s = 2 \times 10 = 20\) V</p>
+
+        <p class="mt-2"><strong>Step 3: Required terminal voltage with boost</strong></p>
+        <p>\(V_{\text{terminal}} = V_{\text{ideal}} + \Delta V = 38.3 + 20 = \mathbf{58.3 \text{ V}}\)</p>
+
+        <div class="box motivation mt-2">
+          <span class="box-label">Why This Matters</span>
+          <p>Without boost, the airgap voltage would be only \(38.3 - 20 = 18.3\) V instead of the needed 38.3 V &mdash; the flux would be <strong>less than half</strong> of rated! The 20 V boost is absolutely critical at this low frequency. Notice that at rated frequency (460 V supply), the same 20 V drop is only 4.3% of supply &mdash; negligible. But at 5 Hz it's 52% of the ideal voltage &mdash; devastating without compensation.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 7 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 7 &mdash; Constant Power Region: Torque at Twice Rated Speed</span>
+      <p>An IM rated at 50 Hz develops 100 N&middot;m at rated speed. Using V/F control, the frequency is increased to 100 Hz (voltage stays at rated). Find the available torque at 100 Hz, assuming operation in the constant power region.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Rated power</strong></p>
+        <p>At 50 Hz, synchronous speed \(\omega_{s1} = 2\pi \times 50 / (P/2)\). Let's use the ratio approach.</p>
+        <p>Since frequency doubles: \(\omega_{s2} = 2\omega_{s1}\)</p>
+
+        <p class="mt-2"><strong>Step 2: In the constant power region</strong></p>
+        <p>\(P_{\text{rated}} = T_1 \times \omega_{s1} \approx 100 \times \omega_{s1}\)</p>
+        <p>At 100 Hz: \(T_2 = P_{\text{rated}} / \omega_{s2} = P_{\text{rated}} / (2\omega_{s1}) = T_1 / 2\)</p>
+        <p>\(T_2 = 100/2 = \mathbf{50 \text{ N}\cdot\text{m}}\)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Rule of Thumb</span>
+          <p>In the constant power region, torque is inversely proportional to speed. Double the speed, half the torque. This is the same trade-off as in DC motor field weakening.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 8 -->
+    <div class="problem-card">
+      <span class="problem-number">Example 8 &mdash; Normalized Torque Equation</span>
+      <p>An IM has \(s_m = 0.15\). Using the normalized torque equation, find the developed torque (as a fraction of \(T_{\max}\)) when the motor operates at slip \(s = 0.05\).</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p>Using the normalized torque formula:</p>
+        <p>\(\frac{T_d}{T_{\max}} = \frac{2 s \cdot s_m}{s^2 + s_m^2}\)</p>
+        <p>\(\frac{T_d}{T_{\max}} = \frac{2 \times 0.05 \times 0.15}{0.05^2 + 0.15^2} = \frac{0.015}{0.0025 + 0.0225} = \frac{0.015}{0.025} = \mathbf{0.6}\)</p>
+
+        <p>So the motor produces 60% of its maximum torque at this operating point.</p>
+
+        <div class="box intuition mt-2">
+          <span class="box-label">Sanity Check</span>
+          <p>The slip (0.05) is one-third of \(s_m\) (0.15), so we're on the "left side" of the torque-speed curve (stable operating region), well below the peak. Getting 60% of \(T_{\max}\) is reasonable &mdash; the curve rises steeply from zero slip and is already quite high at \(s/s_m = 1/3\).</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 11: Practice Problems
+     ============================================================ -->
+<div class="section" id="sec-practice">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>11. Practice Problems</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="problem-card">
+      <span class="problem-number">Problem 1</span>
+      <p>A 3-phase, 6-pole, 50 Hz induction motor operates with V/F control. At rated conditions, the motor runs at 960 rpm. (a) Find the rated slip. (b) Find the motor speed when the supply frequency is 35 Hz (same slip). (c) If the rated torque is 80 N&middot;m, find the power developed at both frequencies.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Rated slip:</strong></p>
+        <p>\(N_s = 120 \times 50/6 = 1000\) rpm</p>
+        <p>\(s = (1000 - 960)/1000 = 0.04\) (4%)</p>
+
+        <p class="mt-2"><strong>(b) Speed at 35 Hz:</strong></p>
+        <p>\(N_{s,35} = 120 \times 35/6 = 700\) rpm</p>
+        <p>\(N_{r,35} = 700(1 - 0.04) = \mathbf{672 \text{ rpm}}\)</p>
+
+        <p class="mt-2"><strong>(c) Power at each frequency:</strong></p>
+        <p>At 50 Hz: \(P_{50} = T \times \omega = 80 \times 2\pi \times 960/60 = 80 \times 100.53 = \mathbf{8042 \text{ W}}\)</p>
+        <p>At 35 Hz: \(P_{35} = 80 \times 2\pi \times 672/60 = 80 \times 70.37 = \mathbf{5630 \text{ W}}\)</p>
+        <p>Power scales with speed (as expected in the constant-torque region).</p>
+      </div>
+    </div>
+
+    <div class="problem-card">
+      <span class="problem-number">Problem 2</span>
+      <p>A wound-rotor IM has \(R'_r = 0.4\;\Omega\) and \(X_s + X'_r = 2.0\;\Omega\) (all referred to stator). Neglect \(R_s\). (a) Find \(s_m\) with no external resistance. (b) Find the external resistance \(R'_e\) needed to achieve \(s_m = 1\) (maximum torque at standstill). (c) Does \(T_{\max}\) change?</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a)</strong> \(s_m = R'_r/(X_s + X'_r) = 0.4/2.0 = \mathbf{0.2}\)</p>
+
+        <p class="mt-2"><strong>(b)</strong> For \(s_m = 1\):</p>
+        <p>\(s_m = (R'_r + R'_e)/(X_s + X'_r)\)</p>
+        <p>\(1 = (0.4 + R'_e)/2.0\)</p>
+        <p>\(R'_e = 2.0 - 0.4 = \mathbf{1.6\;\Omega}\)</p>
+
+        <p class="mt-2"><strong>(c)</strong> No! \(T_{\max} = 3V^2/[2\omega_s(X_s + X'_r)]\). It depends only on voltage and reactances, not on rotor resistance. \(T_{\max}\) is <strong>unchanged</strong>.</p>
+      </div>
+    </div>
+
+    <div class="problem-card">
+      <span class="problem-number">Problem 3</span>
+      <p>A static rotor resistance controller uses \(R = 10\;\Omega\). Find: (a) The range of equivalent external resistance \(R_e\) achievable. (b) The duty ratio for \(R_e = 1.5\;\Omega\). (c) If the motor rotor current is \(I_r = 15\) A, find the DC link current.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Range of \(R_e\):</strong></p>
+        <p>At \(k = 0\): \(R_e = 0.5 \times 10 \times 1 = 5\;\Omega\) (maximum)</p>
+        <p>At \(k = 1\): \(R_e = 0.5 \times 10 \times 0 = 0\;\Omega\) (minimum)</p>
+        <p>Range: \(\mathbf{0 \leq R_e \leq 5\;\Omega}\)</p>
+
+        <p class="mt-2"><strong>(b) Duty ratio for \(R_e = 1.5\;\Omega\):</strong></p>
+        <p>\(1.5 = 0.5 \times 10 \times (1 - k)\)</p>
+        <p>\(1 - k = 0.3\)</p>
+        <p>\(k = \mathbf{0.7}\)</p>
+
+        <p class="mt-2"><strong>(c) DC link current:</strong></p>
+        <p>\(I_d = \sqrt{3/2} \times I_r = \sqrt{1.5} \times 15 = 1.225 \times 15 = \mathbf{18.37 \text{ A}}\)</p>
+      </div>
+    </div>
+
+    <div class="problem-card">
+      <span class="problem-number">Problem 4</span>
+      <p>An IM driven by a V/F controller operates at 30 Hz. The motor parameters are \(R_s = 1.5\;\Omega\), rated V/f = 380 V / 50 Hz = 7.6 V/Hz. The rated stator current is 12 A. (a) Find the ideal terminal voltage at 30 Hz. (b) Find the required voltage boost. (c) Find the actual terminal voltage needed.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Ideal voltage at 30 Hz:</strong></p>
+        <p>\(V_{\text{ideal}} = 7.6 \times 30 = \mathbf{228 \text{ V (line)}}\)</p>
+
+        <p class="mt-2"><strong>(b) Voltage boost (current-dependent):</strong></p>
+        <p>\(\Delta V = R_s \times I_s = 1.5 \times 12 = \mathbf{18 \text{ V}}\)</p>
+
+        <p class="mt-2"><strong>(c) Actual terminal voltage:</strong></p>
+        <p>\(V_{\text{actual}} = 228 + 18 = \mathbf{246 \text{ V}}\)</p>
+
+        <p>For comparison, at 50 Hz the boost fraction is \(18/380 = 4.7\%\) (small). At 30 Hz it's \(18/228 = 7.9\%\) (more significant). At 10 Hz it would be \(18/76 = 23.7\%\) (critical).</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 12: Flashcards
+     ============================================================ -->
+<div class="section" id="sec-flashcards">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>12. Flashcards &mdash; Review</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <p>Click a card to flip it. Use the arrow buttons or keyboard arrows to navigate. These 18 cards target Sheet 6 problems 8&ndash;15.</p>
+
+    <div class="flashcard-deck" id="flashcard-deck">
+      <div class="flashcard-controls">
+        <button id="fc-prev" onclick="fcPrev()" aria-label="Previous card">&#9664; Prev</button>
+        <span class="flashcard-counter" id="fc-counter">1 / 18</span>
+        <button id="fc-next" onclick="fcNext()" aria-label="Next card">Next &#9654;</button>
+      </div>
+
+      <div class="flashcard-scene" id="fc-scene">
+        <div class="flashcard" id="fc-card" onclick="fcFlip()">
+          <div class="flashcard-face flashcard-face--front">
+            <span class="card-label">Question</span>
+            <p id="fc-question"></p>
+          </div>
+          <div class="flashcard-face flashcard-face--back">
+            <span class="card-label">Answer</span>
+            <p id="fc-answer"></p>
+          </div>
+        </div>
+      </div>
+
+      <p class="flashcard-hint" id="fc-hint">Click the card or press Space to flip</p>
+
+      <div class="flashcard-progress-bar">
+        <div class="flashcard-progress-fill" id="fc-progress"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /content-wrapper -->
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ===========================================
+// THEME TOGGLE
+// ===========================================
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+  if (theme === 'dark') {
+    icon.textContent = '\u2600'; // sun
+    label.textContent = 'Light';
+  } else {
+    icon.textContent = '\u263E'; // moon
+    label.textContent = 'Dark';
+  }
+}
+
+// Initialize theme
+(function() {
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+
+// ===========================================
+// SIDEBAR TOGGLE (mobile)
+// ===========================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar when clicking a link (mobile)
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+});
+
+// ===========================================
+// COLLAPSIBLE SECTIONS
+// ===========================================
+function toggleSection(header) {
+  var content = header.nextElementSibling;
+  var icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    icon.classList.remove('collapsed');
+    setTimeout(function() { content.style.maxHeight = 'none'; }, 500);
+  } else {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    requestAnimationFrame(function() {
+      content.classList.add('collapsed');
+      icon.classList.add('collapsed');
+    });
+  }
+}
+
+// Initialize all sections as expanded
+document.querySelectorAll('.section-content').forEach(function(el) {
+  el.style.maxHeight = 'none';
+});
+
+// ===========================================
+// SOLUTION TOGGLE
+// ===========================================
+function toggleSolution(btn) {
+  var content = btn.nextElementSibling;
+  content.classList.toggle('visible');
+  btn.textContent = content.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+  // Re-render MathJax in the revealed content
+  if (content.classList.contains('visible') && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([content]);
+  }
+}
+
+// ===========================================
+// PROGRESS BAR
+// ===========================================
+function updateProgress() {
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+// ===========================================
+// ACTIVE TOC HIGHLIGHT
+// ===========================================
+function updateActiveTOC() {
+  var sections = document.querySelectorAll('.section[id], .subsection[id], .hero[id]');
+  var links = document.querySelectorAll('.sidebar nav a');
+  var scrollPos = window.pageYOffset + 120;
+  var activeId = '';
+
+  sections.forEach(function(section) {
+    if (section.offsetTop <= scrollPos) {
+      activeId = section.id;
+    }
+  });
+
+  links.forEach(function(link) {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + activeId) {
+      link.classList.add('active');
+    }
+  });
+}
+
+// Throttle scroll events
+var scrollTicking = false;
+window.addEventListener('scroll', function() {
+  if (!scrollTicking) {
+    requestAnimationFrame(function() {
+      updateProgress();
+      updateActiveTOC();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
+});
+
+// Initial call
+updateProgress();
+updateActiveTOC();
+
+// ===========================================
+// FLASHCARD ENGINE
+// ===========================================
+var fcCards = [
+  {
+    q: "What is the constant V/F principle?",
+    a: "E/f = constant, which maintains constant airgap flux. When frequency changes, voltage must change proportionally so that \\(\\Phi_m\\) remains the same."
+  },
+  {
+    q: "Under V/F control with R\\(_s\\) neglected, what is T\\(_{\\max}\\)?",
+    a: "\\(T_{\\max} = \\dfrac{3E_{\\text{base}}^2}{2\\omega_s X'_r}\\). It stays CONSTANT as long as E/f is maintained, because the \\(f^2\\) terms cancel."
+  },
+  {
+    q: "What are the three operating regions of V/F control?",
+    a: "1) Constant Torque (f \\(\\leq\\) f\\(_{\\text{rated}}\\), V/f = const). 2) Constant Power (f > f\\(_{\\text{rated}}\\), V = V\\(_{\\text{rated}}\\)). 3) Breakdown Torque (high f, slip at maximum, torque falls further)."
+  },
+  {
+    q: "In the constant torque region, what happens to power as speed increases?",
+    a: "P = T \\(\\cdot \\omega\\). Since T is constant and \\(\\omega\\) increases, power increases linearly with speed."
+  },
+  {
+    q: "In the constant power region, what happens to torque?",
+    a: "T = P/\\(\\omega\\). Since P is constant and \\(\\omega\\) increases, torque decreases inversely with speed: T \\(\\propto 1/\\omega\\)."
+  },
+  {
+    q: "Why is voltage boost needed at low frequencies?",
+    a: "At low f, the stator impedance drop \\(R_s I_s\\) is a significant fraction of the (small) supply voltage, starving the airgap of flux. Boost voltage \\(\\Delta V\\) compensates this drop to maintain rated flux."
+  },
+  {
+    q: "How does adding external rotor resistance affect the T-\\(\\omega\\) curve?",
+    a: "It shifts \\(T_{\\max}\\) to higher slip (lower speed) but does NOT change the value of \\(T_{\\max}\\). The peak slides left; the peak height stays the same."
+  },
+  {
+    q: "What is the formula for slip at max torque with external resistance?",
+    a: "\\(s_m = \\dfrac{R'_r + R'_e}{\\sqrt{R_s^2 + (X_s + X'_r)^2}}\\). If \\(R_s\\) neglected: \\(s_m = \\dfrac{R'_r + R'_e}{X_s + X'_r}\\)."
+  },
+  {
+    q: "In static rotor resistance control, what is the equivalent external resistance?",
+    a: "\\(R_e = \\frac{1}{2} R(1 - k)\\), where R = DC resistance and k = duty ratio of DC chopper."
+  },
+  {
+    q: "What duty ratio k gives maximum resistance (lowest speed)?",
+    a: "k = 0 gives \\(R_e = 0.5R\\) (maximum resistance, lowest speed). k = 1 gives \\(R_e = 0\\) (zero external resistance, normal operation, highest speed)."
+  },
+  {
+    q: "What is the relationship between DC and AC currents in static rotor resistance?",
+    a: "\\(I_d = \\sqrt{\\dfrac{3}{2}} \\cdot I_r\\), i.e., the DC link current equals \\(\\sqrt{1.5}\\) times the AC rotor current (RMS per phase)."
+  },
+  {
+    q: "What is the main advantage of Kramer drive over rotor resistance control?",
+    a: "Slip power is converted to useful mechanical power via a DC motor coupled to the shaft, instead of being wasted as heat in resistors. Much more efficient at high slip."
+  },
+  {
+    q: "What is the main advantage of Scherbius drive over Kramer?",
+    a: "No auxiliary DC motor needed. Slip power is fed back to the grid through an inverter and transformer, making it simpler and lighter."
+  },
+  {
+    q: "How do you find external resistance for a target speed with rotor resistance control?",
+    a: "1) Find new slip: \\(s_{\\text{new}} = (N_s - N_{r,\\text{new}})/N_s\\). 2) At the operating point, equate motor torque to load torque. 3) Solve for \\(R'_e\\) from the torque equation."
+  },
+  {
+    q: "For static resistance control, how do you find the duty ratio for a target speed?",
+    a: "1) Find required \\(R_e\\) from the speed/torque equation. 2) Use \\(R_e = 0.5R(1-k)\\). 3) Solve: \\(k = 1 - 2R_e/R\\)."
+  },
+  {
+    q: "What is a doubly-fed induction machine (DFIM)?",
+    a: "An IM with a bidirectional AC/DC/AC converter on the rotor. Power is injected or extracted depending on speed. It acts like a synchronous machine and is used extensively in wind turbines."
+  },
+  {
+    q: "How does the stator-to-rotor turns ratio affect referred values?",
+    a: "\\(R'_r = a^2 R_{r,\\text{actual}}\\) and \\(R'_e = a^2 R_{e,\\text{actual}}\\), where \\(a = N_{\\text{stator}}/N_{\\text{rotor}}\\). All equivalent circuit values are referred to the stator side."
+  },
+  {
+    q: "For wound rotor problems, what must you account for with the turns ratio?",
+    a: "External resistance referred to stator: \\(R'_e = a^2 R_e\\), where \\(a\\) = stator/rotor turns ratio. All equivalent circuit calculations use stator-referred quantities."
+  }
+];
+
+var fcIndex = 0;
+var fcFlipped = false;
+
+function fcRender() {
+  var card = fcCards[fcIndex];
+  document.getElementById('fc-question').innerHTML = card.q;
+  document.getElementById('fc-answer').innerHTML = card.a;
+  document.getElementById('fc-counter').textContent = (fcIndex + 1) + ' / ' + fcCards.length;
+  document.getElementById('fc-progress').style.width = ((fcIndex + 1) / fcCards.length * 100) + '%';
+
+  // Update button states
+  document.getElementById('fc-prev').disabled = (fcIndex === 0);
+  document.getElementById('fc-next').disabled = (fcIndex === fcCards.length - 1);
+
+  // Reset flip
+  fcFlipped = false;
+  document.getElementById('fc-card').classList.remove('is-flipped');
+
+  // Re-render MathJax
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('fc-scene')]);
+  }
+}
+
+function fcFlip() {
+  fcFlipped = !fcFlipped;
+  var el = document.getElementById('fc-card');
+  if (fcFlipped) {
+    el.classList.add('is-flipped');
+  } else {
+    el.classList.remove('is-flipped');
+  }
+  // Re-typeset the back face after flip
+  if (fcFlipped && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('fc-scene')]);
+  }
+}
+
+function fcNext() {
+  if (fcIndex < fcCards.length - 1) {
+    fcIndex++;
+    fcRender();
+  }
+}
+
+function fcPrev() {
+  if (fcIndex > 0) {
+    fcIndex--;
+    fcRender();
+  }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', function(e) {
+  // Only handle if flashcard section is visible
+  var deck = document.getElementById('flashcard-deck');
+  if (!deck) return;
+  var rect = deck.getBoundingClientRect();
+  var visible = rect.top < window.innerHeight && rect.bottom > 0;
+  if (!visible) return;
+
+  if (e.key === 'ArrowRight' || e.key === 'Right') {
+    e.preventDefault();
+    fcNext();
+  } else if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    e.preventDefault();
+    fcPrev();
+  } else if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    fcFlip();
+  }
+});
+
+// Initialize first card
+fcRender();
+</script>
+</body>
+</html>

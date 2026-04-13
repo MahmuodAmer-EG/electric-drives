@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 9: DC Chopper Drives</title>
+
+<!-- MathJax CDN -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      omega: '\\omega',
+      phi: '\\varphi'
+    }
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script>
+    (function() {
+        var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+        var s = document.createElement('script');
+        s.async = true; s.src = primary;
+        s.onerror = function() {
+            var s2 = document.createElement('script');
+            s2.async = true; s2.src = fallback;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    })();
+</script>
+
+<style>
+/* ============================================================
+   CSS RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Accent colors */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #dbeafe;
+  --accent-blue-border: #93c5fd;
+  --accent-green: #16a34a;
+  --accent-green-light: #dcfce7;
+  --accent-green-border: #86efac;
+  --accent-yellow: #d97706;
+  --accent-yellow-light: #fef3c7;
+  --accent-yellow-border: #fcd34d;
+  --accent-red: #dc2626;
+  --accent-purple: #7c3aed;
+
+  /* Section colors */
+  --motivation-bg: #fffbeb;
+  --motivation-border: #f59e0b;
+  --motivation-text: #92400e;
+  --motivation-icon: #f59e0b;
+
+  --intuition-bg: #eff6ff;
+  --intuition-border: #3b82f6;
+  --intuition-text: #1e40af;
+  --intuition-icon: #3b82f6;
+
+  --deepdive-bg: #f0fdf4;
+  --deepdive-border: #22c55e;
+  --deepdive-text: #166534;
+  --deepdive-icon: #22c55e;
+
+  --takeaway-bg: #faf5ff;
+  --takeaway-border: #a855f7;
+  --takeaway-text: #6b21a8;
+  --takeaway-icon: #a855f7;
+
+  /* Sizing */
+  --sidebar-width: 280px;
+  --content-max: 900px;
+  --progress-height: 4px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-sidebar: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+  --accent-blue: #60a5fa;
+  --accent-blue-light: #1e3a5f;
+  --accent-blue-border: #2563eb;
+  --accent-green: #4ade80;
+  --accent-green-light: #14532d;
+  --accent-green-border: #16a34a;
+  --accent-yellow: #fbbf24;
+  --accent-yellow-light: #451a03;
+  --accent-yellow-border: #d97706;
+
+  --motivation-bg: #1c1207;
+  --motivation-border: #d97706;
+  --motivation-text: #fcd34d;
+  --motivation-icon: #fbbf24;
+
+  --intuition-bg: #0c1929;
+  --intuition-border: #2563eb;
+  --intuition-text: #93c5fd;
+  --intuition-icon: #60a5fa;
+
+  --deepdive-bg: #052e16;
+  --deepdive-border: #16a34a;
+  --deepdive-text: #86efac;
+  --deepdive-icon: #4ade80;
+
+  --takeaway-bg: #1a0533;
+  --takeaway-border: #7c3aed;
+  --takeaway-text: #c4b5fd;
+  --takeaway-icon: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: var(--progress-height);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================
+   TOP HEADER
+   ============================================================ */
+.top-header {
+  position: fixed;
+  top: var(--progress-height);
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 999;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-normal);
+}
+
+.top-header .lecture-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.top-header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Sidebar toggle (mobile) */
+.sidebar-toggle {
+  display: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   SIDEBAR / TABLE OF CONTENTS
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: calc(56px + var(--progress-height));
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - 56px - var(--progress-height));
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 998;
+  transition: transform var(--transition-normal), background var(--transition-normal);
+}
+
+.sidebar h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 7px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.sidebar nav a:hover {
+  background: var(--bg-primary);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+
+.sidebar nav a.active {
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+  background: var(--bg-primary);
+  font-weight: 600;
+}
+
+.sidebar nav a.sub {
+  padding-left: 36px;
+  font-size: 0.8rem;
+}
+
+.sidebar nav a.subsub {
+  padding-left: 50px;
+  font-size: 0.78rem;
+}
+
+/* Sidebar scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: calc(56px + var(--progress-height) + 40px) 48px 80px 48px;
+  max-width: calc(var(--content-max) + var(--sidebar-width) + 96px);
+  transition: margin-left var(--transition-normal);
+}
+
+.content-wrapper {
+  max-width: var(--content-max);
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  margin-bottom: 48px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.hero .lecture-number {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-blue);
+  background: var(--accent-blue-light);
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   SECTION STRUCTURE
+   ============================================================ */
+.section {
+  margin-bottom: 56px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.section-header .collapse-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-normal);
+  width: 24px;
+  text-align: center;
+}
+
+.section-header .collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.section-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Sub-section */
+.subsection {
+  margin: 28px 0;
+}
+
+.subsection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.subsection h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   COLORED BOXES (Motivation, Intuition, Deep Dive, Takeaway)
+   ============================================================ */
+.box {
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 20px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+
+.box .box-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.box.motivation {
+  background: var(--motivation-bg);
+  border-left-color: var(--motivation-border);
+  color: var(--motivation-text);
+}
+.box.motivation .box-label {
+  background: var(--motivation-border);
+  color: #fff;
+}
+
+.box.intuition {
+  background: var(--intuition-bg);
+  border-left-color: var(--intuition-border);
+  color: var(--intuition-text);
+}
+.box.intuition .box-label {
+  background: var(--intuition-border);
+  color: #fff;
+}
+
+.box.deepdive {
+  background: var(--deepdive-bg);
+  border-left-color: var(--deepdive-border);
+  color: var(--deepdive-text);
+}
+.box.deepdive .box-label {
+  background: var(--deepdive-border);
+  color: #fff;
+}
+
+.box.takeaway {
+  background: var(--takeaway-bg);
+  border-left-color: var(--takeaway-border);
+  color: var(--takeaway-text);
+}
+.box.takeaway .box-label {
+  background: var(--takeaway-border);
+  color: #fff;
+}
+
+/* ============================================================
+   EQUATIONS
+   ============================================================ */
+.equation-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.equation-block .eq-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.styled-table th, .styled-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.styled-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.styled-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* ============================================================
+   SVG DIAGRAMS
+   ============================================================ */
+.diagram-container {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ============================================================
+   LISTS
+   ============================================================ */
+.content-list {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.content-list li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   PRACTICE PROBLEMS
+   ============================================================ */
+.problem-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 16px 0;
+}
+
+.problem-card .problem-number {
+  display: inline-block;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.problem-card .solution {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.solution-toggle {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all var(--transition-fast);
+}
+
+.solution-toggle:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.solution-content {
+  display: none;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.solution-content.visible {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+p {
+  margin-bottom: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.highlight {
+  background: var(--accent-yellow-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.text-center { text-align: center; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-content {
+    margin-left: 0;
+    padding: calc(56px + var(--progress-height) + 24px) 20px 60px 20px;
+  }
+  .sidebar-toggle {
+    display: block;
+  }
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.35rem; }
+  .section-header h2 { font-size: 1.25rem; }
+  .box { padding: 16px 18px; }
+}
+
+/* ============================================================
+   SVG THEME OVERRIDES
+   ============================================================ */
+svg text {
+  fill: var(--text-primary);
+}
+[data-theme="dark"] svg .wire { stroke: #94a3b8; }
+[data-theme="dark"] svg .component { stroke: #94a3b8; fill: none; }
+[data-theme="dark"] svg .component-fill { fill: #334155; stroke: #94a3b8; }
+[data-theme="dark"] svg .label { fill: #e2e8f0; }
+[data-theme="dark"] svg .arrow { stroke: #94a3b8; fill: #94a3b8; }
+[data-theme="dark"] svg .axis { stroke: #64748b; }
+[data-theme="dark"] svg .curve1 { stroke: #60a5fa; }
+[data-theme="dark"] svg .curve2 { stroke: #f87171; }
+[data-theme="dark"] svg .curve3 { stroke: #4ade80; }
+[data-theme="dark"] svg .curve4 { stroke: #fbbf24; }
+[data-theme="dark"] svg .region { fill-opacity: 0.15; }
+
+/* Light mode SVG defaults */
+svg .wire { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component-fill { fill: #f1f5f9; stroke: #334155; stroke-width: 2; }
+svg .label { fill: #1e293b; font-size: 13px; font-family: 'Segoe UI', sans-serif; }
+svg .label-sm { fill: #475569; font-size: 11px; font-family: 'Segoe UI', sans-serif; }
+svg .arrow { stroke: #334155; stroke-width: 2; fill: #334155; }
+svg .axis { stroke: #475569; stroke-width: 1.5; }
+svg .curve1 { stroke: #2563eb; stroke-width: 2.5; fill: none; }
+svg .curve2 { stroke: #dc2626; stroke-width: 2.5; fill: none; }
+svg .curve3 { stroke: #16a34a; stroke-width: 2.5; fill: none; }
+svg .curve4 { stroke: #d97706; stroke-width: 2.5; fill: none; }
+svg .region { stroke: none; }
+svg .quadrant-active { fill: #dbeafe; fill-opacity: 0.5; stroke: #2563eb; stroke-width: 1; stroke-dasharray: 4; }
+svg .quadrant-inactive { fill: #f1f5f9; fill-opacity: 0.3; stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; }
+[data-theme="dark"] svg .quadrant-active { fill: #1e3a5f; fill-opacity: 0.5; stroke: #60a5fa; }
+[data-theme="dark"] svg .quadrant-inactive { fill: #1e293b; fill-opacity: 0.3; stroke: #475569; }
+
+/* Scrollbar for main */
+.main-content::-webkit-scrollbar { width: 6px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
+
+/* ============================================================
+   FLASHCARD STYLES
+   ============================================================ */
+.flashcard-deck { text-align:center; }
+.flashcard-container { perspective:1000px; margin:20px auto; max-width:600px; height:300px; cursor:pointer; }
+.flashcard-inner { position:relative; width:100%; height:100%; transition:transform 0.6s; transform-style:preserve-3d; }
+.flashcard-container.flipped .flashcard-inner { transform:rotateY(180deg); }
+.flashcard-front,.flashcard-back { position:absolute; width:100%; height:100%; backface-visibility:hidden; border-radius:12px; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box; flex-direction:column; }
+.flashcard-front { background:var(--bg-secondary); border:2px solid #ef4444; color:var(--text-primary); font-size:1.1rem; }
+.flashcard-back { background:#fef2f2; border:2px solid #ef4444; color:#7f1d1d; transform:rotateY(180deg); font-size:1rem; }
+[data-theme="dark"] .flashcard-back { background:#3b1111; color:#fca5a5; }
+.flashcard-nav { margin-top:16px; display:flex; gap:12px; justify-content:center; }
+.flashcard-nav button { background:var(--accent-blue); color:#fff; border:none; border-radius:6px; padding:8px 20px; cursor:pointer; font-size:0.9rem; }
+.flashcard-nav button:hover { opacity:0.85; }
+.flashcard-counter { font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; }
+.flashcard-category { display:inline-block; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:2px 8px; border-radius:4px; margin-bottom:8px; background:#ef4444; color:#fff; }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Top Header -->
+<header class="top-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
+    <span class="lecture-tag">Lecture 9 &mdash; Electric Drives</span>
+  </div>
+  <div class="header-controls">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span id="theme-icon">&#9790;</span>
+      <span id="theme-label" style="font-size:0.8rem;font-weight:600;">Dark</span>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar / TOC -->
+<aside class="sidebar" id="sidebar">
+  <h3>Table of Contents</h3>
+  <nav id="toc-nav">
+    <a href="#hero">Overview</a>
+    <a href="#sec-intro" class="sub">1. Introduction to Choppers</a>
+    <a href="#sec-devices" class="subsub">Switching Devices</a>
+    <a href="#sec-chopper-types" class="sub">2. Chopper Types</a>
+    <a href="#sec-step-down" class="subsub">Step-Down (Buck)</a>
+    <a href="#sec-step-up" class="subsub">Step-Up (Boost)</a>
+    <a href="#sec-motoring" class="sub">3. Motoring Operation</a>
+    <a href="#sec-duty-interval" class="subsub">Duty Interval</a>
+    <a href="#sec-freewheel-interval" class="subsub">Freewheeling Interval</a>
+    <a href="#sec-steady-state" class="subsub">Steady-State Solution</a>
+    <a href="#sec-regen" class="sub">4. Regenerative Braking</a>
+    <a href="#sec-energy-storage" class="subsub">Energy Storage Interval</a>
+    <a href="#sec-energy-transfer" class="subsub">Energy Transfer Interval</a>
+    <a href="#sec-dynamic-braking" class="sub">5. Dynamic Braking</a>
+    <a href="#sec-composite" class="sub">6. Composite Braking</a>
+    <a href="#sec-two-quadrant" class="sub">7. Two-Quadrant Drives</a>
+    <a href="#sec-four-quadrant" class="sub">8. Four-Quadrant Drives</a>
+    <a href="#sec-practice" class="sub">9. Practice Problems</a>
+    <a href="#sec-flashcards" class="sub">10. Flashcards</a>
+    <a href="#sec-summary" class="sub">Lecture Summary</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrapper">
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<div class="hero" id="hero">
+  <span class="lecture-number">Lecture 9</span>
+  <h1>DC Chopper Drives</h1>
+  <p class="subtitle">High-frequency DC-DC converters for efficient motor control: step-down and step-up choppers, motoring, regenerative braking, and multi-quadrant operation.</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1: Introduction to Choppers
+     ============================================================ -->
+<div class="section" id="sec-intro">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>1. Introduction to Choppers</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>In the previous lectures, we used phase-controlled rectifiers (thyristor converters) to control DC motors from an AC supply. They work, but they have a fundamental limitation: the switching frequency is locked to the AC mains (50 or 60 Hz). This means the output has large voltage and current ripples, which cause torque pulsations, extra heating, and a wide region of discontinuous conduction where speed regulation is poor.</p>
+      <p>What if our DC supply is already available &mdash; from batteries (like in an electric vehicle), solar panels, or a simple diode rectifier? We need a way to <em>chop</em> the DC voltage into a variable average value. That is exactly what a <strong>DC chopper</strong> does, and it does so at frequencies far above 50 Hz &mdash; typically 2.5 kHz to 200 kHz &mdash; giving us dramatically smoother current and faster dynamic response.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of a chopper as a very fast light dimmer switch, but for DC. If you flip a switch ON and OFF very rapidly and adjust the fraction of time it stays ON, the average voltage seen by the load changes smoothly. The motor's inductance acts like a low-pass filter &mdash; it "averages out" the chopped waveform and sees a nearly smooth current. The faster you chop, the smoother it gets.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Chopper Advantages</span>
+      <p>Compared to phase-controlled rectifiers, DC choppers offer:</p>
+      <ul class="content-list">
+        <li><strong>High efficiency</strong> &mdash; power semiconductor operates as a switch (low conduction losses)</li>
+        <li><strong>Flexibility</strong> &mdash; duty ratio can be varied continuously from 0 to 1</li>
+        <li><strong>Light weight and small size</strong> &mdash; high switching frequency means smaller filter components</li>
+        <li><strong>Quick response</strong> &mdash; response time limited only by switching speed, not mains frequency</li>
+        <li><strong>Regeneration capability</strong> &mdash; can return energy to the source down to very low speeds</li>
+        <li><strong>Less current ripple</strong> &mdash; higher frequency means smaller \(\Delta I_a\), reducing torque pulsations</li>
+        <li><strong>Smaller discontinuous conduction region</strong> &mdash; better speed regulation and transient response</li>
+      </ul>
+    </div>
+
+    <div class="subsection" id="sec-devices">
+      <h3>Switching Devices</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Device Selection</span>
+        <p>The choice of switching device depends on the application's voltage, current, and frequency requirements:</p>
+        <table class="styled-table">
+          <thead>
+            <tr><th>Device</th><th>Switching Frequency</th><th>Application</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Thyristors / GTOs</strong></td><td>Up to a few hundred Hz</td><td>High voltage, high power (MW range). Limited frequency due to slow turn-off.</td></tr>
+            <tr><td><strong>Power Transistors / IGBTs</strong></td><td>&gt; 2.5 kHz typical</td><td>Medium power. IGBTs dominate modern industrial drives.</td></tr>
+            <tr><td><strong>MOSFETs</strong></td><td>&gt; 200 kHz</td><td>Low power applications. Fastest switching, lowest losses at high frequency.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Choppers are preferred when a DC source is already available (batteries, fuel cells, diode bridge output) or when higher performance is needed than phase-controlled converters can deliver. Higher chopping frequency directly translates to smoother motor current and better dynamic performance.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2: Chopper Types
+     ============================================================ -->
+<div class="section" id="sec-chopper-types">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>2. Chopper Types</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>We need the output voltage to be <em>lower</em> than the supply for normal motor speed control (motoring below base speed), and <em>higher</em> than the supply for regenerative braking (to push energy back into the source when \(E_g\) is low). These are two fundamentally different tasks requiring different circuit topologies.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>A <strong>step-down (buck)</strong> chopper is like a faucet &mdash; it can only reduce the water pressure from the supply. A <strong>step-up (boost)</strong> chopper is like a pump &mdash; it stores energy in an inductor and releases it at a higher voltage, boosting the pressure above the supply level. Together, they cover all operating needs.</p>
+    </div>
+
+    <!-- STEP-DOWN CHOPPER -->
+    <div class="subsection" id="sec-step-down">
+      <h3>a) Step-Down Chopper (Buck / Class A)</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Circuit and Operation</span>
+
+        <!-- Step-Down Chopper Circuit Diagram -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+            <!-- DC Source -->
+            <text x="18" y="30" class="label" font-weight="bold">Step-Down Chopper</text>
+            <line x1="40" y1="60" x2="40" y2="200" class="wire"/>
+            <text x="15" y="115" class="label">V</text>
+            <text x="28" y="78" class="label" font-size="11">+</text>
+            <text x="28" y="188" class="label" font-size="11">&minus;</text>
+
+            <!-- Switch G -->
+            <line x1="40" y1="60" x2="120" y2="60" class="wire"/>
+            <rect x="120" y="42" width="60" height="36" rx="4" class="component-fill"/>
+            <text x="138" y="65" class="label" font-size="13" font-weight="bold">G</text>
+            <line x1="180" y1="60" x2="280" y2="60" class="wire"/>
+
+            <!-- Freewheeling diode D -->
+            <line x1="200" y1="60" x2="200" y2="100" class="wire"/>
+            <!-- Diode symbol -->
+            <polygon points="186,120 214,120 200,100" class="component" fill="none" stroke-width="2"/>
+            <line x1="186" y1="100" x2="214" y2="100" class="wire"/>
+            <line x1="200" y1="120" x2="200" y2="200" class="wire"/>
+            <text x="218" y="115" class="label" font-size="12">D</text>
+            <text x="212" y="133" class="label-sm">(freewheel)</text>
+
+            <!-- Motor: Ra + La + Eg -->
+            <!-- Ra -->
+            <rect x="280" y="48" width="44" height="24" rx="3" class="component-fill"/>
+            <text x="290" y="65" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+            <line x1="324" y1="60" x2="360" y2="60" class="wire"/>
+
+            <!-- La -->
+            <path d="M360,60 C365,48 375,48 380,60 C385,48 395,48 400,60 C405,48 415,48 420,60" class="component" fill="none"/>
+            <text x="380" y="44" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+            <line x1="420" y1="60" x2="460" y2="60" class="wire"/>
+
+            <!-- Eg (back-EMF source) -->
+            <circle cx="460" cy="130" r="20" class="component"/>
+            <text x="448" y="126" class="label" font-size="10">E</text>
+            <text x="462" y="126" class="label" font-size="8" dy="2">g</text>
+            <text x="452" y="142" class="label" font-size="9">+</text>
+            <line x1="460" y1="60" x2="460" y2="110" class="wire"/>
+            <line x1="460" y1="150" x2="460" y2="200" class="wire"/>
+
+            <!-- Bottom return wire -->
+            <line x1="40" y1="200" x2="460" y2="200" class="wire"/>
+
+            <!-- Current arrow ia -->
+            <line x1="240" y1="60" x2="260" y2="60" class="wire" stroke-width="1"/>
+            <polygon points="258,56 266,60 258,64" class="arrow"/>
+            <text x="240" y="48" class="label" font-size="11">i<tspan font-size="9" dy="2">a</tspan></text>
+
+            <!-- Va label -->
+            <text x="210" y="80" class="label" font-size="11" font-style="italic">V<tspan font-size="9" dy="2">a</tspan></text>
+          </svg>
+          <div class="diagram-caption">Figure 1: Step-down (buck) chopper circuit with DC motor load</div>
+        </div>
+
+        <p>The chopper has two operating intervals in each period \(T\):</p>
+
+        <p><strong>1. Duty interval</strong> (switch G ON, \(0 \le t \le \delta T\)): The supply voltage \(V\) is applied directly across the motor. The armature current flows through G and increases.</p>
+
+        <p><strong>2. Freewheeling interval</strong> (switch G OFF, \(\delta T \le t \le T\)): The motor current continues to flow through the freewheeling diode D. The voltage across the motor is essentially zero (ignoring diode drop). The current decreases as the motor's stored energy dissipates in \(R_a\) and \(E_g\).</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Output Voltage</div>
+          \[
+          V_a = \begin{cases} V & \text{for } 0 \le t \le \delta T \\ 0 & \text{for } \delta T \le t \le T \end{cases}
+          \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Average Output Voltage</div>
+          \[
+          V_{a(\text{avg})} = \delta \cdot V
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">where \(\delta = T_{\text{on}} / T\) is the <strong>duty ratio</strong> (0 to 1)</p>
+        </div>
+
+        <!-- Output Voltage Waveform -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 500 220" xmlns="http://www.w3.org/2000/svg" style="max-width:480px;">
+            <text x="20" y="20" class="label" font-weight="bold">Step-Down Chopper Waveforms</text>
+            <!-- Axes -->
+            <line x1="60" y1="180" x2="460" y2="180" class="axis"/>
+            <line x1="60" y1="40" x2="60" y2="190" class="axis"/>
+            <polygon points="460,177 468,180 460,183" class="arrow"/>
+            <text x="462" y="194" class="label-sm">t</text>
+            <text x="35" y="50" class="label-sm">V<tspan font-size="8" dy="1">a</tspan></text>
+
+            <!-- Voltage waveform -->
+            <path d="M60,60 L60,60 L180,60 L180,180 L300,180 L300,60 L420,60 L420,180 L460,180" class="curve1" stroke-width="2.5"/>
+            <text x="40" y="64" class="label-sm">V</text>
+
+            <!-- dT labels -->
+            <line x1="60" y1="195" x2="180" y2="195" class="wire" stroke-dasharray="4"/>
+            <text x="105" y="210" class="label-sm" font-style="italic">&delta;T</text>
+            <line x1="180" y1="195" x2="300" y2="195" class="wire" stroke-dasharray="4"/>
+            <text x="210" y="210" class="label-sm">(1&minus;&delta;)T</text>
+            <line x1="300" y1="195" x2="420" y2="195" class="wire" stroke-dasharray="4"/>
+            <text x="345" y="210" class="label-sm" font-style="italic">&delta;T</text>
+
+            <!-- Average voltage line -->
+            <line x1="60" y1="108" x2="460" y2="108" class="curve2" stroke-dasharray="6,4" stroke-width="1.5"/>
+            <text x="370" y="102" class="label-sm" style="fill:#dc2626;">V<tspan font-size="8" dy="1">avg</tspan><tspan dy="-1"> = &delta;V</tspan></text>
+
+            <!-- Current waveform (approximate) -->
+            <text x="35" y="142" class="label-sm" style="fill:#16a34a;">i<tspan font-size="8" dy="1">a</tspan></text>
+            <path d="M60,158 Q90,148 120,140 Q150,132 180,128 Q210,134 240,142 Q270,150 300,158 Q330,148 360,140 Q390,132 420,128" class="curve3" stroke-width="2"/>
+          </svg>
+          <div class="diagram-caption">Figure 2: Output voltage (blue) and armature current (green) waveforms. Red dashed line is the average voltage.</div>
+        </div>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>The step-down chopper reduces the average voltage from \(V\) to \(\delta V\) by varying the duty ratio \(\delta\). It operates in quadrant I (positive voltage, positive current) &mdash; motoring in the forward direction.</p>
+      </div>
+    </div>
+
+    <!-- STEP-UP CHOPPER -->
+    <div class="subsection" id="sec-step-up">
+      <h3>b) Step-Up Chopper (Boost / Class B)</h3>
+
+      <div class="box motivation">
+        <span class="box-label">The Problem / The Why</span>
+        <p>During regenerative braking, the motor acts as a generator. Its back-EMF \(E_g\) may be <em>lower</em> than the DC supply voltage \(V\). But to push current back into the supply, we need the motor terminal voltage to <em>exceed</em> \(V\). How do we boost a lower voltage to a higher one using just a switch and an inductor?</p>
+      </div>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Imagine pressing down on a spring (storing energy in the inductor during the ON period) and then releasing it so it bounces higher than where it started (the inductor voltage adds to the source voltage during the OFF period). The key insight: an inductor resists changes in current, and when you suddenly force the current to redirect, it generates a voltage spike that "boosts" the output.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Step-Up Operation</span>
+
+        <!-- Step-Up Chopper Circuit -->
+        <div class="diagram-container">
+          <svg viewBox="0 0 560 280" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+            <text x="18" y="30" class="label" font-weight="bold">Step-Up Chopper</text>
+
+            <!-- Source V (left side, this is the load/supply we push into) -->
+            <line x1="480" y1="60" x2="480" y2="220" class="wire"/>
+            <text x="490" y="130" class="label">V</text>
+            <text x="468" y="78" class="label" font-size="11">+</text>
+            <text x="468" y="208" class="label" font-size="11">&minus;</text>
+
+            <!-- Motor/source E (right side is actually left in this topology) -->
+            <circle cx="60" cy="140" r="22" class="component"/>
+            <text x="48" y="136" class="label" font-size="11">E</text>
+            <text x="63" y="136" class="label" font-size="8" dy="2">g</text>
+            <text x="52" y="152" class="label" font-size="9">+</text>
+
+            <!-- From E top to inductor -->
+            <line x1="60" y1="118" x2="60" y2="60" class="wire"/>
+            <line x1="60" y1="60" x2="100" y2="60" class="wire"/>
+
+            <!-- La inductor -->
+            <path d="M100,60 C105,48 115,48 120,60 C125,48 135,48 140,60 C145,48 155,48 160,60 C165,48 175,48 180,60" class="component" fill="none"/>
+            <text x="128" y="44" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+            <line x1="180" y1="60" x2="240" y2="60" class="wire"/>
+
+            <!-- Ra -->
+            <rect x="240" y="48" width="44" height="24" rx="3" class="component-fill"/>
+            <text x="250" y="65" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+            <line x1="284" y1="60" x2="340" y2="60" class="wire"/>
+
+            <!-- Switch G (to ground) -->
+            <line x1="340" y1="60" x2="340" y2="100" class="wire"/>
+            <rect x="318" y="100" width="44" height="30" rx="4" class="component-fill"/>
+            <text x="330" y="120" class="label" font-size="12" font-weight="bold">G</text>
+            <line x1="340" y1="130" x2="340" y2="220" class="wire"/>
+
+            <!-- Diode D from junction to supply -->
+            <line x1="340" y1="60" x2="380" y2="60" class="wire"/>
+            <!-- Diode pointing right (anode left, cathode right) -->
+            <polygon points="380,48 380,72 410,60" class="component" fill="none" stroke-width="2"/>
+            <line x1="410" y1="48" x2="410" y2="72" class="wire"/>
+            <text x="385" y="44" class="label" font-size="12">D</text>
+            <line x1="410" y1="60" x2="440" y2="60" class="wire"/>
+
+            <!-- Capacitor C -->
+            <line x1="440" y1="60" x2="440" y2="100" class="wire"/>
+            <line x1="428" y1="100" x2="452" y2="100" class="wire" stroke-width="3"/>
+            <line x1="428" y1="110" x2="452" y2="110" class="wire" stroke-width="3"/>
+            <line x1="440" y1="110" x2="440" y2="220" class="wire"/>
+            <text x="454" y="108" class="label" font-size="12">C</text>
+
+            <!-- Connect to V supply -->
+            <line x1="440" y1="60" x2="480" y2="60" class="wire"/>
+
+            <!-- Bottom return -->
+            <line x1="60" y1="162" x2="60" y2="220" class="wire"/>
+            <line x1="60" y1="220" x2="480" y2="220" class="wire"/>
+
+            <!-- Current arrow is -->
+            <polygon points="88,56 96,60 88,64" class="arrow"/>
+            <text x="82" y="50" class="label" font-size="11">i<tspan font-size="9" dy="2">s</tspan></text>
+          </svg>
+          <div class="diagram-caption">Figure 3: Step-up (boost) chopper circuit for regenerative braking</div>
+        </div>
+
+        <p><strong>During ON period</strong> (\(0 \le t \le \delta T\)): Switch G is closed. The source current \(i_s\) increases from \(I_{s1}\) to \(I_{s2}\), storing energy in the inductor \(L\). The diode D is reverse-biased, and the capacitor C sustains the load voltage.</p>
+
+        <p><strong>During OFF period</strong> (\(\delta T \le t \le T\)): Switch G opens. The inductor current cannot change instantaneously, so the inductor's self-induced EMF adds to the source voltage, forward-biasing diode D. Current flows to the supply through D, and the capacitor charges. Current decreases from \(I_{s2}\) to \(I_{s1}\).</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Step-Up Voltage Relationship</div>
+          \[
+          V_{ab} = \frac{V_a}{1 - \delta}
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">Since in steady state the average voltage across \(L\) is zero:<br>
+          \(V = V_L + V_{ab}\), and \(\bar{V}_L = 0\), so \(V_a = (1-\delta) \cdot V_{ab}\)<br>
+          Rearranging: \(V_{ab} = V_a / (1-\delta)\)</p>
+        </div>
+
+        <p>As \(\delta \to 1\), the output voltage \(V_{ab} \to \infty\) in theory. In practice, losses limit the boost ratio. For \(\delta = 0.5\), the output is twice the input.</p>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>The step-up chopper boosts the motor's back-EMF to a level exceeding the supply voltage, enabling regenerative braking. As duty ratio \(\delta\) increases, the boost factor \(1/(1-\delta)\) increases. This topology operates in quadrant II or IV (current reversed relative to motoring).</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3: Motoring Operation (Separately Excited DC Motor)
+     ============================================================ -->
+<div class="section" id="sec-motoring">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>3. Motoring Operation &mdash; Step-Down Chopper</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Knowing the average voltage \(V_a = \delta V\) is great for steady-state speed calculations, but in reality the armature current is <em>not</em> constant &mdash; it ripples between a minimum \(I_{a1}\) and a maximum \(I_{a2}\). To properly design the chopper (select switching frequency, evaluate motor heating, determine if current becomes discontinuous), we need the <strong>exact time-domain expressions</strong> for the armature current during each interval.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>During the duty interval, the current ramps up because the supply voltage exceeds the back-EMF plus resistive drop. During freewheeling, the current ramps down because the back-EMF and resistance "drain" the stored magnetic energy. The current waveform looks like a sawtooth riding on top of the average value, with the peak-to-peak amplitude (ripple) depending on how fast we chop and how much inductance the motor has.</p>
+    </div>
+
+    <!-- Motoring Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+        <text x="18" y="26" class="label" font-weight="bold">Motoring Circuit (Step-Down Chopper + DC Motor)</text>
+
+        <!-- DC Supply V -->
+        <line x1="40" y1="55" x2="40" y2="200" class="wire"/>
+        <text x="18" y="120" class="label">V</text>
+        <text x="30" y="70" class="label" font-size="10">+</text>
+        <text x="30" y="190" class="label" font-size="10">&minus;</text>
+
+        <!-- Switch G -->
+        <line x1="40" y1="55" x2="100" y2="55" class="wire"/>
+        <rect x="100" y="39" width="50" height="32" rx="4" class="component-fill"/>
+        <text x="115" y="60" class="label" font-size="12" font-weight="bold">G</text>
+        <line x1="150" y1="55" x2="220" y2="55" class="wire"/>
+
+        <!-- Freewheel diode -->
+        <line x1="190" y1="55" x2="190" y2="90" class="wire"/>
+        <polygon points="178,110 202,110 190,90" class="component" fill="none" stroke-width="2"/>
+        <line x1="178" y1="90" x2="202" y2="90" class="wire"/>
+        <line x1="190" y1="110" x2="190" y2="200" class="wire"/>
+        <text x="205" y="105" class="label" font-size="11">D</text>
+
+        <!-- La -->
+        <path d="M220,55 C225,43 235,43 240,55 C245,43 255,43 260,55 C265,43 275,43 280,55" class="component" fill="none"/>
+        <text x="240" y="38" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+        <line x1="280" y1="55" x2="320" y2="55" class="wire"/>
+
+        <!-- Ra -->
+        <rect x="320" y="43" width="44" height="24" rx="3" class="component-fill"/>
+        <text x="330" y="60" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+        <line x1="364" y1="55" x2="420" y2="55" class="wire"/>
+
+        <!-- Eg -->
+        <circle cx="420" cy="127" r="20" class="component"/>
+        <text x="408" y="123" class="label" font-size="10">E</text>
+        <text x="423" y="123" class="label" font-size="8" dy="2">g</text>
+        <text x="413" y="139" class="label" font-size="9">+</text>
+        <line x1="420" y1="55" x2="420" y2="107" class="wire"/>
+        <line x1="420" y1="147" x2="420" y2="200" class="wire"/>
+
+        <!-- Bottom wire -->
+        <line x1="40" y1="200" x2="420" y2="200" class="wire"/>
+
+        <!-- Current arrow -->
+        <polygon points="168,51 176,55 168,59" class="arrow"/>
+        <text x="162" y="43" class="label" font-size="11">i<tspan font-size="9" dy="2">a</tspan></text>
+      </svg>
+      <div class="diagram-caption">Figure 4: Separately excited DC motor with step-down chopper (motoring mode)</div>
+    </div>
+
+    <!-- Duty Interval -->
+    <div class="subsection" id="sec-duty-interval">
+      <h3>Duty Interval (\(0 \le t \le \delta T\))</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; KVL During ON Period</span>
+        <p>When switch G is ON, applying KVL around the armature loop:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Armature Loop Equation (Duty Interval)</div>
+          \[
+          R_a \, i_a + L_a \frac{di_a}{dt} + E = V
+          \]
+        </div>
+
+        <p>This is a first-order linear ODE with constant coefficients. With initial condition \(i_a(0) = I_{a1}\) (the minimum current at the start of the duty interval):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Current During Duty Interval (Eq. 3.7)</div>
+          \[
+          i_a(t) = \frac{V - E}{R_a}\left(1 - e^{-t/\tau_a}\right) + I_{a1} \, e^{-t/\tau_a}
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">where \(\tau_a = L_a / R_a\) is the armature time constant</p>
+        </div>
+
+        <p>At the end of the duty interval (\(t = \delta T\)), the current reaches its maximum value \(I_{a2}\):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Maximum Current (Eq. 3.8)</div>
+          \[
+          I_{a2} = \frac{V - E}{R_a}\left(1 - e^{-\delta T/\tau_a}\right) + I_{a1} \, e^{-\delta T/\tau_a}
+          \]
+        </div>
+      </div>
+    </div>
+
+    <!-- Freewheeling Interval -->
+    <div class="subsection" id="sec-freewheel-interval">
+      <h3>Freewheeling Interval (\(\delta T \le t \le T\))</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; KVL During OFF Period</span>
+        <p>When switch G is OFF, the motor current freewheels through diode D. The supply is disconnected, so KVL gives:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Armature Loop Equation (Freewheel Interval)</div>
+          \[
+          R_a \, i_a + L_a \frac{di_a}{dt'} + E = 0
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">where \(t' = t - \delta T\) (reset time origin to start of freewheel)</p>
+        </div>
+
+        <p>With initial condition \(i_a(0) = I_{a2}\):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Current During Freewheel (Eq. 3.10)</div>
+          \[
+          i_a(t') = -\frac{E}{R_a}\left(1 - e^{-t'/\tau_a}\right) + I_{a2} \, e^{-t'/\tau_a}
+          \]
+        </div>
+
+        <p>At the end of the freewheeling interval (\(t' = (1-\delta)T\)), the current drops to its minimum \(I_{a1}\):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Minimum Current (Eq. 3.11)</div>
+          \[
+          I_{a1} = -\frac{E}{R_a}\left(1 - e^{-(1-\delta)T/\tau_a}\right) + I_{a2} \, e^{-(1-\delta)T/\tau_a}
+          \]
+        </div>
+      </div>
+    </div>
+
+    <!-- Steady State -->
+    <div class="subsection" id="sec-steady-state">
+      <h3>Steady-State Solution</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Solving for \(I_{a1}\) and \(I_{a2}\)</span>
+        <p>In steady state, the current waveform is periodic: the \(I_{a1}\) at the end of one cycle equals the \(I_{a1}\) at the start of the next. We solve equations 3.8 and 3.11 simultaneously (two equations, two unknowns):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Simultaneous Equations</div>
+          \[
+          \begin{cases}
+          I_{a2} = \dfrac{V - E}{R_a}\left(1 - e^{-\delta T/\tau_a}\right) + I_{a1} \, e^{-\delta T/\tau_a} \\[12pt]
+          I_{a1} = -\dfrac{E}{R_a}\left(1 - e^{-(1-\delta)T/\tau_a}\right) + I_{a2} \, e^{-(1-\delta)T/\tau_a}
+          \end{cases}
+          \]
+        </div>
+
+        <p>Let \(x = e^{-\delta T / \tau_a}\) and \(y = e^{-(1-\delta)T / \tau_a}\). Solving:</p>
+
+        <div class="equation-block">
+          \[
+          I_{a1} = \frac{V}{R_a} \cdot \frac{1 - x}{1 - xy} \cdot y - \frac{E}{R_a}
+          \]
+          \[
+          I_{a2} = \frac{V}{R_a} \cdot \frac{1 - x}{1 - xy} - \frac{E}{R_a}
+          \]
+        </div>
+
+        <p>The <strong>average armature current</strong> is:</p>
+        <div class="equation-block">
+          \[
+          I_{a(\text{avg})} = \frac{\delta V - E}{R_a}
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">This is exactly what we'd get from DC analysis: \(V_{a(\text{avg})} = \delta V = E + I_a R_a\)</p>
+        </div>
+      </div>
+
+      <!-- Current Ripple Waveform -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg" style="max-width:480px;">
+          <text x="20" y="20" class="label" font-weight="bold">Steady-State Current Waveform</text>
+          <!-- Axes -->
+          <line x1="60" y1="200" x2="460" y2="200" class="axis"/>
+          <line x1="60" y1="30" x2="60" y2="210" class="axis"/>
+          <polygon points="460,197 468,200 460,203" class="arrow"/>
+          <text x="462" y="214" class="label-sm">t</text>
+          <text x="30" y="42" class="label-sm">i<tspan font-size="8" dy="1">a</tspan></text>
+
+          <!-- Ia2 level -->
+          <line x1="55" y1="70" x2="460" y2="70" class="axis" stroke-dasharray="4,4" style="stroke:#dc2626;stroke-width:1;"/>
+          <text x="15" y="74" class="label-sm" style="fill:#dc2626;">I<tspan font-size="7" dy="1">a2</tspan></text>
+
+          <!-- Ia1 level -->
+          <line x1="55" y1="130" x2="460" y2="130" class="axis" stroke-dasharray="4,4" style="stroke:#2563eb;stroke-width:1;"/>
+          <text x="15" y="134" class="label-sm" style="fill:#2563eb;">I<tspan font-size="7" dy="1">a1</tspan></text>
+
+          <!-- Iavg level -->
+          <line x1="55" y1="100" x2="460" y2="100" class="axis" stroke-dasharray="8,4" style="stroke:#16a34a;stroke-width:1.5;"/>
+          <text x="8" y="104" class="label-sm" style="fill:#16a34a;">I<tspan font-size="7" dy="1">avg</tspan></text>
+
+          <!-- Current waveform (exponential rise during duty, exponential fall during freewheel) -->
+          <!-- Period 1 -->
+          <path d="M60,130 C80,115 110,85 150,70" class="curve1" stroke-width="2.5"/>
+          <path d="M150,70 C170,85 200,115 240,130" class="curve2" stroke-width="2.5"/>
+          <!-- Period 2 -->
+          <path d="M240,130 C260,115 290,85 330,70" class="curve1" stroke-width="2.5"/>
+          <path d="M330,70 C350,85 380,115 420,130" class="curve2" stroke-width="2.5"/>
+
+          <!-- Time markers -->
+          <line x1="60" y1="200" x2="60" y2="195" class="axis"/>
+          <text x="55" y="220" class="label-sm">0</text>
+          <line x1="150" y1="200" x2="150" y2="195" class="axis"/>
+          <text x="138" y="220" class="label-sm">&delta;T</text>
+          <line x1="240" y1="200" x2="240" y2="195" class="axis"/>
+          <text x="235" y="220" class="label-sm">T</text>
+          <line x1="330" y1="200" x2="330" y2="195" class="axis"/>
+          <text x="310" y="220" class="label-sm">T+&delta;T</text>
+          <line x1="420" y1="200" x2="420" y2="195" class="axis"/>
+          <text x="413" y="220" class="label-sm">2T</text>
+
+          <!-- Delta Ia bracket -->
+          <line x1="455" y1="70" x2="455" y2="130" class="wire" stroke-width="1.5" style="stroke:#d97706;"/>
+          <line x1="450" y1="70" x2="460" y2="70" class="wire" stroke-width="1" style="stroke:#d97706;"/>
+          <line x1="450" y1="130" x2="460" y2="130" class="wire" stroke-width="1" style="stroke:#d97706;"/>
+          <text x="464" y="104" class="label-sm" style="fill:#d97706;">&Delta;I<tspan font-size="7" dy="1">a</tspan></text>
+        </svg>
+        <div class="diagram-caption">Figure 5: Steady-state armature current ripple between I<sub>a1</sub> and I<sub>a2</sub></div>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Current Ripple Approximation</span>
+        <p>For high switching frequencies (where \(T \ll \tau_a\)), we can linearize the exponentials and obtain a simple ripple formula:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Current Ripple (Approximate)</div>
+          \[
+          \Delta I_a = I_{a2} - I_{a1} \approx \frac{V \cdot \delta(1-\delta)}{f \cdot L_a}
+          \]
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">Maximum ripple occurs at \(\delta = 0.5\): \(\;\Delta I_{a,\max} = \dfrac{V}{4 f L_a}\)</p>
+        </div>
+
+        <p>This shows that <strong>doubling the switching frequency halves the current ripple</strong>, and more inductance also reduces ripple &mdash; hence the advantage of choppers over low-frequency thyristor converters.</p>
+      </div>
+
+      <div class="box takeaway">
+        <span class="box-label">Takeaway</span>
+        <p>The motoring current waveform is an exponential sawtooth between \(I_{a1}\) and \(I_{a2}\). The average current follows the simple DC relation \(I_a = (\delta V - E)/R_a\). Ripple decreases with higher frequency and higher inductance. For exam problems, you'll either solve the exact exponential equations or use the linear ripple approximation depending on whether \(T/\tau_a\) is small.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4: Regenerative Braking
+     ============================================================ -->
+<div class="section" id="sec-regen">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>4. Regenerative Braking &mdash; Step-Up Chopper</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>When a motor needs to slow down, we want to recover the kinetic energy stored in the rotating mass rather than waste it as heat. In regenerative braking, the motor acts as a generator and feeds energy <em>back</em> to the DC supply. But the motor's back-EMF \(E\) at lower speeds is less than the supply voltage \(V\). We need a step-up chopper to boost the effective terminal voltage so current can flow back into the supply, enabling regeneration down to very low speeds.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of regenerative braking as "reverse motoring." During motoring, the supply pushes current into the motor. During regeneration, the motor (now a generator) pushes current back. The step-up chopper is the "voltage amplifier" that lets the generator's weak voltage overcome the supply voltage, like a lever that lets a small force lift a heavy weight.</p>
+    </div>
+
+    <!-- Regen Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 260" xmlns="http://www.w3.org/2000/svg" style="max-width:520px;">
+        <text x="18" y="26" class="label" font-weight="bold">Regenerative Braking Circuit</text>
+
+        <!-- Motor (generator) E with La, Ra -->
+        <circle cx="60" cy="130" r="20" class="component"/>
+        <text x="48" y="127" class="label" font-size="10">E</text>
+        <text x="63" y="127" class="label" font-size="8" dy="2">g</text>
+        <text x="52" y="142" class="label" font-size="9">+</text>
+
+        <line x1="60" y1="110" x2="60" y2="55" class="wire"/>
+        <line x1="60" y1="55" x2="100" y2="55" class="wire"/>
+
+        <!-- La -->
+        <path d="M100,55 C105,43 115,43 120,55 C125,43 135,43 140,55 C145,43 155,43 160,55" class="component" fill="none"/>
+        <text x="120" y="38" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+        <line x1="160" y1="55" x2="210" y2="55" class="wire"/>
+
+        <!-- Ra -->
+        <rect x="210" y="43" width="44" height="24" rx="3" class="component-fill"/>
+        <text x="220" y="60" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+        <line x1="254" y1="55" x2="320" y2="55" class="wire"/>
+
+        <!-- Switch G -->
+        <line x1="320" y1="55" x2="320" y2="90" class="wire"/>
+        <rect x="298" y="90" width="44" height="30" rx="4" class="component-fill"/>
+        <text x="311" y="110" class="label" font-size="12" font-weight="bold">G</text>
+        <line x1="320" y1="120" x2="320" y2="210" class="wire"/>
+
+        <!-- Diode D -->
+        <line x1="320" y1="55" x2="370" y2="55" class="wire"/>
+        <polygon points="370,43 370,67 400,55" class="component" fill="none" stroke-width="2"/>
+        <line x1="400" y1="43" x2="400" y2="67" class="wire"/>
+        <text x="375" y="38" class="label" font-size="11">D</text>
+        <line x1="400" y1="55" x2="480" y2="55" class="wire"/>
+
+        <!-- Supply V -->
+        <line x1="480" y1="55" x2="480" y2="210" class="wire"/>
+        <text x="490" y="125" class="label">V<tspan font-size="9" dy="2">s</tspan></text>
+        <text x="468" y="72" class="label" font-size="10">+</text>
+        <text x="468" y="198" class="label" font-size="10">&minus;</text>
+
+        <!-- Bottom wire -->
+        <line x1="60" y1="150" x2="60" y2="210" class="wire"/>
+        <line x1="60" y1="210" x2="480" y2="210" class="wire"/>
+
+        <!-- Current arrow -->
+        <polygon points="88,51 96,55 88,59" class="arrow"/>
+        <text x="82" y="44" class="label" font-size="11">i<tspan font-size="9" dy="2">a</tspan></text>
+      </svg>
+      <div class="diagram-caption">Figure 6: Regenerative braking circuit using step-up chopper</div>
+    </div>
+
+    <!-- Energy Storage Interval -->
+    <div class="subsection" id="sec-energy-storage">
+      <h3>Energy Storage Interval (\(0 \le t \le \delta T\))</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Switch G ON</span>
+        <p>When G is ON, the motor (generator) drives current through \(R_a\), \(L_a\), and the switch. The diode D is reverse-biased. Energy is stored in the inductance:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">KVL (Energy Storage)</div>
+          \[
+          R_a \, i_a + L_a \frac{di_a}{dt} = E
+          \]
+        </div>
+
+        <p>With \(i_a(0) = I_{a1}\):</p>
+
+        <div class="equation-block">
+          \[
+          i_a(t) = \frac{E}{R_a}\left(1 - e^{-t/\tau_a}\right) + I_{a1} \, e^{-t/\tau_a}
+          \]
+        </div>
+
+        <p>At \(t = \delta T\): \(\;I_{a2} = \dfrac{E}{R_a}\left(1 - e^{-\delta T/\tau_a}\right) + I_{a1} \, e^{-\delta T/\tau_a}\)</p>
+      </div>
+    </div>
+
+    <!-- Energy Transfer Interval -->
+    <div class="subsection" id="sec-energy-transfer">
+      <h3>Energy Transfer Interval (\(\delta T \le t \le T\))</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Switch G OFF</span>
+        <p>When G opens, diode D becomes forward-biased and current flows into the supply \(V\). Now KVL includes the supply voltage:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">KVL (Energy Transfer)</div>
+          \[
+          R_a \, i_a + L_a \frac{di_a}{dt'} + V = E
+          \]
+        </div>
+
+        <p>With \(i_a(0) = I_{a2}\):</p>
+
+        <div class="equation-block">
+          \[
+          i_a(t') = \frac{E - V}{R_a}\left(1 - e^{-t'/\tau_a}\right) + I_{a2} \, e^{-t'/\tau_a}
+          \]
+        </div>
+
+        <p>At \(t' = (1-\delta)T\): \(\;I_{a1} = \dfrac{E - V}{R_a}\left(1 - e^{-(1-\delta)T/\tau_a}\right) + I_{a2} \, e^{-(1-\delta)T/\tau_a}\)</p>
+
+        <p class="mt-2"><strong>Note:</strong> Since \(E < V\), the term \((E-V)/R_a\) is negative, so the current decreases during this interval, as expected &mdash; energy is being delivered to the supply.</p>
+      </div>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Key Regeneration Relationships</span>
+      <p>From the step-up chopper analysis, the average motor terminal voltage during regeneration is:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Regenerative Braking Voltage</div>
+        \[
+        V_a = (1 - \delta) \cdot V
+        \]
+      </div>
+
+      <p>The motor's voltage equation as a generator:</p>
+      <div class="equation-block">
+        \[
+        V_a = E - I_a R_a
+        \]
+      </div>
+
+      <p>Combining:</p>
+      <div class="equation-block">
+        \[
+        (1-\delta) V = E - I_a R_a
+        \]
+      </div>
+
+      <p>If \(I_a R_a\) is small: \(\;E \approx (1-\delta) V\), so \(\;\omega_m = \frac{(1-\delta)V}{K\phi}\)</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Regenerated Power</div>
+        \[
+        P_{\text{regen}} \approx V \cdot I_a \cdot (1-\delta)
+        \]
+      </div>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Regenerative braking with a step-up chopper stores energy in the motor inductance during the ON period and transfers it to the supply during the OFF period. The effective terminal voltage is \((1-\delta)V\), which must be less than \(E\) for current to flow in the braking direction. By adjusting \(\delta\), we can control braking torque and recover energy down to low speeds.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 5: Dynamic (Rheostatic) Braking
+     ============================================================ -->
+<div class="section" id="sec-dynamic-braking">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>5. Dynamic (Rheostatic) Braking</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Regenerative braking requires the supply to <em>accept</em> the returned energy. But what if the supply cannot absorb energy (e.g., a battery that's fully charged, or the DC bus is at its voltage limit)? In that case, we need an alternative: dissipate the braking energy as heat in a resistor. This is <strong>dynamic braking</strong> (also called rheostatic braking). A chopper controls the effective braking resistance to regulate the braking torque smoothly.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Dynamic braking is like engine braking in a car &mdash; you convert kinetic energy to heat (in resistors instead of engine friction). The chopper acts as a "variable resistor" by adjusting how much of the time the braking resistor is connected.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Dynamic Braking with Chopper</span>
+
+      <!-- Dynamic Braking Circuit -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 460 240" xmlns="http://www.w3.org/2000/svg" style="max-width:440px;">
+          <text x="18" y="26" class="label" font-weight="bold">Dynamic Braking Circuit</text>
+
+          <!-- Motor Eg -->
+          <circle cx="60" cy="130" r="20" class="component"/>
+          <text x="48" y="127" class="label" font-size="10">E</text>
+          <text x="63" y="127" class="label" font-size="8" dy="2">g</text>
+          <text x="52" y="142" class="label" font-size="9">+</text>
+
+          <line x1="60" y1="110" x2="60" y2="50" class="wire"/>
+          <line x1="60" y1="50" x2="120" y2="50" class="wire"/>
+
+          <!-- La -->
+          <path d="M120,50 C125,38 135,38 140,50 C145,38 155,38 160,50" class="component" fill="none"/>
+          <text x="130" y="34" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+          <line x1="160" y1="50" x2="200" y2="50" class="wire"/>
+
+          <!-- Ra -->
+          <rect x="200" y="38" width="40" height="24" rx="3" class="component-fill"/>
+          <text x="208" y="55" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+          <line x1="240" y1="50" x2="300" y2="50" class="wire"/>
+
+          <!-- Chopper G -->
+          <line x1="300" y1="50" x2="300" y2="80" class="wire"/>
+          <rect x="278" y="80" width="44" height="28" rx="4" class="component-fill"/>
+          <text x="291" y="99" class="label" font-size="12" font-weight="bold">G</text>
+          <line x1="300" y1="108" x2="300" y2="200" class="wire"/>
+
+          <!-- Braking resistor Rb (parallel path via diode) -->
+          <line x1="300" y1="50" x2="380" y2="50" class="wire"/>
+          <!-- Diode -->
+          <line x1="380" y1="50" x2="380" y2="70" class="wire"/>
+          <polygon points="368,70 392,70 380,90" class="component" fill="none" stroke-width="2"/>
+          <line x1="368" y1="90" x2="392" y2="90" class="wire"/>
+          <text x="395" y="82" class="label" font-size="11">D</text>
+          <line x1="380" y1="90" x2="380" y2="120" class="wire"/>
+
+          <!-- Rb -->
+          <rect x="358" y="120" width="44" height="24" rx="3" class="component-fill"/>
+          <text x="368" y="137" class="label" font-size="11">R<tspan font-size="9" dy="2">b</tspan></text>
+          <line x1="380" y1="144" x2="380" y2="200" class="wire"/>
+
+          <!-- Bottom wire -->
+          <line x1="60" y1="150" x2="60" y2="200" class="wire"/>
+          <line x1="60" y1="200" x2="380" y2="200" class="wire"/>
+        </svg>
+        <div class="diagram-caption">Figure 7: Dynamic braking with chopper-controlled braking resistor</div>
+      </div>
+
+      <p>The motor is disconnected from the supply and the armature is connected to a braking resistance \(R_b\) through a chopper. During the ON period, current circulates through the motor and switch G (storing energy in \(L_a\)). During the OFF period, current flows through \(R_b\), dissipating energy as heat.</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Effective Braking Resistance</div>
+        \[
+        R_e = (1-\delta) \cdot R_b
+        \]
+      </div>
+
+      <div class="equation-block">
+        <div class="eq-label">Average Braking Voltage</div>
+        \[
+        V_b = V_{a(\text{avg})} = (1-\delta) \cdot I_a \cdot R_b
+        \]
+      </div>
+
+      <p>By varying \(\delta\) from 0 to 1, the effective resistance varies from \(R_b\) (maximum braking) to 0 (no braking), giving smooth control of braking torque.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Dynamic braking converts kinetic energy to heat in a resistor. The chopper duty ratio controls the effective braking resistance: \(R_e = (1-\delta)R_b\). This is used when the supply cannot accept regenerated energy, or as a backup when regenerative braking reaches its limits.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 6: Composite Braking
+     ============================================================ -->
+<div class="section" id="sec-composite">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>6. Composite Braking</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>In real applications like DC traction (trains, trams, electric vehicles), we need braking over the <em>entire</em> speed range. Regenerative braking is efficient but only works when the motor's back-EMF is high enough. At very low speeds, \(E\) is too small for regeneration. We need a strategy that combines multiple braking methods to cover the full speed range.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Composite braking is like a car with both regenerative and friction brakes. At high speed, the regenerative system recovers most of the energy. As speed drops and regeneration becomes weak, the friction brakes (dynamic braking) take over. Near standstill, mechanical brakes bring the vehicle to a complete stop. Each method covers the other's weakness.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Composite Braking Strategy</span>
+      <p>A composite braking system combines regenerative and dynamic braking in a single circuit:</p>
+
+      <ul class="content-list">
+        <li><strong>High speed:</strong> Regenerative braking active. The step-up chopper boosts the motor's back-EMF and returns energy to the supply. Duty ratio is adjusted to control braking torque.</li>
+        <li><strong>Capacitor overvoltage protection:</strong> A braking resistor \(R_b\) and thyristor \(T_1\) are added in parallel. When the DC bus capacitor voltage exceeds the supply tolerance limit, \(T_1\) fires and diverts excess energy to \(R_b\).</li>
+        <li><strong>Low speed:</strong> When back-EMF drops too low for effective regeneration, the circuit switches to pure dynamic braking. The chopper now controls the braking resistor directly.</li>
+        <li><strong>Very low speed / standstill:</strong> Mechanical brakes engage for the final stop, since electromagnetic braking torque approaches zero.</li>
+      </ul>
+
+      <p><strong>Speed control during braking:</strong> Reduce \(V_a\) by changing the duty cycle while keeping \(E > V_a\) so that current flows in the braking direction.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Composite braking combines regenerative braking (energy-efficient, high speeds), dynamic braking (medium-to-low speeds), and mechanical braking (standstill) to provide smooth, controllable deceleration over the full speed range. This is the standard approach in DC traction systems.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 7: Two-Quadrant Chopper Drives
+     ============================================================ -->
+<div class="section" id="sec-two-quadrant">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>7. Two-Quadrant Chopper Drives</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>So far, we've treated motoring (step-down chopper) and regenerative braking (step-up chopper) as separate circuits. In practice, we want a single circuit that can do <em>both</em> &mdash; smoothly transitioning between motoring and braking without switching hardware. This is the <strong>two-quadrant chopper</strong>.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>A two-quadrant chopper is like a car's accelerator and regenerative braking pedal combined into one system. Press the "gas" (Q1 operates as step-down) and you motor forward. Lift off and "brake" (Q2 operates as step-up) and you recover energy back to the battery. The voltage across the motor stays positive, but the current direction reverses between motoring and braking.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Two-Quadrant Circuit</span>
+
+      <!-- Two-Quadrant Chopper Circuit -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 520 320" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
+          <text x="18" y="26" class="label" font-weight="bold">Two-Quadrant Chopper Drive</text>
+
+          <!-- Supply V -->
+          <line x1="50" y1="60" x2="50" y2="260" class="wire"/>
+          <text x="25" y="155" class="label">V</text>
+          <text x="38" y="78" class="label" font-size="10">+</text>
+          <text x="38" y="248" class="label" font-size="10">&minus;</text>
+
+          <!-- Top rail -->
+          <line x1="50" y1="60" x2="400" y2="60" class="wire"/>
+          <!-- Bottom rail -->
+          <line x1="50" y1="260" x2="400" y2="260" class="wire"/>
+
+          <!-- Q1 switch -->
+          <line x1="160" y1="60" x2="160" y2="90" class="wire"/>
+          <rect x="138" y="90" width="44" height="30" rx="4" class="component-fill"/>
+          <text x="146" y="110" class="label" font-size="11" font-weight="bold">Q1</text>
+          <line x1="160" y1="120" x2="160" y2="160" class="wire"/>
+
+          <!-- D2 diode (antiparallel to Q2, from bottom to middle) -->
+          <line x1="160" y1="160" x2="160" y2="180" class="wire"/>
+          <!-- Q2 switch -->
+          <rect x="138" y="180" width="44" height="30" rx="4" class="component-fill"/>
+          <text x="146" y="200" class="label" font-size="11" font-weight="bold">Q2</text>
+          <line x1="160" y1="210" x2="160" y2="260" class="wire"/>
+
+          <!-- D1 diode (antiparallel to Q1) -->
+          <line x1="100" y1="60" x2="100" y2="80" class="wire"/>
+          <polygon points="88,80 112,80 100,100" class="component" fill="none" stroke-width="2"/>
+          <line x1="88" y1="100" x2="112" y2="100" class="wire"/>
+          <line x1="100" y1="100" x2="100" y2="160" class="wire"/>
+          <line x1="100" y1="160" x2="160" y2="160" class="wire"/>
+          <text x="75" y="92" class="label" font-size="10">D1</text>
+
+          <!-- D2 diode (antiparallel to Q2) -->
+          <line x1="100" y1="160" x2="100" y2="180" class="wire"/>
+          <polygon points="88,180 112,180 100,200" class="component" fill="none" stroke-width="2"/>
+          <line x1="88" y1="200" x2="112" y2="200" class="wire"/>
+          <line x1="100" y1="200" x2="100" y2="260" class="wire"/>
+          <text x="75" y="192" class="label" font-size="10">D2</text>
+
+          <!-- Motor load from junction to right -->
+          <line x1="160" y1="160" x2="220" y2="160" class="wire"/>
+
+          <!-- La -->
+          <path d="M220,160 C225,148 235,148 240,160 C245,148 255,148 260,160 C265,148 275,148 280,160" class="component" fill="none"/>
+          <text x="240" y="144" class="label" font-size="11">L<tspan font-size="9" dy="2">a</tspan></text>
+          <line x1="280" y1="160" x2="320" y2="160" class="wire"/>
+
+          <!-- Ra -->
+          <rect x="320" y="148" width="40" height="24" rx="3" class="component-fill"/>
+          <text x="328" y="165" class="label" font-size="11">R<tspan font-size="9" dy="2">a</tspan></text>
+          <line x1="360" y1="160" x2="400" y2="160" class="wire"/>
+
+          <!-- Eg -->
+          <line x1="400" y1="60" x2="400" y2="110" class="wire"/>
+          <circle cx="400" cy="130" r="20" class="component"/>
+          <text x="388" y="127" class="label" font-size="10">E</text>
+          <text x="403" y="127" class="label" font-size="8" dy="2">g</text>
+          <line x1="400" y1="150" x2="400" y2="160" class="wire"/>
+          <line x1="400" y1="160" x2="400" y2="260" class="wire"/>
+
+          <!-- Labels -->
+          <text x="190" y="155" class="label" font-size="10" font-style="italic">V<tspan font-size="8" dy="1">a</tspan></text>
+
+          <!-- Quadrant diagram (small) -->
+          <rect x="280" y="230" width="100" height="60" rx="2" class="component" fill="none" stroke-width="1"/>
+          <line x1="330" y1="230" x2="330" y2="290" class="axis" stroke-width="1"/>
+          <line x1="280" y1="260" x2="380" y2="260" class="axis" stroke-width="1"/>
+          <text x="340" y="252" class="label-sm" style="fill:#16a34a;">I</text>
+          <text x="310" y="252" class="label-sm" style="fill:#dc2626;">IV</text>
+          <text x="340" y="280" class="label-sm" style="fill:#94a3b8;">II</text>
+          <text x="310" y="280" class="label-sm" style="fill:#94a3b8;">III</text>
+          <text x="370" y="267" class="label-sm">V<tspan font-size="6" dy="1">a</tspan></text>
+          <text x="325" y="242" class="label-sm">I<tspan font-size="6" dy="1">a</tspan></text>
+        </svg>
+        <div class="diagram-caption">Figure 8: Two-quadrant chopper (Class A + Class B combined). Operates in Quadrants I and IV.</div>
+      </div>
+
+      <p>The two-quadrant chopper consists of two switches (Q1, Q2) and two antiparallel diodes (D1, D2):</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Mode</th><th>Active Devices</th><th>Quadrant</th><th>Operation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Motoring (Forward)</strong></td><td>Q1 (step-down), D2 (freewheel)</td><td>I: +V<sub>a</sub>, +I<sub>a</sub></td><td>Class A chopper</td></tr>
+          <tr><td><strong>Regenerative Braking</strong></td><td>Q2 (step-up), D1 (to supply)</td><td>IV: +V<sub>a</sub>, &minus;I<sub>a</sub></td><td>Class B chopper</td></tr>
+        </tbody>
+      </table>
+
+      <p>The transition between motoring and braking is seamless &mdash; no mechanical switching is needed. The controller simply changes which transistor is pulsed.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>A two-quadrant chopper combines step-down (Q1, D2) and step-up (Q2, D1) in one half-bridge. It handles forward motoring and regenerative braking with positive voltage and bidirectional current. This is the minimum configuration for applications like electric vehicles where energy recovery during braking is desired.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 8: Four-Quadrant Chopper Drives
+     ============================================================ -->
+<div class="section" id="sec-four-quadrant">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>8. Four-Quadrant Chopper Drives</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Many industrial applications require <em>full</em> four-quadrant operation: forward motoring, forward braking (regeneration), reverse motoring, and reverse braking. Think of an elevator, a rolling mill, or a robotic arm &mdash; they all need to run and brake in both directions. The two-quadrant chopper only handles one direction of voltage. To get bidirectional voltage <em>and</em> current, we need the full H-bridge.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>The four-quadrant chopper is an H-bridge &mdash; imagine the motor sitting in the middle of the letter "H," with a switch at each of the four corners. By choosing which diagonal pair of switches to close, we control both the <em>direction</em> and <em>magnitude</em> of the voltage applied to the motor, enabling full forward/reverse operation with regeneration in both directions.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; H-Bridge Configuration</span>
+
+      <!-- H-Bridge Circuit -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" style="max-width:460px;">
+          <text x="18" y="26" class="label" font-weight="bold">Four-Quadrant (H-Bridge) Chopper</text>
+
+          <!-- Supply rails -->
+          <line x1="60" y1="60" x2="420" y2="60" class="wire"/>
+          <line x1="60" y1="300" x2="420" y2="300" class="wire"/>
+          <text x="30" y="55" class="label" font-size="10">+V</text>
+          <text x="30" y="308" class="label" font-size="10">&minus;</text>
+
+          <!-- Left leg -->
+          <!-- Q1 (top-left) -->
+          <line x1="130" y1="60" x2="130" y2="80" class="wire"/>
+          <rect x="108" y="80" width="44" height="28" rx="4" class="component-fill"/>
+          <text x="116" y="99" class="label" font-size="10" font-weight="bold">Q1</text>
+          <line x1="130" y1="108" x2="130" y2="130" class="wire"/>
+          <!-- D1 -->
+          <line x1="90" y1="60" x2="90" y2="75" class="wire"/>
+          <polygon points="80,75 100,75 90,95" class="component" fill="none" stroke-width="1.5"/>
+          <line x1="80" y1="95" x2="100" y2="95" class="wire" stroke-width="1.5"/>
+          <line x1="90" y1="95" x2="90" y2="130" class="wire"/>
+          <line x1="90" y1="130" x2="130" y2="130" class="wire"/>
+          <text x="68" y="88" class="label" font-size="9">D1</text>
+
+          <!-- Q4 (bottom-left) -->
+          <line x1="130" y1="130" x2="130" y2="180" class="wire"/>
+          <line x1="130" y1="220" x2="130" y2="230" class="wire"/>
+          <rect x="108" y="230" width="44" height="28" rx="4" class="component-fill"/>
+          <text x="116" y="249" class="label" font-size="10" font-weight="bold">Q4</text>
+          <line x1="130" y1="258" x2="130" y2="300" class="wire"/>
+          <!-- D4 -->
+          <line x1="90" y1="130" x2="90" y2="180" class="wire"/>
+          <line x1="90" y1="220" x2="90" y2="235" class="wire"/>
+          <polygon points="80,235 100,235 90,255" class="component" fill="none" stroke-width="1.5"/>
+          <line x1="80" y1="255" x2="100" y2="255" class="wire" stroke-width="1.5"/>
+          <line x1="90" y1="255" x2="90" y2="300" class="wire"/>
+          <text x="68" y="248" class="label" font-size="9">D4</text>
+
+          <!-- Right leg -->
+          <!-- Q3 (top-right) -->
+          <line x1="350" y1="60" x2="350" y2="80" class="wire"/>
+          <rect x="328" y="80" width="44" height="28" rx="4" class="component-fill"/>
+          <text x="336" y="99" class="label" font-size="10" font-weight="bold">Q3</text>
+          <line x1="350" y1="108" x2="350" y2="130" class="wire"/>
+          <!-- D3 -->
+          <line x1="390" y1="60" x2="390" y2="75" class="wire"/>
+          <polygon points="380,75 400,75 390,95" class="component" fill="none" stroke-width="1.5"/>
+          <line x1="380" y1="95" x2="400" y2="95" class="wire" stroke-width="1.5"/>
+          <line x1="390" y1="95" x2="390" y2="130" class="wire"/>
+          <line x1="350" y1="130" x2="390" y2="130" class="wire"/>
+          <text x="402" y="88" class="label" font-size="9">D3</text>
+
+          <!-- Q2 (bottom-right) -->
+          <line x1="350" y1="130" x2="350" y2="180" class="wire"/>
+          <line x1="350" y1="220" x2="350" y2="230" class="wire"/>
+          <rect x="328" y="230" width="44" height="28" rx="4" class="component-fill"/>
+          <text x="336" y="249" class="label" font-size="10" font-weight="bold">Q2</text>
+          <line x1="350" y1="258" x2="350" y2="300" class="wire"/>
+          <!-- D2 -->
+          <line x1="390" y1="130" x2="390" y2="180" class="wire"/>
+          <line x1="390" y1="220" x2="390" y2="235" class="wire"/>
+          <polygon points="380,235 400,235 390,255" class="component" fill="none" stroke-width="1.5"/>
+          <line x1="380" y1="255" x2="400" y2="255" class="wire" stroke-width="1.5"/>
+          <line x1="390" y1="255" x2="390" y2="300" class="wire"/>
+          <text x="402" y="248" class="label" font-size="9">D2</text>
+
+          <!-- Motor in the middle -->
+          <line x1="130" y1="180" x2="180" y2="180" class="wire"/>
+          <!-- La -->
+          <path d="M180,180 C185,168 195,168 200,180 C205,168 215,168 220,180" class="component" fill="none"/>
+          <text x="192" y="166" class="label" font-size="10">L<tspan font-size="8" dy="1">a</tspan></text>
+          <line x1="220" y1="180" x2="240" y2="180" class="wire"/>
+          <!-- Ra -->
+          <rect x="240" y="170" width="34" height="20" rx="3" class="component-fill"/>
+          <text x="247" y="184" class="label" font-size="9">R<tspan font-size="7" dy="1">a</tspan></text>
+          <line x1="274" y1="180" x2="290" y2="180" class="wire"/>
+          <!-- Eg -->
+          <circle cx="310" cy="200" r="16" class="component"/>
+          <text x="300" y="198" class="label" font-size="9">E<tspan font-size="7" dy="1">g</tspan></text>
+          <line x1="310" y1="184" x2="310" y2="180" class="wire"/>
+          <line x1="290" y1="180" x2="310" y2="180" class="wire"/>
+          <line x1="310" y1="216" x2="310" y2="220" class="wire"/>
+          <line x1="130" y1="220" x2="350" y2="220" class="wire"/>
+
+          <!-- Va label -->
+          <text x="210" y="210" class="label" font-size="10" font-style="italic">V<tspan font-size="8" dy="1">a</tspan></text>
+
+          <!-- Quadrant diagram -->
+          <rect x="160" y="270" width="160" height="80" rx="3" style="fill:none;stroke:var(--border-color);stroke-width:1;"/>
+          <line x1="240" y1="270" x2="240" y2="350" class="axis" stroke-width="1"/>
+          <line x1="160" y1="310" x2="320" y2="310" class="axis" stroke-width="1"/>
+          <!-- Active quadrants -->
+          <rect x="240" y="270" width="80" height="40" class="quadrant-active"/>
+          <rect x="160" y="270" width="80" height="40" class="quadrant-active"/>
+          <rect x="160" y="310" width="80" height="40" class="quadrant-active"/>
+          <rect x="240" y="310" width="80" height="40" class="quadrant-active"/>
+          <text x="268" y="295" class="label-sm" font-weight="bold" style="fill:#16a34a;">I</text>
+          <text x="188" y="295" class="label-sm" font-weight="bold" style="fill:#2563eb;">II</text>
+          <text x="188" y="335" class="label-sm" font-weight="bold" style="fill:#d97706;">III</text>
+          <text x="268" y="335" class="label-sm" font-weight="bold" style="fill:#dc2626;">IV</text>
+          <text x="308" y="318" class="label-sm">V<tspan font-size="6" dy="1">a</tspan></text>
+          <text x="233" y="280" class="label-sm">I<tspan font-size="6" dy="1">a</tspan></text>
+        </svg>
+        <div class="diagram-caption">Figure 9: Four-quadrant H-bridge chopper drive with all four operating quadrants active</div>
+      </div>
+
+      <p>The H-bridge uses four switches (Q1&ndash;Q4) with antiparallel diodes (D1&ndash;D4):</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Switches ON</th><th>Motor Voltage</th><th>Quadrant</th><th>Operation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Q1 + Q2</strong></td><td>+V<sub>a</sub></td><td>I (+V, +I): Forward motoring</td><td>Positive voltage applied</td></tr>
+          <tr><td><strong>Q3 + Q4</strong></td><td>&minus;V<sub>a</sub></td><td>III (&minus;V, &minus;I): Reverse motoring</td><td>Negative voltage applied</td></tr>
+          <tr><td><strong>D3 + D4</strong></td><td>&minus;V back to supply</td><td>II (&minus;V, +I): Forward regen. braking</td><td>Current forced to supply</td></tr>
+          <tr><td><strong>D1 + D2</strong></td><td>+V back to supply</td><td>IV (+V, &minus;I): Reverse regen. braking</td><td>Current forced to supply</td></tr>
+        </tbody>
+      </table>
+
+      <p>By using PWM on the appropriate switch pair, the H-bridge can produce any average voltage from \(-V\) to \(+V\) and handle current in either direction, giving true four-quadrant operation.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The four-quadrant H-bridge chopper is the most versatile DC drive topology. It provides full bidirectional voltage and current control, enabling forward/reverse motoring and forward/reverse regenerative braking. This is the standard topology for servo drives, industrial positioning, and any application requiring full speed reversal with regeneration.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 9: Practice Problems
+     ============================================================ -->
+<div class="section" id="sec-practice">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>9. Practice Problems</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 1</span>
+      <p>A separately excited DC motor is fed from a 200 V DC source through a step-down chopper operating at 1 kHz. The motor has \(R_a = 0.5\;\Omega\), \(L_a = 10\;\text{mH}\), and \(K\phi = 0.4\;\text{V}\cdot\text{s/rad}\). The motor draws an average current of 20 A. Find: (a) the duty ratio \(\delta\), (b) the motor speed in rpm, and (c) the peak-to-peak current ripple.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Average voltage equation:</strong></p>
+        <p>\(V_a = \delta \cdot V = E + I_a R_a\)</p>
+        <p>\(E = K\phi \cdot \omega_m\), so we need speed first... Actually, let's use the information given.</p>
+        <p>We know \(I_a = 20\) A, so the resistive drop is \(I_a R_a = 20 \times 0.5 = 10\) V.</p>
+        <p>We need another equation. Let's find \(E\) from the motor equation and duty ratio simultaneously:</p>
+        <p>\(\delta \cdot 200 = E + 10\), so \(E = 200\delta - 10\)</p>
+        <p class="mt-2">Wait &mdash; we need either speed or duty ratio as a given. Let's assume the problem intends that the motor runs at a speed such that \(I_a = 20\) A and we need to find \(\delta\) for a given speed. Since no speed is specified, let's find the duty ratio if the motor runs at 800 rpm.</p>
+        <p class="mt-2">At 800 rpm: \(\omega_m = 2\pi \times 800/60 = 83.78\) rad/s</p>
+        <p>\(E = 0.4 \times 83.78 = 33.51\) V</p>
+        <p>\(V_a = E + I_a R_a = 33.51 + 10 = 43.51\) V</p>
+        <p>\(\delta = V_a / V = 43.51 / 200 = \mathbf{0.2176}\)</p>
+
+        <p class="mt-2"><strong>(b) Speed:</strong> 800 rpm (as assumed above, or \(\omega_m = (V_a - I_a R_a)/(K\phi)\) for any given \(\delta\)).</p>
+
+        <p class="mt-2"><strong>(c) Current ripple:</strong></p>
+        <p>\(\Delta I_a = \dfrac{V \cdot \delta(1-\delta)}{f \cdot L_a} = \dfrac{200 \times 0.2176 \times 0.7824}{1000 \times 0.01}\)</p>
+        <p>\(\Delta I_a = \dfrac{200 \times 0.1703}{10} = \dfrac{34.06}{10} = \mathbf{3.41\;\text{A}}\)</p>
+      </div>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 2</span>
+      <p>A DC motor (\(R_a = 1\;\Omega\), \(K\phi = 0.5\;\text{V}\cdot\text{s/rad}\)) is braking regeneratively using a step-up chopper connected to a 120 V DC supply. The motor speed is 1200 rpm and the average braking current is 15 A. Find: (a) the duty ratio, (b) the regenerated power.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Finding the duty ratio:</strong></p>
+        <p>Motor speed: \(\omega_m = 2\pi \times 1200/60 = 125.66\) rad/s</p>
+        <p>Back-EMF: \(E = K\phi \cdot \omega_m = 0.5 \times 125.66 = 62.83\) V</p>
+        <p>Generator voltage equation: \(V_a = E - I_a R_a = 62.83 - 15 \times 1 = 47.83\) V</p>
+        <p>Step-up chopper relation: \(V_a = (1-\delta) \cdot V\)</p>
+        <p>\(47.83 = (1-\delta) \times 120\)</p>
+        <p>\(1-\delta = 47.83/120 = 0.3986\)</p>
+        <p>\(\delta = 1 - 0.3986 = \mathbf{0.6014}\)</p>
+
+        <p class="mt-2"><strong>(b) Regenerated power:</strong></p>
+        <p>\(P_{\text{regen}} = V \cdot I_a \cdot (1-\delta) = 120 \times 15 \times 0.3986 = \mathbf{717.5\;\text{W}}\)</p>
+
+        <div class="box intuition mt-2">
+          <span class="box-label">Check</span>
+          <p>The motor generates \(P_{\text{gen}} = E \cdot I_a = 62.83 \times 15 = 942.5\) W. After \(I_a^2 R_a = 225\) W of copper losses, the net power to supply is \(942.5 - 225 = 717.5\) W. This matches!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 3</span>
+      <p>A step-down chopper has \(V = 220\) V, \(T_{\text{on}} = 1\) ms, \(T_{\text{off}} = 3\) ms. The motor has \(R_a = 2\;\Omega\) and \(K\phi = 0.3\;\text{V}\cdot\text{s/rad}\). Find: (a) the chopping frequency, (b) the duty ratio, (c) the average output voltage, (d) the motor speed if \(I_a = 10\) A.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Chopping frequency:</strong></p>
+        <p>\(T = T_{\text{on}} + T_{\text{off}} = 1 + 3 = 4\) ms</p>
+        <p>\(f = 1/T = 1/0.004 = \mathbf{250\;\text{Hz}}\)</p>
+
+        <p class="mt-2"><strong>(b) Duty ratio:</strong></p>
+        <p>\(\delta = T_{\text{on}}/T = 1/4 = \mathbf{0.25}\)</p>
+
+        <p class="mt-2"><strong>(c) Average output voltage:</strong></p>
+        <p>\(V_a = \delta \cdot V = 0.25 \times 220 = \mathbf{55\;\text{V}}\)</p>
+
+        <p class="mt-2"><strong>(d) Motor speed:</strong></p>
+        <p>\(V_a = E + I_a R_a\)</p>
+        <p>\(E = V_a - I_a R_a = 55 - 10 \times 2 = 35\) V</p>
+        <p>\(\omega_m = E/(K\phi) = 35/0.3 = 116.67\) rad/s</p>
+        <p>\(N = 60 \omega_m / (2\pi) = 60 \times 116.67 / 6.2832 = \mathbf{1114\;\text{rpm}}\)</p>
+      </div>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 4</span>
+      <p>For dynamic braking with a chopper, a DC motor (\(K\phi = 0.6\;\text{V}\cdot\text{s/rad}\), \(R_a = 0.5\;\Omega\)) is connected to a braking resistance \(R_b = 5\;\Omega\). The motor is running at 1500 rpm. If the duty ratio is 0.4, find: (a) the effective braking resistance, (b) the braking current, (c) the braking torque, and (d) the power dissipated in \(R_b\).</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Effective braking resistance:</strong></p>
+        <p>\(R_e = (1-\delta) \cdot R_b = (1-0.4) \times 5 = 0.6 \times 5 = \mathbf{3\;\Omega}\)</p>
+
+        <p class="mt-2"><strong>(b) Braking current:</strong></p>
+        <p>\(\omega_m = 2\pi \times 1500/60 = 157.08\) rad/s</p>
+        <p>\(E = K\phi \cdot \omega_m = 0.6 \times 157.08 = 94.25\) V</p>
+        <p>\(I_a = E/(R_a + R_e) = 94.25/(0.5 + 3) = 94.25/3.5 = \mathbf{26.93\;\text{A}}\)</p>
+
+        <p class="mt-2"><strong>(c) Braking torque:</strong></p>
+        <p>\(T_b = K\phi \cdot I_a = 0.6 \times 26.93 = \mathbf{16.16\;\text{N}\cdot\text{m}}\)</p>
+
+        <p class="mt-2"><strong>(d) Power dissipated in \(R_b\):</strong></p>
+        <p>\(P_{R_b} = I_a^2 \cdot R_e = 26.93^2 \times 3 = 725.2 \times 3 = \mathbf{2175.7\;\text{W}}\)</p>
+        <p>(The remaining power \(I_a^2 R_a = 362.6\) W is lost in the armature resistance.)</p>
+      </div>
+    </div>
+
+    <!-- Problem 5 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 5</span>
+      <p>A step-down chopper supplies a separately excited DC motor from a 300 V DC source. The motor parameters are \(R_a = 0.8\;\Omega\), \(L_a = 20\;\text{mH}\), \(K\phi = 0.5\;\text{V}\cdot\text{s/rad}\). The chopper operates at 500 Hz with \(\delta = 0.6\). Find: (a) the average motor voltage, (b) if the motor drives a load requiring 25 A average current, find the motor speed, (c) the peak-to-peak current ripple, (d) \(I_{\max}\) and \(I_{\min}\).</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>(a) Average motor voltage:</strong></p>
+        <p>\(V_a = \delta \cdot V = 0.6 \times 300 = \mathbf{180\;\text{V}}\)</p>
+
+        <p class="mt-2"><strong>(b) Motor speed:</strong></p>
+        <p>\(E = V_a - I_a R_a = 180 - 25 \times 0.8 = 180 - 20 = 160\) V</p>
+        <p>\(\omega_m = E/(K\phi) = 160/0.5 = 320\) rad/s</p>
+        <p>\(N = 60 \times 320/(2\pi) = \mathbf{3056\;\text{rpm}}\)</p>
+
+        <p class="mt-2"><strong>(c) Peak-to-peak current ripple:</strong></p>
+        <p>\(\Delta I_a = \dfrac{V \cdot \delta(1-\delta)}{f \cdot L_a} = \dfrac{300 \times 0.6 \times 0.4}{500 \times 0.02} = \dfrac{72}{10} = \mathbf{7.2\;\text{A}}\)</p>
+
+        <p class="mt-2"><strong>(d) Maximum and minimum current:</strong></p>
+        <p>\(I_{\max} = I_{a(\text{avg})} + \Delta I_a / 2 = 25 + 3.6 = \mathbf{28.6\;\text{A}}\)</p>
+        <p>\(I_{\min} = I_{a(\text{avg})} - \Delta I_a / 2 = 25 - 3.6 = \mathbf{21.4\;\text{A}}\)</p>
+
+        <div class="box motivation mt-2">
+          <span class="box-label">Note</span>
+          <p>Since \(I_{\min} = 21.4 > 0\), the current is continuous. If \(I_{\min}\) were negative (which is impossible physically since the diode prevents it), it would mean discontinuous conduction and the linear ripple formula would no longer apply.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 10: Flashcards
+     ============================================================ -->
+<div class="section" id="sec-flashcards">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>10. Flashcards &mdash; Sheet 5 Review</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <p>Click the card to flip it. Use the arrows to navigate. These target key formulas and problem-solving skills for Sheet 5.</p>
+
+    <div class="flashcard-deck">
+      <div class="flashcard-counter" id="fc-counter">Card 1 of 16</div>
+      <div class="flashcard-container" id="fc-container" onclick="flipCard()">
+        <div class="flashcard-inner" id="fc-inner">
+          <div class="flashcard-front" id="fc-front">
+            <span class="flashcard-category" id="fc-cat">Category</span>
+            <div id="fc-question">Loading...</div>
+          </div>
+          <div class="flashcard-back" id="fc-back">
+            <span class="flashcard-category">Answer</span>
+            <div id="fc-answer">Loading...</div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-nav">
+        <button onclick="prevCard()">&#9664; Previous</button>
+        <button onclick="nextCard()">Next &#9654;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     LECTURE SUMMARY
+     ============================================================ -->
+<div class="section" id="sec-summary">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>Lecture Summary</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="box takeaway">
+      <span class="box-label">Big Picture</span>
+      <p>In this lecture, we covered the complete landscape of DC chopper drives:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li><strong>Chopper fundamentals:</strong> High-frequency switching of a DC source produces a variable average voltage. Higher frequency means smoother current (less ripple) and better dynamic response than phase-controlled converters.</li>
+        <li><strong>Step-down (Buck):</strong> \(V_a = \delta V\). Used for motoring (Quadrant I). Current ripple: \(\Delta I_a = V\delta(1-\delta)/(fL_a)\).</li>
+        <li><strong>Step-up (Boost):</strong> \(V_{out} = V_{in}/(1-\delta)\). Used for regenerative braking, boosting the motor's low back-EMF to exceed the supply voltage.</li>
+        <li><strong>Motoring analysis:</strong> Exact exponential solutions for current during duty and freewheeling intervals. Steady-state requires solving two simultaneous equations for \(I_{a1}\) and \(I_{a2}\).</li>
+        <li><strong>Regenerative braking:</strong> Step-up chopper stores energy in inductance during ON, transfers to supply during OFF. Terminal voltage: \(V_a = (1-\delta)V\).</li>
+        <li><strong>Dynamic braking:</strong> Energy dissipated in \(R_b\) with effective resistance \(R_e = (1-\delta)R_b\).</li>
+        <li><strong>Two-quadrant:</strong> Half-bridge combining Class A (motoring) and Class B (regeneration) for forward operation.</li>
+        <li><strong>Four-quadrant:</strong> Full H-bridge for complete forward/reverse motoring and braking.</li>
+      </ol>
+      <p class="mt-2">These chopper topologies form the basis of modern DC drive systems, from small battery-powered robots to large industrial machines and electric vehicles.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content-wrapper -->
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ===========================================
+// THEME TOGGLE
+// ===========================================
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+  if (theme === 'dark') {
+    icon.textContent = '\u2600'; // sun
+    label.textContent = 'Light';
+  } else {
+    icon.textContent = '\u263E'; // moon
+    label.textContent = 'Dark';
+  }
+}
+
+// Initialize theme
+(function() {
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+
+// ===========================================
+// SIDEBAR TOGGLE (mobile)
+// ===========================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar when clicking a link (mobile)
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+});
+
+// ===========================================
+// COLLAPSIBLE SECTIONS
+// ===========================================
+function toggleSection(header) {
+  var content = header.nextElementSibling;
+  var icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    icon.classList.remove('collapsed');
+    setTimeout(function() { content.style.maxHeight = 'none'; }, 500);
+  } else {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    requestAnimationFrame(function() {
+      content.classList.add('collapsed');
+      icon.classList.add('collapsed');
+    });
+  }
+}
+
+// Initialize all sections as expanded
+document.querySelectorAll('.section-content').forEach(function(el) {
+  el.style.maxHeight = 'none';
+});
+
+// ===========================================
+// SOLUTION TOGGLE
+// ===========================================
+function toggleSolution(btn) {
+  var content = btn.nextElementSibling;
+  content.classList.toggle('visible');
+  btn.textContent = content.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+  // Re-render MathJax in the revealed content
+  if (content.classList.contains('visible') && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([content]);
+  }
+}
+
+// ===========================================
+// PROGRESS BAR
+// ===========================================
+function updateProgress() {
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+// ===========================================
+// ACTIVE TOC HIGHLIGHT
+// ===========================================
+function updateActiveTOC() {
+  var sections = document.querySelectorAll('.section[id], .subsection[id], .hero[id]');
+  var links = document.querySelectorAll('.sidebar nav a');
+  var scrollPos = window.pageYOffset + 120;
+  var activeId = '';
+
+  sections.forEach(function(section) {
+    if (section.offsetTop <= scrollPos) {
+      activeId = section.id;
+    }
+  });
+
+  links.forEach(function(link) {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + activeId) {
+      link.classList.add('active');
+    }
+  });
+}
+
+// Throttle scroll events
+var scrollTicking = false;
+window.addEventListener('scroll', function() {
+  if (!scrollTicking) {
+    requestAnimationFrame(function() {
+      updateProgress();
+      updateActiveTOC();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
+});
+
+// Initial call
+updateProgress();
+updateActiveTOC();
+
+// ===========================================
+// FLASHCARDS
+// ===========================================
+var fcCards = [
+  {q: "What is the average output voltage of a step-down chopper?", a: "\\(V_a = \\delta \\cdot V_s\\) where \\(\\delta = T_{on}/T\\) is the duty ratio and \\(V_s\\) is the supply voltage. Range: 0 to \\(V_s\\).", cat: "Step-Down"},
+  {q: "How do you find the duty ratio \\(\\delta\\) to run a motor at a specific speed?", a: "From \\(V_a = \\delta V_s\\) and \\(V_a = E_g + I_a R_a = K\\phi\\omega_m + I_a R_a\\). Solve for \\(\\delta = V_a / V_s\\).", cat: "Motoring"},
+  {q: "What is the formula for armature current ripple?", a: "\\(\\Delta I_a = \\dfrac{V_s \\cdot \\delta(1-\\delta)}{f \\cdot L_a}\\). Maximum ripple occurs at \\(\\delta = 0.5\\): \\(\\Delta I_{a,max} = V_s/(4fL_a)\\).", cat: "Current Ripple"},
+  {q: "How do you find \\(I_{max}\\) and \\(I_{min}\\) of armature current?", a: "\\(I_{max} = I_{a(avg)} + \\Delta I_a/2\\), \\(I_{min} = I_{a(avg)} - \\Delta I_a/2\\). Or solve the exact exponential equations for \\(I_{a1}\\) and \\(I_{a2}\\) simultaneously.", cat: "Current Ripple"},
+  {q: "For regenerative braking with a step-up chopper, what is the relationship between \\(E\\) and \\(V\\)?", a: "\\(E\\) must exceed \\(V_a\\). For step-up: \\(V_a = (1-\\delta)V\\), so \\(E = (1-\\delta)V + I_a R_a\\). Speed: \\(\\omega_m = E/(K\\phi)\\).", cat: "Regeneration"},
+  {q: "How do you calculate motor speed from chopper parameters?", a: "\\(\\omega_m = \\dfrac{V_a - I_a R_a}{K\\phi} = \\dfrac{\\delta V_s - I_a R_a}{K\\phi}\\) for motoring with step-down chopper.", cat: "Motoring"},
+  {q: "What is the input power from the DC source in a chopper drive?", a: "\\(P_{in} = V_s \\cdot I_{s(avg)}\\). For step-down: average source current \\(= \\delta \\cdot I_a\\), so \\(P_{in} = V_s \\cdot \\delta \\cdot I_a\\).", cat: "Power"},
+  {q: "Given on-time and off-time, how do you find duty ratio and frequency?", a: "\\(\\delta = T_{on}/(T_{on}+T_{off})\\), \\(f = 1/(T_{on}+T_{off})\\), \\(T = T_{on}+T_{off}\\).", cat: "Fundamentals"},
+  {q: "For motoring at rated torque, how do you find \\(I_a\\)?", a: "Rated torque \\(T = K\\phi \\cdot I_{a(rated)}\\). If load torque is \\(x\\) times rated, then \\(I_a = x \\cdot I_{a(rated)}\\).", cat: "Motoring"},
+  {q: "During regenerative braking, what determines the regenerated power?", a: "\\(P_{regen} \\approx V \\cdot I_a \\cdot (1-\\delta)\\). The motor acts as generator with \\(E > V_a\\). Power balance: \\(P_{regen} = E \\cdot I_a - I_a^2 R_a\\).", cat: "Regeneration"},
+  {q: "What is the speed range for a step-down chopper drive?", a: "From \\(\\omega_{min} \\approx 0\\) (at \\(\\delta = I_a R_a / V_s\\)) to \\(\\omega_{max} = (V_s - I_a R_a)/(K\\phi)\\) (at \\(\\delta = 1\\)).", cat: "Speed Range"},
+  {q: "How does chopping frequency affect current ripple?", a: "Higher frequency gives smaller ripple: \\(\\Delta I_a \\propto 1/f\\). Doubling \\(f\\) halves the ripple. This is the main advantage of choppers over thyristor converters.", cat: "Current Ripple"},
+  {q: "What is the duty ratio range for a given speed range?", a: "\\(\\delta_{min} = (K\\phi \\cdot \\omega_{min} + I_a R_a)/V_s\\) and \\(\\delta_{max} = (K\\phi \\cdot \\omega_{max} + I_a R_a)/V_s\\).", cat: "Speed Range"},
+  {q: "For dynamic braking with a chopper, what is the effective braking resistance?", a: "\\(R_e = (1-\\delta) \\cdot R_b\\), where \\(R_b\\) is the braking resistance. Braking current: \\(I_a = E/(R_a + R_e)\\).", cat: "Dynamic Braking"},
+  {q: "How do you convert between rpm and rad/s?", a: "\\(\\omega\\;(\\text{rad/s}) = 2\\pi N / 60\\), where \\(N\\) is speed in rpm. Equivalently, \\(N = 60\\omega/(2\\pi)\\).", cat: "Unit Conversion"},
+  {q: "What quadrants does a two-quadrant chopper cover?", a: "Quadrants I (+\\(V_a\\), +\\(I_a\\): forward motoring via Q1, D2) and IV (+\\(V_a\\), -\\(I_a\\): regenerative braking via Q2, D1). Voltage is always positive.", cat: "Multi-Quadrant"}
+];
+
+var fcIndex = 0;
+
+function showCard(i) {
+  var card = fcCards[i];
+  document.getElementById('fc-counter').textContent = 'Card ' + (i + 1) + ' of ' + fcCards.length;
+  document.getElementById('fc-cat').textContent = card.cat;
+  document.getElementById('fc-question').innerHTML = card.q;
+  document.getElementById('fc-answer').innerHTML = card.a;
+  // Remove flip
+  document.getElementById('fc-container').classList.remove('flipped');
+  // Re-typeset MathJax
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('fc-front'), document.getElementById('fc-back')]);
+  }
+}
+
+function flipCard() {
+  document.getElementById('fc-container').classList.toggle('flipped');
+  // Typeset back side on flip
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('fc-back')]);
+  }
+}
+
+function nextCard() {
+  fcIndex = (fcIndex + 1) % fcCards.length;
+  showCard(fcIndex);
+}
+
+function prevCard() {
+  fcIndex = (fcIndex - 1 + fcCards.length) % fcCards.length;
+  showCard(fcIndex);
+}
+
+// Initialize first card after page load
+document.addEventListener('DOMContentLoaded', function() {
+  showCard(0);
+});
+// Also try immediately in case DOMContentLoaded already fired
+if (document.readyState !== 'loading') {
+  showCard(0);
+}
+</script>
+
+</body>
+</html>

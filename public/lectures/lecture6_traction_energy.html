@@ -832,6 +832,22 @@ hr.section-divider {
   .main-content { margin-left: 0; padding: 20px; }
   .section.collapsed .section-body { max-height: none; opacity: 1; }
 }
+
+/* Flashcard Styles */
+.flashcard-deck{text-align:center;padding:10px 0}
+.flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+.flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+.flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+.flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+[data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+.flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+.flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+.flashcard-nav button:hover{opacity:0.85}
+.flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+.flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+.flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
 </style>
 </head>
 
@@ -888,6 +904,10 @@ hr.section-divider {
   <div class="sidebar-section">
     <div class="sidebar-section-title">Review</div>
     <a href="#summary">Summary &amp; Takeaways</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Flashcards</div>
+    <a href="#sec-flashcards">Flashcards</a>
   </div>
 </nav>
 
@@ -2231,6 +2251,36 @@ hr.section-divider {
     </div>
   </div>
 
+  <!-- Flashcards Section -->
+  <div class="section" id="sec-flashcards">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+      <span class="collapse-icon">&#9662;</span>
+    </div>
+    <div class="section-content">
+      <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+      <div class="flashcard-deck">
+        <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+        <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">
+              <span class="flashcard-category" id="fc-category"></span>
+              <div id="fc-front-text"></div>
+              <div class="flashcard-hint">Click to reveal answer</div>
+            </div>
+            <div class="flashcard-back">
+              <div id="fc-back-text"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flashcard-nav">
+          <button onclick="fcPrev()">&#9664; Previous</button>
+          <button onclick="fcNext()">Next &#9654;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <div style="text-align: center; padding: 40px 20px 20px; color: var(--text-muted); font-size: 13px;">
     <p>Lecture 6 &mdash; Specific Energy Consumption &bull; Electric Drives Course</p>
@@ -2342,6 +2392,42 @@ window.addEventListener('scroll', function() {
   window.addEventListener('scroll', updateActive);
   updateActive();
 })();
+
+// Flashcard System
+var fcCards = [
+  {q:"What is Specific Energy Consumption (SEC)?",a:"\\(SEC = \\frac{\\text{Net electrical energy (kWh)}}{M(\\text{tonnes}) \\times D(\\text{km})}\\)<br>Units: kWh/(tonne\u00b7km)",cat:"Formula"},
+  {q:"How do you calculate energy at wheel rims for each phase?",a:"\\(E_i = F_i \\times D_i\\) (Joules)<br>where F_i = total force during phase i, D_i = distance traveled. Convert J to kWh: \u00f7 3.6\u00d710\u2076",cat:"Formula"},
+  {q:"What forces act during acceleration on level track?",a:"\\(F = F_a + F_r = 277.8 M_e \\alpha + r \\times M\\) (N). No gradient force on level.",cat:"Formula"},
+  {q:"What forces act during free running on up-gradient?",a:"\\(F = F_g + F_r = 9.81 M G + r M\\) (N). No acceleration force (constant speed).",cat:"Formula"},
+  {q:"When is the energy negative (regeneration possible)?",a:"When net force is negative: either going DOWN steep gradient (|F_g| > F_r) or during deceleration. Motor acts as generator.",cat:"Concept"},
+  {q:"How to convert mechanical energy to electrical energy consumed?",a:"For motoring: \\(E_{in} = E_{mech}/\\eta\\) (divide by efficiency)<br>For regeneration: \\(E_{regen} = E_{mech} \\times \\eta\\) (multiply by efficiency)",cat:"Formula"},
+  {q:"What is the total net electrical energy?",a:"\\(E_{net} = E_{motoring}/\\eta - |E_{braking}| \\times \\eta\\)<br>First term: energy consumed. Second term: energy recovered (if regeneration possible).",cat:"Formula"},
+  {q:"During coasting, what energy is consumed?",a:"Zero electrical energy! Supply is disconnected. Speed decreases due to resistance and gravity. This saves energy.",cat:"Concept"},
+  {q:"How do you find distance during acceleration?",a:"\\(D_1 = \\frac{1}{2} V_m t_1\\) (convert to km!). Since V goes 0\u2192Vm linearly, average speed = Vm/2",cat:"Formula"},
+  {q:"How do you find distance during free running?",a:"\\(D_2 = V_m \\times t_2\\) (convert to km and hours consistently). Speed is constant at Vm.",cat:"Formula"},
+  {q:"For regenerative braking energy returned, what formula?",a:"\\(E_{returned} = |F_{net}| \\times D \\times \\eta\\) where F_net is the net braking force and \u03b7 is drive efficiency in braking",cat:"Formula"},
+  {q:"What is the deceleration force formula?",a:"\\(F_d = 277.8 M_e \\beta\\) (N) where \u03b2=deceleration (km/h/s). This force opposes motion (decelerates).",cat:"Formula"},
+  {q:"During braking on a down-gradient, what are the forces?",a:"\\(F = -F_d - F_g + F_r\\) where F_d=decel force (opposes motion), F_g=gravity (helps going down\u2192negative), F_r=resistance (opposes motion)",cat:"Problem-Solving"},
+  {q:"Convert kWh to Joules and vice versa",a:"\\(1 \\text{ kWh} = 3.6 \\times 10^6 \\text{ J}\\)<br>\\(1 \\text{ J} = \\frac{1}{3.6 \\times 10^6} \\text{ kWh}\\)<br>Or: kWh = Watt-seconds / 3,600,000",cat:"Formula"}
+];
+var fcIndex = 0;
+function fcShow(i){
+  var c=document.getElementById('fc-container');
+  if(!c)return;
+  c.classList.remove('flipped');
+  var front=document.getElementById('fc-front-text');
+  var back=document.getElementById('fc-back-text');
+  var cat=document.getElementById('fc-category');
+  var counter=document.getElementById('fc-current');
+  if(front)front.innerHTML=fcCards[i].q;
+  if(back)back.innerHTML=fcCards[i].a;
+  if(cat)cat.textContent=fcCards[i].cat;
+  if(counter)counter.textContent=i+1;
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([front,back]);}
+}
+function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
 </script>
 
 </body>

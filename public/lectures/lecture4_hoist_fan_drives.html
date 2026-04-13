@@ -1035,6 +1035,22 @@
             margin: 48px 0;
             border: none;
         }
+
+        /* Flashcard Styles */
+        .flashcard-deck{text-align:center;padding:10px 0}
+        .flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+        .flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+        .flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+        .flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+        .flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+        .flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+        [data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+        .flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+        .flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+        .flashcard-nav button:hover{opacity:0.85}
+        .flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+        .flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+        .flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
     </style>
 </head>
 
@@ -1081,6 +1097,7 @@
             <li><a href="#problem5" class="toc-sub">Problem 5: Winch Drive</a></li>
             <li><a href="#problem7" class="toc-sub">Problem 7: Conveyor Belt</a></li>
             <li><a href="#summary">Lecture Summary</a></li>
+            <li><a href="#sec-flashcards">Flashcards</a></li>
         </ul>
     </nav>
 
@@ -2084,6 +2101,35 @@
             </div>
         </div>
 
+        <div class="section" id="sec-flashcards">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+            <span class="collapse-icon">&#9662;</span>
+          </div>
+          <div class="section-content">
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+            <div class="flashcard-deck">
+              <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+              <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">
+                    <span class="flashcard-category" id="fc-category"></span>
+                    <div id="fc-front-text"></div>
+                    <div class="flashcard-hint">Click to reveal answer</div>
+                  </div>
+                  <div class="flashcard-back">
+                    <div id="fc-back-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flashcard-nav">
+                <button onclick="fcPrev()">&#9664; Previous</button>
+                <button onclick="fcNext()">Next &#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Footer -->
         <footer class="lecture-footer">
             <p>Lecture 4: Dynamics &mdash; Hoist Drives &amp; Fan Drives | Electric Drives Course</p>
@@ -2221,6 +2267,42 @@
         // Initial calls
         updateProgress();
         updateBackToTop();
+
+        // Flashcard System
+        var fcCards = [
+          {q:"What is the power equation for a crane/hoist?",a:"\\(P = 9.81 \\times M \\times R \\times \\omega_{m1}/\\eta = F \\times V/\\eta\\) where M=mass(kg), R=drum radius, V=linear speed, \u03b7=efficiency",cat:"Formula"},
+          {q:"How does a counterweight reduce motor power in an elevator?",a:"Counterweight = empty cage + half load capacity. Motor only needs to handle the difference. Reduces power to less than half.",cat:"Concept"},
+          {q:"In an elevator, when does the motor act as a generator?",a:"1) Going UP unloaded (counterweight > cage weight \u2192 pulls cage up, motor brakes)<br>2) Going DOWN loaded (load weight > counterweight \u2192 gravity drives load down)",cat:"Concept"},
+          {q:"What is the torque characteristic of fan loads?",a:"\\(T = k\\omega^2\\) (square law). Power: \\(P = k\\omega^3\\). Does not need direction reversal.",cat:"Formula"},
+          {q:"For a conveyor belt problem, how do you find equivalent J?",a:"\\(J_{eq} = J_m + M(V/\\omega_m)^2\\) where M = total mass on belt (material + belt), V = belt speed",cat:"Formula"},
+          {q:"How do you calculate motor torque for accelerating a conveyor?",a:"\\(T = T_l + J_{eq} \\frac{\\Delta\\omega}{\\Delta t}\\) where T_l is steady-state load torque, \u0394\u03c9/\u0394t is required acceleration",cat:"Formula"},
+          {q:"For a winch with gearbox, how to refer torque to motor shaft?",a:"\\(T_{motor} = T_{load} \\times a/\\eta\\) where a = gear ratio (load speed/motor speed), \u03b7 = gear efficiency",cat:"Formula"},
+          {q:"What is the rated load for an elevator motor?",a:"M_rated = full cage weight - counterweight = (cage + full load) - (cage + half load) = half of load capacity",cat:"Problem-Solving"},
+          {q:"How to find equivalent J for a winch system?",a:"\\(J_{eq} = J_m + J_{gears} \\cdot a^2 + J_{drum} \\cdot a^2 + M(V/\\omega_m)^2\\)",cat:"Formula"},
+          {q:"Why is a water tank (balloon) important for pump motors?",a:"Without tank: motor cycles on-off too frequently \u2192 burns from starting current. Tank allows motor to run long enough ON and rest long enough OFF.",cat:"Concept"},
+          {q:"For hoist problems, when is T positive vs negative?",a:"T > 0: motor provides torque to lift load (motoring going up, or holding load going down).<br>T < 0: load drives motor (regenerative braking).",cat:"Concept"},
+          {q:"How to calculate load torque for a hoist referred to motor?",a:"\\(T_l = \\frac{F \\times R_{drum}}{\\eta \\times \\text{gear ratio}^{-1}}\\) or \\(T_l = \\frac{9.81 \\times M \\times R_{drum} \\times a}{\\eta}\\)",cat:"Formula"}
+        ];
+        var fcIndex = 0;
+        function fcShow(i){
+          var c=document.getElementById('fc-container');
+          if(!c)return;
+          c.classList.remove('flipped');
+          var front=document.getElementById('fc-front-text');
+          var back=document.getElementById('fc-back-text');
+          var cat=document.getElementById('fc-category');
+          var counter=document.getElementById('fc-current');
+          if(front)front.innerHTML=fcCards[i].q;
+          if(back)back.innerHTML=fcCards[i].a;
+          if(cat)cat.textContent=fcCards[i].cat;
+          if(counter)counter.textContent=i+1;
+          if(window.MathJax&&MathJax.typesetPromise){
+            MathJax.typesetPromise([front,back]);
+          }
+        }
+        function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+        function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+        document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
     </script>
 </body>
 </html>

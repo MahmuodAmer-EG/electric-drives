@@ -1073,6 +1073,22 @@
             font-size: 0.82rem;
             opacity: 0.85;
         }
+
+        /* Flashcard Styles */
+        .flashcard-deck{text-align:center;padding:10px 0}
+        .flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+        .flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+        .flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+        .flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+        .flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+        .flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+        [data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+        .flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+        .flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+        .flashcard-nav button:hover{opacity:0.85}
+        .flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+        .flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+        .flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
     </style>
 </head>
 <body>
@@ -1133,6 +1149,7 @@
             <li class="toc-item"><a href="#example2" class="toc-link sub" data-section="example2">Problem 4: Winch Lifting</a></li>
             <li class="toc-item"><a href="#example3" class="toc-link sub" data-section="example3">Problem 11: Starting Time</a></li>
             <li class="toc-item"><a href="#summary" class="toc-link" data-section="summary">Lecture Summary</a></li>
+            <li class="toc-item"><a href="#sec-flashcards" class="toc-link" data-section="sec-flashcards">Flashcards</a></li>
         </ul>
     </nav>
 
@@ -2424,6 +2441,35 @@
             </div>
         </section>
 
+        <div class="section" id="sec-flashcards">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+            <span class="collapse-icon">&#9662;</span>
+          </div>
+          <div class="section-content">
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+            <div class="flashcard-deck">
+              <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+              <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">
+                    <span class="flashcard-category" id="fc-category"></span>
+                    <div id="fc-front-text"></div>
+                    <div class="flashcard-hint">Click to reveal answer</div>
+                  </div>
+                  <div class="flashcard-back">
+                    <div id="fc-back-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flashcard-nav">
+                <button onclick="fcPrev()">&#9664; Previous</button>
+                <button onclick="fcNext()">Next &#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
     </main>
 
     <!-- Back to Top Button -->
@@ -2609,6 +2655,45 @@
             chevron.classList.remove('open');
         }
     }
+
+    // Flashcard System
+    var fcCards = [
+      {q:"What is the fundamental torque equation?",a:"\\(T - T_l = J \\frac{d\\omega_m}{dt}\\)<br>T=motor torque, T_l=load torque, J=equivalent inertia, \u03c9_m=motor speed",cat:"Formula"},
+      {q:"If T > T_l, what happens?",a:"d\u03c9/dt > 0 \u2192 Motor accelerates. Kinetic energy is being stored in the rotating mass.",cat:"Concept"},
+      {q:"How do you calculate equivalent J for loads with rotational motion through gears?",a:"\\(J_{eq} = J_m + J_1 a^2\\) where \\(a = \\omega_{m1}/\\omega_m\\) (gear ratio = driven/driving speed)",cat:"Formula"},
+      {q:"How do you calculate equivalent J for translational loads?",a:"\\(J_{eq} = J_m + M(V/\\omega_m)^2\\) where M=mass, V=linear velocity, \u03c9_m=motor speed",cat:"Formula"},
+      {q:"How do you refer load torque through a gearbox?",a:"\\(T_l = T_{l0} + \\frac{a \\cdot T_{l1}}{\\eta}\\) where a=gear ratio, \u03b7=efficiency, T_l0=motor shaft losses",cat:"Formula"},
+      {q:"What are the components of load torque?",a:"\\(T_l = T_F + T_w + T_L\\)<br>T_F=friction (Ts+Tc+B\u03c9), T_w=windage (c\u03c9\u00b2), T_L=useful load",cat:"Formula"},
+      {q:"What is the complete equation of motion?",a:"\\(T = T_l + J\\frac{d\\omega}{dt} + B\\omega\\) where B=viscous friction coefficient",cat:"Formula"},
+      {q:"How do you calculate dynamic time (starting time)?",a:"\\(dt = \\frac{J \\, d\\omega}{T - T_l}\\). Integrate from \u03c9_initial to \u03c9_final. For linear T(\u03c9), can solve analytically.",cat:"Formula"},
+      {q:"In the retardation test, how do you find J?",a:"Run motor above rated speed, disconnect supply, record deceleration. \\(J = \\frac{P_{rot}}{\\omega_r \\cdot (d\\omega/dt)}\\)",cat:"Problem-Solving"},
+      {q:"K.E. equivalence principle for calculating J?",a:"\\(\\frac{1}{2}J\\omega_m^2 = \\frac{1}{2}J_m\\omega_m^2 + \\frac{1}{2}J_1\\omega_{m1}^2 + \\frac{1}{2}MV^2\\) \u2014 sum of all kinetic energies",cat:"Formula"},
+      {q:"Power balance for referring load torque?",a:"\\(P_m = T_l \\omega_m = T_{l1}\\omega_{m1}/\\eta_1 + T_{l2}\\omega_{m2}/\\eta_2 + F \\cdot V/\\eta\\)",cat:"Formula"},
+      {q:"For problem with T=15+0.5\u03c9 and Tl=5+0.6\u03c9, how to find starting time?",a:"At steady state: T=Tl \u2192 15+0.5\u03c9=5+0.6\u03c9 \u2192 \u03c9_ss=100 rad/s.<br>dt=Jd\u03c9/(T-Tl)=10d\u03c9/(10-0.1\u03c9). Integrate 0 to 100.",cat:"Problem-Solving"},
+      {q:"What is the gear ratio for a belt/pulley system?",a:"\\(a = r_1/r_2 = N_1/N_2\\) where r=radius, N=speed. Same as gear ratio concept.",cat:"Concept"},
+      {q:"How to convert between linear velocity V and angular velocity \u03c9?",a:"\\(V = \\omega \\cdot r\\) where r is the drum/pulley/wheel radius",cat:"Formula"},
+      {q:"What is the power rating of a motor driving multiple loads?",a:"\\(P = T_l \\cdot \\omega_m\\) where T_l is the total equivalent load torque referred to motor shaft",cat:"Formula"}
+    ];
+    var fcIndex = 0;
+    function fcShow(i){
+      var c=document.getElementById('fc-container');
+      if(!c)return;
+      c.classList.remove('flipped');
+      var front=document.getElementById('fc-front-text');
+      var back=document.getElementById('fc-back-text');
+      var cat=document.getElementById('fc-category');
+      var counter=document.getElementById('fc-current');
+      if(front)front.innerHTML=fcCards[i].q;
+      if(back)back.innerHTML=fcCards[i].a;
+      if(cat)cat.textContent=fcCards[i].cat;
+      if(counter)counter.textContent=i+1;
+      if(window.MathJax&&MathJax.typesetPromise){
+        MathJax.typesetPromise([front,back]);
+      }
+    }
+    function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+    function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+    document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
     </script>
 </body>
 </html>

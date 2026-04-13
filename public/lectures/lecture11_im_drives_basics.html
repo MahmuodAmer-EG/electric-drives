@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lecture 11: Induction Motor Drives &mdash; Basics &amp; Stator Voltage Control</title>
+
+<!-- MathJax CDN -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)']],
+    displayMath: [['\\[', '\\]']],
+    macros: {
+      omega: '\\omega',
+      phi: '\\varphi'
+    }
+  },
+  options: {
+    skipHtmlTags: ['script','noscript','style','textarea','pre']
+  }
+};
+</script>
+<script>
+    (function() {
+        var primary = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        var fallback = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.min.js';
+        var s = document.createElement('script');
+        s.async = true; s.src = primary;
+        s.onerror = function() {
+            var s2 = document.createElement('script');
+            s2.async = true; s2.src = fallback;
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    })();
+</script>
+
+<style>
+/* ============================================================
+   CSS RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Light mode */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-sidebar: #f1f3f5;
+  --text-primary: #1a1a2e;
+  --text-secondary: #495057;
+  --text-muted: #868e96;
+  --border-color: #dee2e6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+
+  /* Accent colors */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #dbeafe;
+  --accent-blue-border: #93c5fd;
+  --accent-green: #16a34a;
+  --accent-green-light: #dcfce7;
+  --accent-green-border: #86efac;
+  --accent-yellow: #d97706;
+  --accent-yellow-light: #fef3c7;
+  --accent-yellow-border: #fcd34d;
+  --accent-red: #dc2626;
+  --accent-purple: #7c3aed;
+
+  /* Section colors */
+  --motivation-bg: #fffbeb;
+  --motivation-border: #f59e0b;
+  --motivation-text: #92400e;
+  --motivation-icon: #f59e0b;
+
+  --intuition-bg: #eff6ff;
+  --intuition-border: #3b82f6;
+  --intuition-text: #1e40af;
+  --intuition-icon: #3b82f6;
+
+  --deepdive-bg: #f0fdf4;
+  --deepdive-border: #22c55e;
+  --deepdive-text: #166534;
+  --deepdive-icon: #22c55e;
+
+  --takeaway-bg: #faf5ff;
+  --takeaway-border: #a855f7;
+  --takeaway-text: #6b21a8;
+  --takeaway-icon: #a855f7;
+
+  /* Sizing */
+  --sidebar-width: 280px;
+  --content-max: 900px;
+  --progress-height: 4px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-sidebar: #1e293b;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+
+  --accent-blue: #60a5fa;
+  --accent-blue-light: #1e3a5f;
+  --accent-blue-border: #2563eb;
+  --accent-green: #4ade80;
+  --accent-green-light: #14532d;
+  --accent-green-border: #16a34a;
+  --accent-yellow: #fbbf24;
+  --accent-yellow-light: #451a03;
+  --accent-yellow-border: #d97706;
+
+  --motivation-bg: #1c1207;
+  --motivation-border: #d97706;
+  --motivation-text: #fcd34d;
+  --motivation-icon: #fbbf24;
+
+  --intuition-bg: #0c1929;
+  --intuition-border: #2563eb;
+  --intuition-text: #93c5fd;
+  --intuition-icon: #60a5fa;
+
+  --deepdive-bg: #052e16;
+  --deepdive-border: #16a34a;
+  --deepdive-text: #86efac;
+  --deepdive-icon: #4ade80;
+
+  --takeaway-bg: #1a0533;
+  --takeaway-border: #7c3aed;
+  --takeaway-text: #c4b5fd;
+  --takeaway-icon: #a78bfa;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  transition: background var(--transition-normal), color var(--transition-normal);
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: var(--progress-height);
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  z-index: 10000;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================
+   TOP HEADER
+   ============================================================ */
+.top-header {
+  position: fixed;
+  top: var(--progress-height);
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 999;
+  box-shadow: var(--shadow-sm);
+  transition: background var(--transition-normal);
+}
+
+.top-header .lecture-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.top-header .header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme toggle */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Sidebar toggle (mobile) */
+.sidebar-toggle {
+  display: none;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   SIDEBAR / TABLE OF CONTENTS
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: calc(56px + var(--progress-height));
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100vh - 56px - var(--progress-height));
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  padding: 20px 0;
+  z-index: 998;
+  transition: transform var(--transition-normal), background var(--transition-normal);
+}
+
+.sidebar h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 7px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+.sidebar nav a:hover {
+  background: var(--bg-primary);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+
+.sidebar nav a.active {
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+  background: var(--bg-primary);
+  font-weight: 600;
+}
+
+.sidebar nav a.sub {
+  padding-left: 36px;
+  font-size: 0.8rem;
+}
+
+.sidebar nav a.subsub {
+  padding-left: 50px;
+  font-size: 0.78rem;
+}
+
+/* Sidebar scrollbar */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: calc(56px + var(--progress-height) + 40px) 48px 80px 48px;
+  max-width: calc(var(--content-max) + var(--sidebar-width) + 96px);
+  transition: margin-left var(--transition-normal);
+}
+
+.content-wrapper {
+  max-width: var(--content-max);
+}
+
+/* ============================================================
+   HERO SECTION
+   ============================================================ */
+.hero {
+  text-align: center;
+  padding: 48px 0 40px;
+  margin-bottom: 48px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.hero .lecture-number {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-blue);
+  background: var(--accent-blue-light);
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+}
+
+.hero .subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   SECTION STRUCTURE
+   ============================================================ */
+.section {
+  margin-bottom: 56px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.section-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.section-header .collapse-icon {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-normal);
+  width: 24px;
+  text-align: center;
+}
+
+.section-header .collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  overflow: hidden;
+  transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+.section-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+}
+
+/* Sub-section */
+.subsection {
+  margin: 28px 0;
+}
+
+.subsection h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.subsection h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   COLORED BOXES (Motivation, Intuition, Deep Dive, Takeaway)
+   ============================================================ */
+.box {
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 20px 0;
+  border-left: 5px solid;
+  position: relative;
+}
+
+.box .box-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.box.motivation {
+  background: var(--motivation-bg);
+  border-left-color: var(--motivation-border);
+  color: var(--motivation-text);
+}
+.box.motivation .box-label {
+  background: var(--motivation-border);
+  color: #fff;
+}
+
+.box.intuition {
+  background: var(--intuition-bg);
+  border-left-color: var(--intuition-border);
+  color: var(--intuition-text);
+}
+.box.intuition .box-label {
+  background: var(--intuition-border);
+  color: #fff;
+}
+
+.box.deepdive {
+  background: var(--deepdive-bg);
+  border-left-color: var(--deepdive-border);
+  color: var(--deepdive-text);
+}
+.box.deepdive .box-label {
+  background: var(--deepdive-border);
+  color: #fff;
+}
+
+.box.takeaway {
+  background: var(--takeaway-bg);
+  border-left-color: var(--takeaway-border);
+  color: var(--takeaway-text);
+}
+.box.takeaway .box-label {
+  background: var(--takeaway-border);
+  color: #fff;
+}
+
+/* ============================================================
+   EQUATIONS
+   ============================================================ */
+.equation-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin: 16px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+.equation-block .eq-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 0.9rem;
+}
+
+.styled-table th, .styled-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.styled-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.styled-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* ============================================================
+   SVG DIAGRAMS
+   ============================================================ */
+.diagram-container {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.diagram-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-caption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ============================================================
+   LISTS
+   ============================================================ */
+.content-list {
+  padding-left: 24px;
+  margin: 12px 0;
+}
+
+.content-list li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   PRACTICE PROBLEMS
+   ============================================================ */
+.problem-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 22px 26px;
+  margin: 16px 0;
+}
+
+.problem-card .problem-number {
+  display: inline-block;
+  background: var(--accent-blue);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.problem-card .solution {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.solution-toggle {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all var(--transition-fast);
+}
+
+.solution-toggle:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.solution-content {
+  display: none;
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.solution-content.visible {
+  display: block;
+}
+
+/* ============================================================
+   FLASHCARDS
+   ============================================================ */
+.flashcard-section {
+  margin: 32px 0;
+}
+
+.flashcard-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.flashcard-counter {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.flashcard-btn {
+  background: var(--accent-blue);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.flashcard-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.flashcard-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.flashcard-viewport {
+  perspective: 1200px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  min-height: 320px;
+}
+
+.flashcard {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 300px;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+.flashcard-front {
+  background: var(--intuition-bg);
+  border-color: var(--intuition-border);
+}
+
+.flashcard-back {
+  background: var(--deepdive-bg);
+  border-color: var(--deepdive-border);
+  transform: rotateY(180deg);
+}
+
+.flashcard-face .fc-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+  padding: 3px 12px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.flashcard-front .fc-label {
+  background: var(--intuition-border);
+}
+
+.flashcard-back .fc-label {
+  background: var(--deepdive-border);
+}
+
+.flashcard-face .fc-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+.flashcard-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 16px;
+  font-style: italic;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+p {
+  margin-bottom: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.highlight {
+  background: var(--accent-yellow-light);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.text-center { text-align: center; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-content {
+    margin-left: 0;
+    padding: calc(56px + var(--progress-height) + 24px) 20px 60px 20px;
+  }
+  .sidebar-toggle {
+    display: block;
+  }
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero h1 { font-size: 1.35rem; }
+  .section-header h2 { font-size: 1.25rem; }
+  .box { padding: 16px 18px; }
+  .flashcard-face { padding: 22px 18px; min-height: 260px; }
+  .flashcard-viewport { min-height: 280px; }
+}
+
+/* ============================================================
+   SVG THEME OVERRIDES
+   ============================================================ */
+svg text {
+  fill: var(--text-primary);
+}
+[data-theme="dark"] svg .wire { stroke: #94a3b8; }
+[data-theme="dark"] svg .component { stroke: #94a3b8; fill: none; }
+[data-theme="dark"] svg .component-fill { fill: #334155; stroke: #94a3b8; }
+[data-theme="dark"] svg .label { fill: #e2e8f0; }
+[data-theme="dark"] svg .arrow { stroke: #94a3b8; fill: #94a3b8; }
+[data-theme="dark"] svg .axis { stroke: #64748b; }
+[data-theme="dark"] svg .curve1 { stroke: #60a5fa; }
+[data-theme="dark"] svg .curve2 { stroke: #f87171; }
+[data-theme="dark"] svg .curve3 { stroke: #4ade80; }
+[data-theme="dark"] svg .curve4 { stroke: #fbbf24; }
+[data-theme="dark"] svg .curve5 { stroke: #c084fc; }
+[data-theme="dark"] svg .region { fill-opacity: 0.15; }
+
+/* Light mode SVG defaults */
+svg .wire { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component { stroke: #334155; stroke-width: 2; fill: none; }
+svg .component-fill { fill: #f1f5f9; stroke: #334155; stroke-width: 2; }
+svg .label { fill: #1e293b; font-size: 13px; font-family: 'Segoe UI', sans-serif; }
+svg .label-sm { fill: #475569; font-size: 11px; font-family: 'Segoe UI', sans-serif; }
+svg .arrow { stroke: #334155; stroke-width: 2; fill: #334155; }
+svg .axis { stroke: #475569; stroke-width: 1.5; }
+svg .curve1 { stroke: #2563eb; stroke-width: 2.5; fill: none; }
+svg .curve2 { stroke: #dc2626; stroke-width: 2.5; fill: none; }
+svg .curve3 { stroke: #16a34a; stroke-width: 2.5; fill: none; }
+svg .curve4 { stroke: #d97706; stroke-width: 2.5; fill: none; }
+svg .curve5 { stroke: #7c3aed; stroke-width: 2.5; fill: none; }
+svg .region { stroke: none; }
+svg .quadrant-active { fill: #dbeafe; fill-opacity: 0.5; stroke: #2563eb; stroke-width: 1; stroke-dasharray: 4; }
+svg .quadrant-inactive { fill: #f1f5f9; fill-opacity: 0.3; stroke: #cbd5e1; stroke-width: 1; stroke-dasharray: 4; }
+[data-theme="dark"] svg .quadrant-active { fill: #1e3a5f; fill-opacity: 0.5; stroke: #60a5fa; }
+[data-theme="dark"] svg .quadrant-inactive { fill: #1e293b; fill-opacity: 0.3; stroke: #475569; }
+
+/* Scrollbar for main */
+.main-content::-webkit-scrollbar { width: 6px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 6px; }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Top Header -->
+<header class="top-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">&#9776;</button>
+    <span class="lecture-tag">Lecture 11 &mdash; Electric Drives</span>
+  </div>
+  <div class="header-controls">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span id="theme-icon">&#9790;</span>
+      <span id="theme-label" style="font-size:0.8rem;font-weight:600;">Dark</span>
+    </button>
+  </div>
+</header>
+
+<!-- Sidebar / TOC -->
+<aside class="sidebar" id="sidebar">
+  <h3>Table of Contents</h3>
+  <nav id="toc-nav">
+    <a href="#hero">Overview</a>
+    <a href="#sec-im-intro" class="sub">1. Induction Motor Types</a>
+    <a href="#sec-special-designs" class="sub">2. Special IM Designs</a>
+    <a href="#sec-low-slip" class="subsub">Low Slip IM</a>
+    <a href="#sec-high-slip" class="subsub">High Slip IM</a>
+    <a href="#sec-deep-bar" class="subsub">Deep Bar IM</a>
+    <a href="#sec-double-cage" class="subsub">Double Cage IM</a>
+    <a href="#sec-equiv-circuit" class="sub">3. Equivalent Circuit</a>
+    <a href="#sec-performance" class="sub">4. Torque &amp; Performance</a>
+    <a href="#sec-torque-deriv" class="subsub">Torque Derivation</a>
+    <a href="#sec-max-torque" class="subsub">Max Torque &amp; Slip</a>
+    <a href="#sec-normalized" class="subsub">Normalized Torque</a>
+    <a href="#sec-design-tradeoffs" class="sub">5. Design Trade-offs</a>
+    <a href="#sec-speed-methods" class="sub">6. Speed Control Methods</a>
+    <a href="#sec-stator-voltage" class="sub">7. Stator Voltage Control</a>
+    <a href="#sec-stator-impl" class="subsub">Implementation</a>
+    <a href="#sec-worked-example" class="sub">8. Worked Example</a>
+    <a href="#sec-practice" class="sub">9. Practice Problems</a>
+    <a href="#sec-flashcards" class="sub">10. Flashcards</a>
+    <a href="#sec-summary" class="sub">Lecture Summary</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrapper">
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<div class="hero" id="hero">
+  <span class="lecture-number">Lecture 11</span>
+  <h1>Induction Motor Drives &mdash; Basics &amp; Stator Voltage Control</h1>
+  <p class="subtitle">Understanding induction motor types, equivalent circuit analysis, torque-speed characteristics, and stator voltage control as the simplest IM speed control method.</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1: Induction Motor Types
+     ============================================================ -->
+<div class="section" id="sec-im-intro">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>1. Induction Motor Types</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>We've spent several lectures on DC drives, and by now you know how beautifully controllable DC motors are &mdash; independent knobs for flux and torque. So why bother with induction motors? Because <strong>over 90% of all motors in the world are induction motors.</strong> They're cheap, rugged, maintenance-free (no brushes, no commutator), and they work directly from the AC grid. The challenge is that controlling their speed is much harder than for DC motors. Understanding the machine itself is the critical first step.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of an induction motor like a barbecue rotisserie driven by a rotating magnetic field. The stator (the stationary outer part) creates a magnetic field that spins at "synchronous speed." The rotor (the inner part) tries to follow, but it can never quite catch up &mdash; it always lags behind. That lag is called <strong>slip</strong>. If the rotor actually caught up to the rotating field, there would be no relative motion, no induced voltage in the rotor, no rotor current, and no torque. The slip is essential &mdash; it's the engine of the induction motor.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; IM Classifications</span>
+
+      <p>Induction motors come in three broad families:</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Type</th><th>Rotor Construction</th><th>Key Feature</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Squirrel Cage IM</strong></td>
+            <td>Rotor bars short-circuited by end rings &mdash; like a hamster cage</td>
+            <td>Simplest, most rugged, lowest cost, 80%+ of all IMs. No external rotor access.</td>
+          </tr>
+          <tr>
+            <td><strong>Wound Rotor IM</strong></td>
+            <td>Three-phase winding on rotor, brought out through slip rings</td>
+            <td>External rotor resistance can be added. Better starting torque, speed control via rotor circuit. More expensive and needs maintenance (brushes).</td>
+          </tr>
+          <tr>
+            <td><strong>Linear IM</strong></td>
+            <td>"Unrolled" rotary motor &mdash; flat stator produces traveling field</td>
+            <td>Produces linear force instead of rotational torque. Used in maglev trains, conveyor systems, and sliding doors.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>For drives, the squirrel cage motor is the dominant choice because of its low cost and robustness. The wound rotor motor is used in specialized applications where rotor circuit access provides a control advantage.</p>
+    </div>
+
+    <!-- Squirrel Cage IM Cross Section Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 500 320" xmlns="http://www.w3.org/2000/svg" style="max-width:480px;">
+        <!-- Stator outer ring -->
+        <circle cx="250" cy="160" r="130" class="component" stroke-width="3"/>
+        <circle cx="250" cy="160" r="110" class="component" stroke-width="1.5"/>
+        <!-- Stator label -->
+        <text x="155" y="45" class="label" font-size="13" font-weight="bold">Stator</text>
+        <line x1="190" y1="48" x2="220" y2="60" class="wire" stroke-width="1" stroke-dasharray="3"/>
+
+        <!-- Air gap -->
+        <circle cx="250" cy="160" r="85" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4" fill="none"/>
+        <text x="340" y="105" class="label-sm">Air gap</text>
+
+        <!-- Rotor outer ring -->
+        <circle cx="250" cy="160" r="80" class="component-fill" stroke-width="2"/>
+        <circle cx="250" cy="160" r="30" class="component" stroke-width="1.5"/>
+
+        <!-- Rotor bars (dots around rotor) -->
+        <circle cx="250" cy="83" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="290" cy="88" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="322" cy="110" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="330" cy="145" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="322" cy="180" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="300" cy="210" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="270" cy="230" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="230" cy="230" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="200" cy="210" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="178" cy="180" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="170" cy="145" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="178" cy="110" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+        <circle cx="210" cy="88" r="5" fill="#d97706" stroke="#92400e" stroke-width="1"/>
+
+        <!-- Stator coils (simplified slots) -->
+        <rect x="240" y="32" width="20" height="16" rx="2" fill="#2563eb" opacity="0.6"/>
+        <rect x="300" y="50" width="20" height="16" rx="2" fill="#dc2626" opacity="0.6"/>
+        <rect x="345" y="100" width="16" height="20" rx="2" fill="#16a34a" opacity="0.6"/>
+        <rect x="345" y="180" width="16" height="20" rx="2" fill="#2563eb" opacity="0.6"/>
+        <rect x="300" y="245" width="20" height="16" rx="2" fill="#dc2626" opacity="0.6"/>
+        <rect x="240" y="265" width="20" height="16" rx="2" fill="#16a34a" opacity="0.6"/>
+        <rect x="178" y="245" width="20" height="16" rx="2" fill="#2563eb" opacity="0.6"/>
+        <rect x="135" y="180" width="16" height="20" rx="2" fill="#dc2626" opacity="0.6"/>
+        <rect x="135" y="100" width="16" height="20" rx="2" fill="#16a34a" opacity="0.6"/>
+        <rect x="178" y="50" width="20" height="16" rx="2" fill="#dc2626" opacity="0.6"/>
+
+        <!-- Shaft -->
+        <circle cx="250" cy="160" r="15" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+        <text x="243" y="164" class="label-sm" font-size="9">Shaft</text>
+
+        <!-- Rotor label -->
+        <text x="340" y="300" class="label" font-size="13" font-weight="bold">Rotor</text>
+        <line x1="340" y1="290" x2="310" y2="230" class="wire" stroke-width="1" stroke-dasharray="3"/>
+
+        <!-- Rotor bar label -->
+        <text x="370" y="150" class="label-sm" fill="#d97706">Rotor bars</text>
+        <line x1="370" y1="146" x2="336" y2="146" class="wire" stroke-width="1" stroke-dasharray="3"/>
+
+        <!-- Rotating field arrow -->
+        <path d="M 290 55 A 90 90 0 0 1 340 95" fill="none" stroke="#7c3aed" stroke-width="2" stroke-dasharray="5"/>
+        <polygon points="340,90 348,100 335,100" fill="#7c3aed" stroke="none"/>
+        <text x="340" y="70" class="label-sm" fill="#7c3aed">Rotating</text>
+        <text x="345" y="82" class="label-sm" fill="#7c3aed">field</text>
+      </svg>
+      <p class="diagram-caption">Figure 1: Cross-section of a squirrel cage induction motor. The rotor bars (orange) are short-circuited by end rings. The stator carries the three-phase winding (colored slots).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Induction motors are the workhorses of industry &mdash; simple, rugged, and cheap. The squirrel cage type dominates. The fundamental operating principle is electromagnetic induction: the stator's rotating field induces currents in the rotor, which interact with the field to produce torque. The rotor must always slip behind the field for this to work.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2: Special IM Designs
+     ============================================================ -->
+<div class="section" id="sec-special-designs">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>2. Special Squirrel Cage Designs</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>A standard squirrel cage motor has a fundamental trade-off: if you make the rotor resistance low, you get good running efficiency but terrible starting torque (and dangerously high starting current). If you make the resistance high, starting is great but running efficiency is poor. Engineers have developed clever rotor bar designs to get <em>both</em> &mdash; good starting and good running &mdash; out of a single motor.</p>
+    </div>
+
+    <!-- Low Slip IM -->
+    <div class="subsection" id="sec-low-slip">
+      <h3>a) Low Slip IM (s = 0.02 &ndash; 0.07)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>This motor is designed for nearly constant speed. Low rotor resistance means minimal slip at rated load &mdash; the rotor almost keeps up with the rotating field. Think of it as a "tightly coupled" follower. The downside? At starting (when slip = 1), the low resistance means very high starting current and low starting torque. Speed control via voltage is limited to a narrow range.</p>
+      </div>
+
+      <ul class="content-list">
+        <li><strong>Rotor resistance:</strong> Low \(R'_r\)</li>
+        <li><strong>Operating slip:</strong> 2&ndash;7% at rated load</li>
+        <li><strong>Starting torque:</strong> Poor (low \(R'_r\) gives low torque at \(s=1\))</li>
+        <li><strong>Starting current:</strong> High (low impedance at standstill)</li>
+        <li><strong>Efficiency:</strong> High at rated speed (low rotor copper losses = \(s \times P_g\))</li>
+        <li><strong>Speed control range:</strong> Narrow via stator voltage</li>
+        <li><strong>Best for:</strong> Constant-speed applications &mdash; pumps, compressors, fans at fixed speed</li>
+      </ul>
+    </div>
+
+    <!-- High Slip IM -->
+    <div class="subsection" id="sec-high-slip">
+      <h3>b) High Slip IM (s = 0.1 &ndash; 0.4)</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>The opposite philosophy: high rotor resistance makes the motor a strong starter with low starting current, but it operates at a much larger slip at rated load. It's like a "loosely coupled" follower &mdash; the rotor lags far behind the field. The high slip means more rotor copper loss (\(P_{cu} = s \cdot P_g\)), so efficiency is poor. But the wider speed range under voltage control and natural softness of the torque-speed curve make it ideal for fan and pump loads where torque is proportional to speed squared.</p>
+      </div>
+
+      <ul class="content-list">
+        <li><strong>Rotor resistance:</strong> High \(R'_r\)</li>
+        <li><strong>Operating slip:</strong> 10&ndash;40% at rated load</li>
+        <li><strong>Starting torque:</strong> High (high \(R'_r\) maximizes torque near \(s=1\))</li>
+        <li><strong>Starting current:</strong> Low</li>
+        <li><strong>Efficiency:</strong> Poor at rated speed (high rotor losses)</li>
+        <li><strong>Speed control range:</strong> Wide via stator voltage</li>
+        <li><strong>Best for:</strong> Fan loads, blowers, centrifugal pumps (where \(T \propto \omega^2\))</li>
+        <li><strong>Torque motor:</strong> A special high-slip design that can produce torque continuously at standstill &mdash; used in tape tensioners, winders, and positioning systems</li>
+      </ul>
+    </div>
+
+    <!-- Deep Bar IM -->
+    <div class="subsection" id="sec-deep-bar">
+      <h3>c) Deep Bar IM</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Here's an elegant trick: instead of choosing between high and low rotor resistance, make bars that <em>automatically</em> change their effective resistance depending on the situation. Deep bar rotors use narrow, deep rotor bars. At starting (slip = 1), the rotor frequency is high (equal to stator frequency), and the <strong>skin effect</strong> crowds the current to the top of the bar &mdash; only a fraction of the conductor cross-section carries current, so the effective resistance is high. At running (low slip = low rotor frequency), the skin effect disappears, current distributes uniformly across the full bar depth, and the effective resistance drops. The motor gets automatic "high resistance at start, low resistance at run."</p>
+      </div>
+
+      <!-- Deep Bar Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 580 260" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;">
+          <!-- At Starting (left) -->
+          <text x="80" y="25" class="label" font-size="14" font-weight="bold">At Starting (s = 1)</text>
+          <text x="65" y="45" class="label-sm">High rotor frequency</text>
+
+          <!-- Bar cross section -->
+          <rect x="100" y="60" width="40" height="150" rx="3" stroke="#475569" stroke-width="2" fill="#fef3c7"/>
+          <!-- Current concentration at top -->
+          <rect x="102" y="62" width="36" height="40" rx="2" fill="#dc2626" opacity="0.7"/>
+          <rect x="102" y="102" width="36" height="30" rx="0" fill="#dc2626" opacity="0.3"/>
+          <rect x="102" y="132" width="36" height="30" rx="0" fill="#dc2626" opacity="0.1"/>
+          <!-- Labels -->
+          <text x="150" y="85" class="label-sm" fill="#dc2626">Current crowded</text>
+          <text x="150" y="100" class="label-sm" fill="#dc2626">at top (skin effect)</text>
+          <text x="150" y="160" class="label-sm">Low current density</text>
+          <text x="150" y="175" class="label-sm">at bottom</text>
+          <text x="55" y="130" class="label-sm" font-weight="bold">Bar</text>
+
+          <!-- Result -->
+          <text x="65" y="230" class="label-sm" fill="#dc2626" font-weight="bold">Effective R: HIGH</text>
+          <text x="65" y="248" class="label-sm" fill="#16a34a">Good starting torque</text>
+
+          <!-- Separator -->
+          <line x1="290" y1="30" x2="290" y2="250" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="6"/>
+
+          <!-- At Running (right) -->
+          <text x="370" y="25" class="label" font-size="14" font-weight="bold">At Running (s &lt;&lt; 1)</text>
+          <text x="360" y="45" class="label-sm">Low rotor frequency</text>
+
+          <!-- Bar cross section -->
+          <rect x="390" y="60" width="40" height="150" rx="3" stroke="#475569" stroke-width="2" fill="#fef3c7"/>
+          <!-- Uniform current -->
+          <rect x="392" y="62" width="36" height="146" rx="2" fill="#2563eb" opacity="0.4"/>
+          <!-- Labels -->
+          <text x="440" y="110" class="label-sm" fill="#2563eb">Current uniformly</text>
+          <text x="440" y="125" class="label-sm" fill="#2563eb">distributed</text>
+          <text x="440" y="145" class="label-sm" fill="#2563eb">(no skin effect)</text>
+
+          <!-- Result -->
+          <text x="355" y="230" class="label-sm" fill="#2563eb" font-weight="bold">Effective R: LOW</text>
+          <text x="355" y="248" class="label-sm" fill="#16a34a">Good running efficiency</text>
+        </svg>
+        <p class="diagram-caption">Figure 2: Deep bar rotor &mdash; skin effect at starting concentrates current at the top (high effective resistance). At running, current distributes uniformly (low resistance).</p>
+      </div>
+    </div>
+
+    <!-- Double Cage IM -->
+    <div class="subsection" id="sec-double-cage">
+      <h3>d) Double Cage IM</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>The double cage motor takes the deep bar idea further by using <em>two separate</em> squirrel cage windings in the rotor. The <strong>upper cage</strong> (closer to the air gap) has high resistance and low leakage reactance. The <strong>lower cage</strong> (deeper in the rotor) has low resistance but high leakage reactance (because more flux leaks around it). At starting, the rotor frequency is high, so the lower cage has very high impedance (\(X = 2\pi f_{rotor} L\)) and most current flows through the upper cage (high R &rarr; good starting torque). At running, the rotor frequency is very low, the reactances become negligible, and current naturally flows through the low-resistance lower cage (good efficiency). Two cages, each optimized for its job.</p>
+      </div>
+
+      <!-- Double Cage Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 520 240" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
+          <!-- Rotor cross section (simplified) -->
+          <text x="180" y="20" class="label" font-size="14" font-weight="bold">Double Cage Rotor Cross-Section</text>
+
+          <!-- Air gap at top -->
+          <rect x="140" y="40" width="240" height="20" rx="3" fill="#e0f2fe" stroke="#93c5fd" stroke-width="1"/>
+          <text x="220" y="55" class="label-sm" fill="#2563eb">Air gap</text>
+
+          <!-- Upper cage (high R) -->
+          <rect x="180" y="70" width="160" height="40" rx="4" fill="#fecaca" stroke="#dc2626" stroke-width="2"/>
+          <text x="195" y="95" class="label" font-size="12" font-weight="bold" fill="#dc2626">Upper Cage</text>
+
+          <!-- Slot between cages -->
+          <rect x="230" y="110" width="60" height="20" rx="2" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1"/>
+          <text x="237" y="124" class="label-sm">Slot</text>
+
+          <!-- Lower cage (low R) -->
+          <rect x="180" y="130" width="160" height="40" rx="4" fill="#bbf7d0" stroke="#16a34a" stroke-width="2"/>
+          <text x="195" y="155" class="label" font-size="12" font-weight="bold" fill="#16a34a">Lower Cage</text>
+
+          <!-- Rotor iron -->
+          <rect x="140" y="170" width="240" height="30" rx="3" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+          <text x="215" y="190" class="label-sm">Rotor iron</text>
+
+          <!-- Annotations on right -->
+          <text x="360" y="80" class="label-sm" fill="#dc2626">High R, Low X</text>
+          <text x="360" y="95" class="label-sm" fill="#dc2626">Active at starting</text>
+          <line x1="355" y1="85" x2="342" y2="85" class="wire" stroke-width="1" stroke-dasharray="3"/>
+
+          <text x="360" y="140" class="label-sm" fill="#16a34a">Low R, High X</text>
+          <text x="360" y="155" class="label-sm" fill="#16a34a">Active at running</text>
+          <line x1="355" y1="145" x2="342" y2="145" class="wire" stroke-width="1" stroke-dasharray="3"/>
+
+          <!-- Bottom summary -->
+          <text x="90" y="225" class="label-sm" font-weight="bold">Result: High starting torque + High running efficiency in one motor</text>
+        </svg>
+        <p class="diagram-caption">Figure 3: Double cage rotor structure. The upper cage (high resistance) dominates at starting; the lower cage (low resistance) dominates at running.</p>
+      </div>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The fundamental squirrel cage design trade-off &mdash; starting performance vs. running efficiency &mdash; is solved by clever rotor bar geometry. Deep bars use skin effect for automatic resistance variation. Double cages use two physically separate windings optimized for different operating conditions. Both achieve good starting torque without sacrificing running efficiency.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3: Equivalent Circuit
+     ============================================================ -->
+<div class="section" id="sec-equiv-circuit">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>3. Per-Phase Equivalent Circuit</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>To analyze and control an induction motor drive, we need a mathematical model &mdash; just as we had the simple \(V_a = E_g + I_a R_a\) for the DC motor. The induction motor is more complex because energy transfers magnetically across an air gap (like a transformer). The <strong>per-phase equivalent circuit</strong> is our "blueprint" &mdash; it captures all the electromagnetic relationships in one circuit diagram that we can analyze with standard circuit theory.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Think of the IM as a <strong>transformer with a moving secondary</strong>. The stator is the primary winding. The rotor is the secondary winding &mdash; but it's spinning! The "trick" of the equivalent circuit is to refer everything to the stator side (just like we refer transformer secondary quantities to the primary). The rotor resistance appears as \(R'_r/s\), where \(s\) is the slip. This single term captures <em>both</em> the rotor copper loss and the mechanical power output. When the motor runs at low slip, \(R'_r/s\) is large (like a lightly loaded transformer), and when it's stalled (\(s=1\)), \(R'_r/s = R'_r\) (like a short-circuited secondary).</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Key Relationships</span>
+
+      <div class="equation-block">
+        <div class="eq-label">Synchronous Speed</div>
+        \[ N_s = \frac{120f}{P} \quad \text{(rpm)}, \qquad \omega_s = \frac{4\pi f}{P} \quad \text{(rad/s)} \]
+      </div>
+
+      <p>where \(f\) is the supply frequency (Hz) and \(P\) is the number of poles.</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Slip</div>
+        \[ s = \frac{N_s - N_r}{N_s} = \frac{\omega_s - \omega_r}{\omega_s} \]
+      </div>
+
+      <p>Slip ranges from 0 (rotor at synchronous speed &mdash; no torque) to 1 (rotor at standstill).</p>
+    </div>
+
+    <!-- Equivalent Circuit Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 650 280" xmlns="http://www.w3.org/2000/svg" style="max-width:620px;">
+        <!-- Title -->
+        <text x="160" y="20" class="label" font-size="14" font-weight="bold">Per-Phase Equivalent Circuit (exact)</text>
+
+        <!-- Vs source -->
+        <circle cx="50" cy="140" r="22" class="component"/>
+        <text x="38" y="136" class="label" font-size="11">+</text>
+        <text x="41" y="156" class="label" font-size="11">&minus;</text>
+        <text x="30" y="185" class="label">V<tspan font-size="9" dy="3">s</tspan></text>
+
+        <!-- Wire from Vs+ up and right -->
+        <line x1="50" y1="118" x2="50" y2="70" class="wire"/>
+        <line x1="50" y1="70" x2="100" y2="70" class="wire"/>
+
+        <!-- Rs -->
+        <rect x="100" y="58" width="50" height="24" rx="3" class="component-fill"/>
+        <text x="113" y="75" class="label" font-size="11">R<tspan font-size="8" dy="2">s</tspan></text>
+
+        <!-- Wire to Xs -->
+        <line x1="150" y1="70" x2="180" y2="70" class="wire"/>
+
+        <!-- jXs -->
+        <path d="M180,70 C185,56 195,56 200,70 C205,56 215,56 220,70 C225,56 235,56 240,70" class="component" fill="none"/>
+        <text x="196" y="55" class="label" font-size="11">jX<tspan font-size="8" dy="2">s</tspan></text>
+
+        <!-- Wire to junction -->
+        <line x1="240" y1="70" x2="290" y2="70" class="wire"/>
+        <circle cx="290" cy="70" r="3" fill="var(--text-primary)"/>
+
+        <!-- Is arrow -->
+        <polygon points="78,66 86,70 78,74" class="arrow"/>
+        <text x="72" y="58" class="label" font-size="11">I<tspan font-size="8" dy="2">s</tspan></text>
+
+        <!-- Magnetizing branch going down -->
+        <line x1="290" y1="70" x2="290" y2="95" class="wire"/>
+        <!-- jXm -->
+        <path d="M290,95 C276,100 276,110 290,115 C276,120 276,130 290,135 C276,140 276,150 290,155" class="component" fill="none"/>
+        <text x="260" y="128" class="label" font-size="11">jX<tspan font-size="8" dy="2">m</tspan></text>
+        <line x1="290" y1="155" x2="290" y2="220" class="wire"/>
+
+        <!-- Im arrow -->
+        <text x="295" y="88" class="label-sm">I<tspan font-size="8" dy="1">m</tspan></text>
+
+        <!-- Continue top wire right -->
+        <line x1="290" y1="70" x2="360" y2="70" class="wire"/>
+
+        <!-- jX'r -->
+        <path d="M360,70 C365,56 375,56 380,70 C385,56 395,56 400,70 C405,56 415,56 420,70" class="component" fill="none"/>
+        <text x="375" y="55" class="label" font-size="11">jX'<tspan font-size="8" dy="2">r</tspan></text>
+
+        <!-- Wire to R'r/s -->
+        <line x1="420" y1="70" x2="460" y2="70" class="wire"/>
+
+        <!-- R'r/s -->
+        <rect x="460" y="58" width="70" height="24" rx="3" class="component-fill"/>
+        <text x="473" y="75" class="label" font-size="11">R'<tspan font-size="8" dy="2">r</tspan><tspan dy="-2">/s</tspan></text>
+
+        <!-- Wire to end -->
+        <line x1="530" y1="70" x2="580" y2="70" class="wire"/>
+
+        <!-- I'r arrow -->
+        <polygon points="340,66 348,70 340,74" class="arrow"/>
+        <text x="334" y="58" class="label" font-size="11">I'<tspan font-size="8" dy="2">r</tspan></text>
+
+        <!-- Bottom wire -->
+        <line x1="50" y1="162" x2="50" y2="220" class="wire"/>
+        <line x1="50" y1="220" x2="580" y2="220" class="wire"/>
+        <circle cx="290" cy="220" r="3" fill="var(--text-primary)"/>
+
+        <!-- Close right side -->
+        <line x1="580" y1="70" x2="580" y2="220" class="wire"/>
+
+        <!-- Voltage labels -->
+        <text x="555" y="150" class="label-sm">V'<tspan font-size="8" dy="1">r</tspan></text>
+      </svg>
+      <p class="diagram-caption">Figure 4: Exact per-phase equivalent circuit of the induction motor (referred to stator side). The rotor resistance appears as R'<sub>r</sub>/s.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Approximate Equivalent Circuit</span>
+
+      <p>For most drive analysis, we use the <strong>approximate equivalent circuit</strong> where the magnetizing branch \(jX_m\) is moved to the input terminals. This simplifies calculations enormously because the stator and rotor impedances are now in a simple series loop:</p>
+
+      <div class="equation-block">
+        <div class="eq-label">RMS Rotor Current (Approximate)</div>
+        \[ I'_r = \frac{V_s}{\sqrt{\left(R_s + \dfrac{R'_r}{s}\right)^2 + (X_s + X'_r)^2}} \]
+      </div>
+
+      <p>This is the key equation for torque analysis. Everything flows from knowing \(I'_r\).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The per-phase equivalent circuit converts the complex electromagnetic coupling of a 3-phase rotating machine into a simple circuit problem. The slip \(s\) in the denominator of \(R'_r/s\) is what makes the circuit "speed-dependent" &mdash; and that's what makes induction motor control both interesting and challenging.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4: Torque & Performance
+     ============================================================ -->
+<div class="section" id="sec-performance">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>4. Torque &amp; Performance Equations</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>In DC drives, torque was simple: \(T = K\phi I_a\). In the induction motor, the torque-speed relationship is <em>nonlinear</em> and much richer. Understanding the torque equation &mdash; where maximum torque occurs, how starting torque depends on rotor resistance, and what the torque-speed curve looks like &mdash; is essential for choosing the right motor and the right control strategy.</p>
+    </div>
+
+    <!-- Torque Derivation -->
+    <div class="subsection" id="sec-torque-deriv">
+      <h3>a) Power Flow and Torque Derivation</h3>
+
+      <div class="box intuition">
+        <span class="box-label">The Intuition</span>
+        <p>Picture power flowing through the motor like water through a pipe with two leaks. Electrical power enters the stator, crosses the air gap as <strong>air gap power</strong> \(P_g\), then splits: a fraction \(s\) is lost as rotor copper loss (heat in the rotor), and the remaining fraction \((1-s)\) becomes useful mechanical power. The lower the slip, the more efficient the conversion. At synchronous speed (\(s=0\)), there would be zero rotor loss &mdash; but also zero torque. At standstill (\(s=1\)), all air gap power is wasted as heat &mdash; this is why stalled motors burn up!</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Power Relationships</span>
+
+        <div class="equation-block">
+          <div class="eq-label">Air Gap Power (per phase &times; 3)</div>
+          \[ P_g = 3|I'_r|^2 \cdot \frac{R'_r}{s} \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Rotor Copper Loss</div>
+          \[ P_{cu,r} = 3|I'_r|^2 \cdot R'_r = s \cdot P_g \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Developed Mechanical Power</div>
+          \[ P_m = P_g - P_{cu,r} = P_g(1-s) = 3|I'_r|^2 \cdot R'_r \cdot \frac{(1-s)}{s} \]
+        </div>
+
+        <p>The <strong>key insight</strong>: rotor copper loss is always \(s\) times the air gap power. This means efficiency is fundamentally limited by slip &mdash; a motor running at 5% slip wastes at least 5% of its air gap power as rotor heat.</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Developed Torque</div>
+          \[ T_d = \frac{P_g}{\omega_s} = \frac{3V_s^2 \cdot R'_r}{\omega_s \cdot s \cdot \left[\left(R_s + \dfrac{R'_r}{s}\right)^2 + (X_s + X'_r)^2\right]} \]
+        </div>
+
+        <p>This is the <strong>complete torque equation</strong> for the induction motor. It depends on the slip \(s\), the supply voltage \(V_s\), the motor parameters (\(R_s, R'_r, X_s, X'_r\)), and the synchronous speed \(\omega_s\).</p>
+      </div>
+
+      <!-- Power Flow Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 620 180" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
+          <!-- Boxes -->
+          <rect x="20" y="50" width="120" height="60" rx="8" class="component-fill" stroke-width="2.5"/>
+          <text x="38" y="78" class="label" font-size="12" font-weight="bold">Electrical</text>
+          <text x="48" y="96" class="label" font-size="12" font-weight="bold">Input</text>
+
+          <rect x="210" y="50" width="120" height="60" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+          <text x="230" y="78" class="label" font-size="12" font-weight="bold" fill="#1e40af">Air Gap</text>
+          <text x="240" y="96" class="label" font-size="12" font-weight="bold" fill="#1e40af">P<tspan font-size="9" dy="2">g</tspan></text>
+
+          <rect x="420" y="50" width="140" height="60" rx="8" fill="#dcfce7" stroke="#16a34a" stroke-width="2.5"/>
+          <text x="440" y="78" class="label" font-size="12" font-weight="bold" fill="#166534">Mechanical</text>
+          <text x="435" y="96" class="label" font-size="12" font-weight="bold" fill="#166534">P<tspan font-size="9" dy="2">m</tspan><tspan dy="-2"> = (1&minus;s)P</tspan><tspan font-size="9" dy="2">g</tspan></text>
+
+          <!-- Arrows -->
+          <line x1="140" y1="80" x2="205" y2="80" class="wire" stroke-width="3"/>
+          <polygon points="200,74 212,80 200,86" class="arrow"/>
+
+          <line x1="330" y1="80" x2="415" y2="80" class="wire" stroke-width="3"/>
+          <polygon points="410,74 422,80 410,86" class="arrow"/>
+
+          <!-- Stator losses going down from input -->
+          <line x1="80" y1="110" x2="80" y2="150" class="wire" stroke-width="2" stroke="#dc2626"/>
+          <polygon points="76,145 80,157 84,145" fill="#dc2626" stroke="#dc2626"/>
+          <text x="30" y="168" class="label-sm" fill="#dc2626">Stator losses</text>
+          <text x="35" y="180" class="label-sm" fill="#dc2626">(R<tspan font-size="7" dy="1">s</tspan><tspan dy="-1">, core)</tspan></text>
+
+          <!-- Rotor copper loss going down -->
+          <line x1="270" y1="110" x2="270" y2="150" class="wire" stroke-width="2" stroke="#dc2626"/>
+          <polygon points="266,145 270,157 274,145" fill="#dc2626" stroke="#dc2626"/>
+          <text x="215" y="168" class="label-sm" fill="#dc2626">Rotor copper loss</text>
+          <text x="225" y="180" class="label-sm" fill="#dc2626">P<tspan font-size="7" dy="1">cu</tspan><tspan dy="-1"> = s&middot;P</tspan><tspan font-size="7" dy="1">g</tspan></text>
+
+          <!-- Friction loss -->
+          <line x1="490" y1="110" x2="490" y2="145" class="wire" stroke-width="2" stroke="#d97706"/>
+          <polygon points="486,140 490,152 494,140" fill="#d97706" stroke="#d97706"/>
+          <text x="450" y="165" class="label-sm" fill="#d97706">Friction &amp; windage</text>
+
+          <!-- Top labels -->
+          <text x="150" y="40" class="label-sm" font-weight="bold">Stator</text>
+          <text x="345" y="40" class="label-sm" font-weight="bold">Rotor</text>
+        </svg>
+        <p class="diagram-caption">Figure 5: Power flow in an induction motor. Rotor copper loss = s &times; P<sub>g</sub>, mechanical power = (1&minus;s) &times; P<sub>g</sub>.</p>
+      </div>
+    </div>
+
+    <!-- Maximum Torque -->
+    <div class="subsection" id="sec-max-torque">
+      <h3>b) Maximum Torque and Critical Slip</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Finding the Peak</span>
+
+        <p>To find the slip at which torque is maximum, we differentiate the torque equation with respect to \(s\) and set it to zero. The result:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Slip for Maximum Torque</div>
+          \[ s_m = \frac{R'_r}{\sqrt{R_s^2 + (X_s + X'_r)^2}} \]
+        </div>
+
+        <p>If stator resistance \(R_s\) is neglected (common approximation):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Slip for Maximum Torque (Rs neglected)</div>
+          \[ s_m \approx \frac{R'_r}{X_s + X'_r} \]
+        </div>
+
+        <p>Substituting back gives the <strong>maximum (breakdown) torque</strong>:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Maximum (Breakdown) Torque</div>
+          \[ T_{mm} = \frac{3V_s^2}{2\omega_s \left(R_s + \sqrt{R_s^2 + (X_s + X'_r)^2}\right)} \]
+        </div>
+
+        <p>With \(R_s\) neglected:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Maximum Torque (Rs neglected)</div>
+          \[ T_{mm} = \frac{3V_s^2}{2\omega_s(X_s + X'_r)} \]
+        </div>
+
+        <p><strong>Critical observation:</strong> The maximum torque is <em>independent of rotor resistance</em> \(R'_r\)! Changing \(R'_r\) only moves the slip \(s_m\) at which the peak occurs, not the peak value itself. This is one of the most important results in induction motor theory.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Starting Torque</span>
+
+        <p>At starting (\(s = 1\)):</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Starting Torque</div>
+          \[ T_{st} = \frac{3V_s^2 \cdot R'_r}{\omega_s \left[(R_s + R'_r)^2 + (X_s + X'_r)^2\right]} \]
+        </div>
+
+        <div class="equation-block">
+          <div class="eq-label">Starting Current</div>
+          \[ I_{st} = \frac{V_s}{\sqrt{(R_s + R'_r)^2 + (X_s + X'_r)^2}} \]
+        </div>
+
+        <p>Notice that starting torque <em>does</em> depend on \(R'_r\). Increasing rotor resistance increases starting torque (up to a point) while also reducing starting current. This is exactly why wound rotor motors with external resistance have superior starting performance.</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Starting Torque to Max Torque Ratio</div>
+          \[ \frac{T_{st}}{T_{mm}} = \frac{2 s_m}{1 + s_m^2} \]
+        </div>
+      </div>
+    </div>
+
+    <!-- Normalized Torque -->
+    <div class="subsection" id="sec-normalized">
+      <h3>c) Normalized Torque Expression</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Universal Torque Curve</span>
+
+        <p>When we normalize the torque by the maximum torque (neglecting \(R_s\)), we get a beautifully simple expression:</p>
+
+        <div class="equation-block">
+          <div class="eq-label">Normalized Torque</div>
+          \[ \frac{T_d}{T_{mm}} = \frac{2 \cdot s \cdot s_m}{s^2 + s_m^2} \]
+        </div>
+
+        <p>This equation has some useful properties:</p>
+        <ul class="content-list">
+          <li>At \(s = s_m\): \(T_d/T_{mm} = 1\) (confirms the peak)</li>
+          <li>At \(s \ll s_m\): \(T_d \approx \frac{2T_{mm}}{s_m} \cdot s\) (torque is approximately linear with slip &mdash; this is the normal operating region)</li>
+          <li>At \(s \gg s_m\): \(T_d \approx \frac{2T_{mm} \cdot s_m}{s}\) (torque drops inversely with slip)</li>
+        </ul>
+
+        <p><strong>Linear approximation near synchronous speed:</strong></p>
+        <div class="equation-block">
+          <div class="eq-label">Linear Region Approximation</div>
+          \[ T_d \approx \frac{2T_{mm}}{s_m} \cdot s \]
+        </div>
+
+        <p>This means the motor acts like a "spring" near synchronous speed: small changes in load cause proportional changes in slip. This is the stable operating region.</p>
+      </div>
+    </div>
+
+    <!-- Torque-Speed Curve -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 380" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+        <!-- Axes -->
+        <line x1="80" y1="330" x2="520" y2="330" class="axis"/>
+        <line x1="80" y1="330" x2="80" y2="30" class="axis"/>
+        <polygon points="520,326 530,330 520,334" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+
+        <!-- Axis labels -->
+        <text x="505" y="352" class="label" font-size="13">Speed (N<tspan font-size="9" dy="2">r</tspan><tspan dy="-2">)</tspan></text>
+        <text x="25" y="35" class="label" font-size="13">Torque</text>
+
+        <!-- Synchronous speed marker -->
+        <line x1="470" y1="325" x2="470" y2="335" class="axis"/>
+        <text x="455" y="352" class="label-sm">N<tspan font-size="8" dy="1">s</tspan></text>
+        <line x1="470" y1="330" x2="470" y2="40" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+
+        <!-- Tmm horizontal marker -->
+        <line x1="75" y1="100" x2="85" y2="100" class="axis"/>
+        <text x="20" y="105" class="label-sm">T<tspan font-size="8" dy="1">mm</tspan></text>
+        <line x1="85" y1="100" x2="470" y2="100" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+
+        <!-- sm vertical marker -->
+        <line x1="280" y1="325" x2="280" y2="335" class="axis"/>
+        <text x="265" y="352" class="label-sm">N<tspan font-size="8" dy="1">m</tspan></text>
+        <text x="262" y="365" class="label-sm">(at s<tspan font-size="8" dy="1">m</tspan><tspan dy="-1">)</tspan></text>
+        <line x1="280" y1="100" x2="280" y2="330" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+
+        <!-- Torque-speed curve (low Rr - low slip motor) -->
+        <path d="M470,330 C460,315 440,240 420,170 C400,115 380,98 360,95 C340,93 320,97 300,105 C260,125 220,170 180,215 C150,250 120,280 90,300" class="curve1" stroke-width="3"/>
+        <text x="100" y="280" class="label-sm" fill="#2563eb" font-weight="bold">Low R'<tspan font-size="8" dy="1">r</tspan></text>
+
+        <!-- Torque-speed curve (high Rr - high slip motor) -->
+        <path d="M470,330 C460,320 440,280 420,245 C400,210 360,155 320,120 C280,100 240,98 200,110 C170,120 140,145 110,180 C95,200 85,220 82,240" class="curve2" stroke-width="3"/>
+        <text x="95" y="215" class="label-sm" fill="#dc2626" font-weight="bold">Medium R'<tspan font-size="8" dy="1">r</tspan></text>
+
+        <!-- Even higher Rr -->
+        <path d="M470,330 C460,325 440,305 420,285 C400,265 360,215 320,175 C280,140 240,120 200,110 C170,105 140,102 110,105 C95,108 85,115 82,120" class="curve3" stroke-width="3"/>
+        <text x="88" y="140" class="label-sm" fill="#16a34a" font-weight="bold">High R'<tspan font-size="8" dy="1">r</tspan></text>
+
+        <!-- Tmm stays the same annotation -->
+        <path d="M350,75 C370,65 390,65 400,68" fill="none" stroke="#7c3aed" stroke-width="1.5"/>
+        <polygon points="397,63 405,68 397,73" fill="#7c3aed" stroke="none"/>
+        <text x="300" y="70" class="label-sm" fill="#7c3aed" font-weight="bold">T<tspan font-size="8" dy="1">mm</tspan><tspan dy="-1"> same!</tspan></text>
+
+        <!-- Stable/Unstable regions -->
+        <text x="360" y="310" class="label-sm" font-weight="bold" fill="#16a34a">Stable</text>
+        <text x="360" y="322" class="label-sm" font-weight="bold" fill="#16a34a">region</text>
+        <text x="130" y="310" class="label-sm" font-weight="bold" fill="#dc2626">Unstable</text>
+        <text x="130" y="322" class="label-sm" font-weight="bold" fill="#dc2626">region</text>
+      </svg>
+      <p class="diagram-caption">Figure 6: Effect of rotor resistance on the torque-speed characteristic. Increasing R'<sub>r</sub> shifts the peak to lower speeds but does NOT change T<sub>mm</sub>.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>The torque-speed curve of an IM has a peak (breakdown torque) that depends on \(V_s^2\) and the leakage reactance, but is <em>independent</em> of rotor resistance. Rotor resistance only shifts where the peak occurs. Near synchronous speed, the motor behaves linearly (torque proportional to slip). The region between synchronous speed and the peak torque slip is the stable operating region &mdash; if the load increases, the motor slows down just enough to produce more torque. Beyond the peak, the motor is unstable and will stall.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 5: Design Trade-offs
+     ============================================================ -->
+<div class="section" id="sec-design-tradeoffs">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>5. Squirrel-Cage Design Trade-offs</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>We now have the mathematical framework to understand <em>exactly</em> why squirrel cage motor design involves painful trade-offs &mdash; and why deep bar and double cage designs exist.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; The Fundamental Contradiction</span>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>Property</th><th>Low R'<sub>r</sub></th><th>High R'<sub>r</sub></th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Rated slip</strong></td><td>Small (2&ndash;7%)</td><td>Large (10&ndash;40%)</td></tr>
+          <tr><td><strong>Running efficiency</strong></td><td>High (low rotor losses)</td><td>Poor (high rotor losses)</td></tr>
+          <tr><td><strong>Starting torque</strong></td><td>Low</td><td>High</td></tr>
+          <tr><td><strong>Starting current</strong></td><td>High (dangerous)</td><td>Low (safe)</td></tr>
+          <tr><td><strong>Speed control range (voltage)</strong></td><td>Narrow</td><td>Wide</td></tr>
+          <tr><td><strong>Breakdown torque slip</strong></td><td>\(s_m\) small (peak near sync speed)</td><td>\(s_m\) large (peak at lower speed)</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>The resolution:</strong> Deep bar and double cage designs provide the "best of both worlds" &mdash; high effective resistance at starting (when rotor frequency is high) and low effective resistance at running (when rotor frequency is low). This is possible because impedance is frequency-dependent, and the rotor frequency is \(s \cdot f\).</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>You can't have good starting AND good running with a simple cage &mdash; you need clever bar geometry (deep bar or double cage) to exploit frequency-dependent impedance. This is one of the most elegant engineering solutions in all of electrical machines.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 6: Speed Control Methods (Overview)
+     ============================================================ -->
+<div class="section" id="sec-speed-methods">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>6. Speed Control Methods &mdash; Overview</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>Unlike the DC motor where speed control was straightforward (change \(V_a\) or \(\phi\)), the induction motor's speed depends on slip, supply frequency, and voltage in a nonlinear way. We have several "knobs" to turn, each with different trade-offs, cost, and complexity. Understanding the landscape of methods is essential before diving into each one.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; The Four Methods</span>
+
+      <p>From the synchronous speed and slip relationships:</p>
+      <p>\(N_r = N_s(1-s) = \frac{120f}{P}(1-s)\)</p>
+      <p>We can control speed by changing:</p>
+
+      <table class="styled-table">
+        <thead>
+          <tr><th>#</th><th>Method</th><th>Motor Type</th><th>What Changes</th><th>Complexity</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>Stator voltage control</td>
+            <td>Squirrel cage</td>
+            <td>Slip changes (via torque reduction)</td>
+            <td>Simple, low cost</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>Frequency control (V/f)</td>
+            <td>Squirrel cage</td>
+            <td>Synchronous speed changes</td>
+            <td>Moderate (inverter needed)</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>Rotor resistance control</td>
+            <td>Wound rotor</td>
+            <td>Slip for given torque changes</td>
+            <td>Simple but lossy</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>Slip power recovery</td>
+            <td>Wound rotor</td>
+            <td>Rotor energy recovered, not wasted</td>
+            <td>Complex, efficient</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>In this lecture, we focus on <strong>Method 1: Stator Voltage Control</strong>. Frequency control (the most important method for modern drives) will be covered in Lecture 12.</p>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>IM speed can be controlled by changing voltage, frequency, or rotor resistance. Each method suits different applications. Voltage control is the simplest but most limited; frequency control is the most versatile and dominates modern practice.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 7: Stator Voltage Control (Detailed)
+     ============================================================ -->
+<div class="section" id="sec-stator-voltage">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>7. Stator Voltage Control</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="box motivation">
+      <span class="box-label">The Problem / The Why</span>
+      <p>What if we could control an IM's speed with just a simple AC voltage controller &mdash; no expensive inverter, no wound rotor, no external resistors? We can, using stator voltage control. The idea is simple: since torque is proportional to \(V_s^2\), reducing the voltage reduces the torque. If the load requires less torque at lower speed (like a fan), the motor settles at a lower speed. It's the cheapest possible speed control method for an IM. But it has serious limitations.</p>
+    </div>
+
+    <div class="box intuition">
+      <span class="box-label">The Intuition</span>
+      <p>Imagine our torque-speed curve as a mountain. At full voltage, the mountain is tall (high \(T_{mm}\)). When we reduce voltage by a factor \(b\) (where \(b < 1\)), the mountain shrinks &mdash; its height drops to \(b^2\) of the original (because \(T \propto V^2\)). The peak position (at \(s_m\)) doesn't move &mdash; only the height changes. Now, if the load is a fan (torque increases with speed squared), the load curve intersects the shrunk mountain at a lower speed. That's our new operating point. The problem: if the mountain shrinks too much, there's no intersection at all, and the motor stalls.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Mathematical Analysis</span>
+
+      <p>When the terminal voltage is reduced by a factor \(b\) (so the new voltage is \(bV_s\), where \(0 < b \le 1\)):</p>
+
+      <div class="equation-block">
+        <div class="eq-label">Torque at Reduced Voltage</div>
+        \[ T_d = \frac{3R'_r \cdot (bV_s)^2}{\omega_s \cdot s \cdot \left[\left(R_s + \dfrac{R'_r}{s}\right)^2 + (X_s + X'_r)^2\right]} = b^2 \cdot T_{d,\text{rated}} \]
+      </div>
+
+      <p>Key consequences:</p>
+      <ul class="content-list">
+        <li><strong>Maximum torque:</strong> \(T_{mm,new} = b^2 \cdot T_{mm,rated}\) (drops quadratically!)</li>
+        <li><strong>Slip for max torque:</strong> \(s_m\) stays the same (independent of voltage)</li>
+        <li><strong>Speed range:</strong> Limited &mdash; especially for low-slip motors where the curve is steep</li>
+        <li><strong>Best match:</strong> High-slip motors with fan/pump loads (\(T \propto \omega^2\))</li>
+      </ul>
+    </div>
+
+    <!-- Voltage Control T-w Curve -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg" style="max-width:540px;">
+        <!-- Axes -->
+        <line x1="80" y1="350" x2="520" y2="350" class="axis"/>
+        <line x1="80" y1="350" x2="80" y2="30" class="axis"/>
+        <polygon points="520,346 530,350 520,354" class="arrow"/>
+        <polygon points="76,30 80,20 84,30" class="arrow"/>
+
+        <text x="490" y="372" class="label" font-size="13">Speed</text>
+        <text x="25" y="35" class="label" font-size="13">Torque</text>
+
+        <!-- Ns marker -->
+        <line x1="470" y1="345" x2="470" y2="355" class="axis"/>
+        <text x="455" y="372" class="label-sm">N<tspan font-size="8" dy="1">s</tspan></text>
+        <line x1="470" y1="350" x2="470" y2="40" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
+
+        <!-- Full voltage curve (b=1) -->
+        <path d="M470,350 C462,338 445,270 430,210 C415,160 395,115 370,100 C345,92 320,98 290,120 C250,150 210,200 170,250 C145,280 115,310 90,330" class="curve1" stroke-width="3"/>
+        <text x="92" y="318" class="label-sm" fill="#2563eb" font-weight="bold">b = 1 (full V)</text>
+
+        <!-- Reduced voltage (b=0.8) -->
+        <path d="M470,350 C464,342 450,300 438,260 C425,220 410,180 390,165 C370,155 350,160 330,175 C300,200 270,235 240,270 C215,295 190,320 170,335" class="curve4" stroke-width="2.5"/>
+        <text x="170" y="345" class="label-sm" fill="#d97706" font-weight="bold">b = 0.8</text>
+
+        <!-- Further reduced (b=0.6) -->
+        <path d="M470,350 C466,346 455,325 445,305 C435,280 425,255 415,240 C400,225 385,220 370,225 C345,235 320,260 295,285 C270,308 250,325 235,340" class="curve2" stroke-width="2.5"/>
+        <text x="237" y="350" class="label-sm" fill="#dc2626" font-weight="bold">b = 0.6</text>
+
+        <!-- Fan load curve (T proportional to w^2) -->
+        <path d="M470,100 C430,120 400,170 370,230 C340,290 310,330 280,345 C250,352 220,354 190,354" class="curve3" stroke-width="2.5" stroke-dasharray="8,4"/>
+        <text x="420" y="90" class="label-sm" fill="#16a34a" font-weight="bold">Fan load</text>
+        <text x="420" y="105" class="label-sm" fill="#16a34a">(T &prop; &omega;&sup2;)</text>
+
+        <!-- Operating points (intersections) -->
+        <circle cx="455" cy="135" r="6" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+        <circle cx="410" cy="190" r="6" fill="#d97706" stroke="#fff" stroke-width="2"/>
+        <circle cx="360" cy="245" r="6" fill="#dc2626" stroke="#fff" stroke-width="2"/>
+
+        <!-- Speed markers for operating points -->
+        <line x1="455" y1="135" x2="455" y2="350" stroke="#2563eb" stroke-width="1" stroke-dasharray="3"/>
+        <line x1="410" y1="190" x2="410" y2="350" stroke="#d97706" stroke-width="1" stroke-dasharray="3"/>
+        <line x1="360" y1="245" x2="360" y2="350" stroke="#dc2626" stroke-width="1" stroke-dasharray="3"/>
+
+        <text x="443" y="370" class="label-sm" fill="#2563eb">N<tspan font-size="7" dy="1">1</tspan></text>
+        <text x="398" y="370" class="label-sm" fill="#d97706">N<tspan font-size="7" dy="1">2</tspan></text>
+        <text x="348" y="370" class="label-sm" fill="#dc2626">N<tspan font-size="7" dy="1">3</tspan></text>
+
+        <!-- Annotation -->
+        <text x="100" y="60" class="label-sm" font-weight="bold">Stable operating points:</text>
+        <text x="100" y="75" class="label-sm">Motor curve &cap; Load curve</text>
+      </svg>
+      <p class="diagram-caption">Figure 7: Stator voltage control with a fan load. Reducing voltage (b &lt; 1) shrinks the torque curve by b&sup2;. The fan load curve intersects at progressively lower speeds.</p>
+    </div>
+
+    <div class="box deepdive">
+      <span class="box-label">Deep Dive &mdash; Why High-Slip Motors?</span>
+
+      <p>Consider two motors with the same breakdown torque but different slips:</p>
+      <ul class="content-list">
+        <li><strong>Low-slip motor (\(s_m = 0.05\)):</strong> The torque curve is very steep near synchronous speed. Reducing voltage even a little causes the operating point to plunge to a much lower speed &mdash; or worse, the curve may not intersect the load at all. Useful speed range: maybe 5&ndash;10%.</li>
+        <li><strong>High-slip motor (\(s_m = 0.3\)):</strong> The torque curve is much "softer" and spreads over a wide speed range. Reducing voltage causes a gradual speed reduction with many possible stable intersections. Useful speed range: 30&ndash;50% or more with fan loads.</li>
+      </ul>
+
+      <p>This is why stator voltage control is <em>always</em> paired with high-slip motors and fan-type loads in practice.</p>
+    </div>
+
+    <!-- Implementation -->
+    <div class="subsection" id="sec-stator-impl">
+      <h3>Implementation of Stator Voltage Control</h3>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Power Electronic Implementation</span>
+
+        <p>The reduced voltage is achieved using power electronic circuits:</p>
+
+        <table class="styled-table">
+          <thead>
+            <tr><th>Topology</th><th>Description</th><th>Pros</th><th>Cons</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>3-Phase AC Voltage Controller</strong></td>
+              <td>6 thyristors (anti-parallel pairs), one pair per phase. Controls RMS voltage by delaying firing angle.</td>
+              <td>Simple, low cost, no DC link needed</td>
+              <td>High harmonics, low input power factor at reduced speed, motor heating from harmonics</td>
+            </tr>
+            <tr>
+              <td><strong>Voltage-Fed Inverter</strong></td>
+              <td>Rectifier + DC link + inverter. Voltage adjusted via DC link or PWM.</td>
+              <td>Better waveform quality, can also control frequency</td>
+              <td>More expensive, typically used for V/f control instead</td>
+            </tr>
+            <tr>
+              <td><strong>PWM AC Controller</strong></td>
+              <td>IGBTs switch at high frequency to control effective voltage.</td>
+              <td>Low harmonics, good power factor</td>
+              <td>Higher cost than thyristor-based</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- AC Voltage Controller Diagram -->
+      <div class="diagram-container">
+        <svg viewBox="0 0 580 300" xmlns="http://www.w3.org/2000/svg" style="max-width:560px;">
+          <text x="130" y="20" class="label" font-size="14" font-weight="bold">3-Phase AC Voltage Controller for IM</text>
+
+          <!-- 3-phase supply -->
+          <text x="30" y="60" class="label" font-size="12" font-weight="bold">3&phi; Supply</text>
+          <!-- Phase A -->
+          <line x1="80" y1="80" x2="150" y2="80" class="wire"/>
+          <text x="60" y="85" class="label-sm" fill="#dc2626">A</text>
+          <!-- Phase B -->
+          <line x1="80" y1="140" x2="150" y2="140" class="wire"/>
+          <text x="60" y="145" class="label-sm" fill="#16a34a">B</text>
+          <!-- Phase C -->
+          <line x1="80" y1="200" x2="150" y2="200" class="wire"/>
+          <text x="60" y="205" class="label-sm" fill="#2563eb">C</text>
+
+          <!-- Thyristor pairs (Phase A) -->
+          <polygon points="160,68 160,80 180,74" class="component-fill" stroke="#dc2626"/>
+          <line x1="180" y1="68" x2="180" y2="80" stroke="#dc2626" stroke-width="2"/>
+          <polygon points="200,80 200,68 180,74" class="component-fill" stroke="#dc2626"/>
+          <line x1="180" y1="80" x2="180" y2="68" stroke="#dc2626" stroke-width="1"/>
+          <rect x="150" y="64" width="60" height="24" rx="4" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3"/>
+          <line x1="210" y1="80" x2="290" y2="80" class="wire"/>
+
+          <!-- Thyristor pairs (Phase B) -->
+          <polygon points="160,128 160,140 180,134" class="component-fill" stroke="#16a34a"/>
+          <line x1="180" y1="128" x2="180" y2="140" stroke="#16a34a" stroke-width="2"/>
+          <polygon points="200,140 200,128 180,134" class="component-fill" stroke="#16a34a"/>
+          <rect x="150" y="124" width="60" height="24" rx="4" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="3"/>
+          <line x1="210" y1="140" x2="290" y2="140" class="wire"/>
+
+          <!-- Thyristor pairs (Phase C) -->
+          <polygon points="160,188 160,200 180,194" class="component-fill" stroke="#2563eb"/>
+          <line x1="180" y1="188" x2="180" y2="200" stroke="#2563eb" stroke-width="2"/>
+          <polygon points="200,200 200,188 180,194" class="component-fill" stroke="#2563eb"/>
+          <rect x="150" y="184" width="60" height="24" rx="4" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3"/>
+          <line x1="210" y1="200" x2="290" y2="200" class="wire"/>
+
+          <!-- Controller box -->
+          <rect x="130" y="235" width="100" height="35" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+          <text x="140" y="258" class="label" font-size="11" font-weight="bold" fill="#92400e">Firing Ctrl</text>
+          <!-- Gate signals -->
+          <line x1="180" y1="235" x2="180" y2="210" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3"/>
+
+          <!-- Label -->
+          <text x="145" y="100" class="label-sm" font-weight="bold">T<tspan font-size="7" dy="1">A</tspan></text>
+          <text x="145" y="160" class="label-sm" font-weight="bold">T<tspan font-size="7" dy="1">B</tspan></text>
+          <text x="145" y="220" class="label-sm" font-weight="bold">T<tspan font-size="7" dy="1">C</tspan></text>
+
+          <!-- Wires to motor -->
+          <line x1="290" y1="80" x2="350" y2="80" class="wire"/>
+          <line x1="290" y1="140" x2="350" y2="140" class="wire"/>
+          <line x1="290" y1="200" x2="350" y2="200" class="wire"/>
+
+          <!-- IM Motor -->
+          <circle cx="420" cy="140" r="60" class="component" stroke-width="2.5"/>
+          <text x="395" y="130" class="label" font-size="18" font-weight="bold">IM</text>
+          <text x="400" y="155" class="label-sm">3&phi;</text>
+
+          <!-- Connect wires to motor -->
+          <line x1="350" y1="80" x2="370" y2="100" class="wire"/>
+          <line x1="350" y1="140" x2="360" y2="140" class="wire"/>
+          <line x1="350" y1="200" x2="370" y2="180" class="wire"/>
+
+          <!-- Shaft -->
+          <line x1="480" y1="140" x2="530" y2="140" class="wire" stroke-width="3"/>
+          <polygon points="525,134 538,140 525,146" class="arrow"/>
+          <text x="500" y="128" class="label-sm">&omega;<tspan font-size="8" dy="1">r</tspan></text>
+
+          <!-- Reduced voltage annotation -->
+          <text x="260" y="55" class="label-sm" fill="#d97706" font-weight="bold">Reduced V<tspan font-size="8" dy="1">s</tspan></text>
+          <line x1="290" y1="58" x2="290" y2="70" stroke="#d97706" stroke-width="1" stroke-dasharray="3"/>
+        </svg>
+        <p class="diagram-caption">Figure 8: Three-phase AC voltage controller for IM speed control. Anti-parallel thyristor pairs in each phase control the RMS voltage to the motor.</p>
+      </div>
+
+      <div class="box deepdive">
+        <span class="box-label">Deep Dive &mdash; Practical Considerations</span>
+        <ul class="content-list">
+          <li><strong>Application domain:</strong> Low-power fans, blowers, centrifugal pumps (up to a few kW)</li>
+          <li><strong>Harmonics:</strong> The phase-controlled thyristors produce significant current harmonics, causing additional motor heating and torque pulsations</li>
+          <li><strong>Power factor:</strong> The input power factor decreases as the firing angle increases (similar to DC drive converters)</li>
+          <li><strong>Efficiency:</strong> At reduced speeds, the motor operates at high slip, so rotor copper losses are significant (\(P_{cu} = s \cdot P_g\))</li>
+          <li><strong>Motor derating:</strong> Due to harmonic heating, the motor must be derated (used below its nameplate power)</li>
+          <li><strong>Soft starting:</strong> Even if speed control isn't needed, AC voltage controllers are widely used as <em>soft starters</em> &mdash; they ramp up the voltage gradually at starting to limit inrush current</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box takeaway">
+      <span class="box-label">Takeaway</span>
+      <p>Stator voltage control is the simplest and cheapest IM speed control method. It works by reducing the voltage (and thus the torque, by \(b^2\)) to create new operating points at lower speeds. It's practical only with high-slip motors and fan/pump loads. The main implementations are thyristor-based AC voltage controllers. The method is limited in range and efficiency, but unbeatable in simplicity for the right application. For wider speed ranges and constant-torque loads, we need frequency control (next lecture).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 8: Worked Example
+     ============================================================ -->
+<div class="section" id="sec-worked-example">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>8. Worked Example</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <div class="problem-card">
+      <span class="problem-number">Worked Example 1</span>
+      <p><strong>Problem:</strong> A 3-phase, 4-pole, 50 Hz induction motor has the following per-phase equivalent circuit parameters (referred to stator): \(R_s = 0.5\;\Omega\), \(R'_r = 0.4\;\Omega\), \(X_s + X'_r = 4\;\Omega\). The motor is supplied at rated voltage \(V_s = 230\) V (phase). Find:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li>The synchronous speed</li>
+        <li>The slip for maximum torque</li>
+        <li>The maximum (breakdown) torque</li>
+        <li>The starting torque and starting current</li>
+        <li>The ratio \(T_{st}/T_{mm}\)</li>
+      </ol>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Synchronous speed</strong></p>
+        \[ N_s = \frac{120f}{P} = \frac{120 \times 50}{4} = 1500 \text{ rpm} \]
+        \[ \omega_s = \frac{2\pi \times 1500}{60} = 50\pi = 157.08 \text{ rad/s} \]
+
+        <p class="mt-2"><strong>Step 2: Slip for maximum torque</strong></p>
+        \[ s_m = \frac{R'_r}{\sqrt{R_s^2 + (X_s + X'_r)^2}} = \frac{0.4}{\sqrt{0.5^2 + 4^2}} = \frac{0.4}{\sqrt{16.25}} = \frac{0.4}{4.031} = 0.0993 \]
+
+        <p class="mt-2"><strong>Step 3: Maximum torque</strong></p>
+        \[ T_{mm} = \frac{3V_s^2}{2\omega_s\left(R_s + \sqrt{R_s^2 + (X_s + X'_r)^2}\right)} \]
+        \[ T_{mm} = \frac{3 \times 230^2}{2 \times 157.08 \times (0.5 + 4.031)} = \frac{158700}{1423.4} = 111.5 \text{ N&middot;m} \]
+
+        <p class="mt-2"><strong>Step 4: Starting torque and current (\(s = 1\))</strong></p>
+        \[ T_{st} = \frac{3V_s^2 \cdot R'_r}{\omega_s\left[(R_s + R'_r)^2 + (X_s + X'_r)^2\right]} \]
+        \[ T_{st} = \frac{3 \times 230^2 \times 0.4}{157.08 \times [(0.5 + 0.4)^2 + 4^2]} = \frac{63480}{157.08 \times 16.81} = \frac{63480}{2640.1} = 24.0 \text{ N&middot;m} \]
+
+        \[ I_{st} = \frac{V_s}{\sqrt{(R_s + R'_r)^2 + (X_s + X'_r)^2}} = \frac{230}{\sqrt{0.81 + 16}} = \frac{230}{4.1} = 56.1 \text{ A} \]
+
+        <p class="mt-2"><strong>Step 5: Ratio \(T_{st}/T_{mm}\)</strong></p>
+        \[ \frac{T_{st}}{T_{mm}} = \frac{2s_m}{1 + s_m^2} = \frac{2 \times 0.0993}{1 + 0.0993^2} = \frac{0.1986}{1.00986} = 0.197 \]
+
+        <p>Check: \(T_{st}/T_{mm} = 24.0/111.5 = 0.215\). The slight discrepancy is because the formula \(2s_m/(1+s_m^2)\) assumes \(R_s\) neglected, while our calculation of \(T_{st}\) and \(T_{mm}\) included \(R_s\).</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>The starting torque is only about 20% of the breakdown torque &mdash; typical for a low-slip motor. The starting current of 56 A is about 4&ndash;6 times rated current for a motor of this size, which is why we need soft starters or star-delta starting for larger motors.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="problem-card">
+      <span class="problem-number">Worked Example 2</span>
+      <p><strong>Problem:</strong> The same motor drives a fan load where \(T_L \propto \omega_r^2\). At rated voltage, the motor runs at 1440 rpm. The stator voltage is reduced to 80% (b = 0.8). Find the new speed.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Find rated operating point</strong></p>
+        <p>Rated slip: \(s_1 = (1500 - 1440)/1500 = 0.04\)</p>
+        <p>Rated speed: \(\omega_1 = 2\pi \times 1440/60 = 150.8\) rad/s</p>
+
+        <p class="mt-2"><strong>Step 2: Find load constant</strong></p>
+        <p>At the rated operating point, the motor torque equals the load torque. Using the approximate torque formula (since we're in the linear region, \(s \ll s_m\)):</p>
+        <p>Load: \(T_L = k_L \omega_r^2\), so \(k_L = T_1/\omega_1^2\)</p>
+
+        <p class="mt-2"><strong>Step 3: Use the voltage reduction relationship</strong></p>
+        <p>At reduced voltage, the motor torque at slip \(s_2\) is:</p>
+        \[ T_{motor} = b^2 \times T_{motor,rated}(s_2) \]
+        <p>In the linear region: \(T \approx \frac{2T_{mm}}{s_m} \cdot s\), so:</p>
+        \[ b^2 \cdot \frac{2T_{mm}}{s_m} \cdot s_2 = k_L \omega_{r2}^2 \]
+
+        <p>Since at rated voltage: \(\frac{2T_{mm}}{s_m} \cdot s_1 = k_L \omega_{r1}^2\), we can write:</p>
+        \[ b^2 \cdot s_2 \cdot \omega_{r1}^2 = s_1 \cdot \omega_{r2}^2 \]
+
+        <p>With \(\omega_{r2} = \omega_s(1 - s_2)\) and \(\omega_{r1} = \omega_s(1 - s_1)\):</p>
+        \[ b^2 \cdot s_2 \cdot (1 - s_1)^2 = s_1 \cdot (1 - s_2)^2 \]
+        \[ 0.64 \cdot s_2 \cdot 0.9216 = 0.04 \cdot (1 - s_2)^2 \]
+        \[ 0.5898 \cdot s_2 = 0.04 \cdot (1 - 2s_2 + s_2^2) \]
+        \[ 0.5898\,s_2 = 0.04 - 0.08\,s_2 + 0.04\,s_2^2 \]
+        \[ 0.04\,s_2^2 - 0.6698\,s_2 + 0.04 = 0 \]
+
+        <p>Using the quadratic formula:</p>
+        \[ s_2 = \frac{0.6698 \pm \sqrt{0.6698^2 - 4(0.04)(0.04)}}{2 \times 0.04} = \frac{0.6698 \pm \sqrt{0.4486 - 0.0064}}{0.08} \]
+        \[ s_2 = \frac{0.6698 \pm 0.6651}{0.08} \]
+
+        <p>Taking the smaller root (stable operating point):</p>
+        \[ s_2 = \frac{0.6698 - 0.6651}{0.08} = \frac{0.0047}{0.08} = 0.0588 \]
+
+        <p>\(N_2 = 1500 \times (1 - 0.0588) = 1500 \times 0.9412 = \mathbf{1412 \text{ rpm}}\)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>Reducing the voltage to 80% only reduced the speed from 1440 to 1412 rpm &mdash; a change of only 28 rpm (about 2%). This illustrates the limited speed range of stator voltage control with a low-slip motor. With a high-slip motor, the speed reduction would be much more significant.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 9: Practice Problems (Sheet 6)
+     ============================================================ -->
+<div class="section" id="sec-practice">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>9. Practice Problems (Sheet 6)</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 1</span>
+      <p>A 3-phase, 6-pole, 50 Hz wound-rotor induction motor has \(R_s = 0.5\;\Omega\), \(R'_r = 0.4\;\Omega\), and \(X_s + X'_r = 3.5\;\Omega\) (per phase). The motor is supplied at 400 V line-to-line (Y-connected). Find:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li>The synchronous speed</li>
+        <li>The slip for maximum torque</li>
+        <li>The maximum torque</li>
+        <li>The starting torque</li>
+      </ol>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Phase voltage and synchronous speed</strong></p>
+        \[ V_s = \frac{400}{\sqrt{3}} = 230.9 \text{ V (phase)} \]
+        \[ N_s = \frac{120 \times 50}{6} = 1000 \text{ rpm}, \quad \omega_s = \frac{2\pi \times 1000}{60} = 104.72 \text{ rad/s} \]
+
+        <p class="mt-2"><strong>Step 2: Slip for maximum torque</strong></p>
+        \[ s_m = \frac{R'_r}{\sqrt{R_s^2 + (X_s + X'_r)^2}} = \frac{0.4}{\sqrt{0.25 + 12.25}} = \frac{0.4}{3.536} = 0.1131 \]
+
+        <p class="mt-2"><strong>Step 3: Maximum torque</strong></p>
+        \[ T_{mm} = \frac{3 \times 230.9^2}{2 \times 104.72 \times (0.5 + 3.536)} = \frac{159,945.4}{845.4} = 189.2 \text{ N&middot;m} \]
+
+        <p class="mt-2"><strong>Step 4: Starting torque (\(s = 1\))</strong></p>
+        \[ T_{st} = \frac{3 \times 230.9^2 \times 0.4}{104.72 \times [(0.9)^2 + (3.5)^2]} = \frac{63,978.2}{104.72 \times 13.06} = \frac{63,978.2}{1367.6} = 46.8 \text{ N&middot;m} \]
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Verification</span>
+          <p>\(T_{st}/T_{mm} = 46.8/189.2 = 0.247\). Using the formula: \(2s_m/(1+s_m^2) = 2(0.1131)/(1+0.0128) = 0.2262/1.0128 = 0.223\). Close (difference due to \(R_s\) not being neglected in the direct calculation).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 2</span>
+      <p>For the motor in Problem 1, external resistance is added to the rotor circuit to make the starting torque equal to the maximum torque. Find the required total rotor resistance (referred to stator).</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Approach:</strong> For \(T_{st} = T_{mm}\), we need \(s_m = 1\) at starting. That means:</p>
+        \[ s_m = \frac{R'_{r,total}}{\sqrt{R_s^2 + (X_s + X'_r)^2}} = 1 \]
+        \[ R'_{r,total} = \sqrt{R_s^2 + (X_s + X'_r)^2} = \sqrt{0.25 + 12.25} = 3.536\;\Omega \]
+
+        <p>External resistance needed (referred to stator):</p>
+        \[ R'_{ext} = R'_{r,total} - R'_r = 3.536 - 0.4 = 3.136\;\Omega \]
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>The external resistance is about 8 times the internal rotor resistance! This dramatically changes the torque-speed curve &mdash; the peak now occurs at standstill. This is the whole point of wound rotor motors: external resistance provides complete control over the starting characteristic. After starting, the external resistance is gradually shorted out to restore normal running performance.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+      <span class="problem-number">Problem 3</span>
+      <p>A 3-phase, 4-pole, 50 Hz IM drives a fan load (\(T_L \propto \omega_r^2\)). At rated voltage, the motor operates at 1450 rpm with a torque of 50 N&middot;m. The voltage is reduced to 70% (\(b = 0.7\)). Neglecting \(R_s\), with \(s_m = 0.08\), find the new operating speed.</p>
+
+      <button class="solution-toggle" onclick="toggleSolution(this)">Show Solution</button>
+      <div class="solution-content">
+        <p><strong>Step 1: Initial conditions</strong></p>
+        \[ N_s = 1500 \text{ rpm}, \quad s_1 = \frac{1500 - 1450}{1500} = 0.0333 \]
+        \[ \omega_{r1} = 2\pi \times 1450/60 = 151.8 \text{ rad/s} \]
+
+        <p class="mt-2"><strong>Step 2: Set up equilibrium at new voltage</strong></p>
+        <p>Using the relationship derived in Worked Example 2:</p>
+        \[ b^2 \cdot s_2 \cdot (1 - s_1)^2 = s_1 \cdot (1 - s_2)^2 \]
+        \[ 0.49 \cdot s_2 \cdot (0.9667)^2 = 0.0333 \cdot (1 - s_2)^2 \]
+        \[ 0.4578\,s_2 = 0.0333(1 - 2s_2 + s_2^2) \]
+        \[ 0.4578\,s_2 = 0.0333 - 0.0666\,s_2 + 0.0333\,s_2^2 \]
+        \[ 0.0333\,s_2^2 - 0.5244\,s_2 + 0.0333 = 0 \]
+        \[ s_2^2 - 15.74\,s_2 + 1 = 0 \]
+        \[ s_2 = \frac{15.74 - \sqrt{247.7 - 4}}{2} = \frac{15.74 - 15.61}{2} = 0.065 \]
+
+        <p>\(N_2 = 1500(1 - 0.065) = \mathbf{1403 \text{ rpm}}\)</p>
+
+        <p>Speed reduction: \(1450 - 1403 = 47\) rpm (about 3.2%)</p>
+
+        <div class="box takeaway mt-2">
+          <span class="box-label">Note</span>
+          <p>Even a 30% voltage reduction only produces about 3% speed change with this low-slip motor. For meaningful speed control, we'd need a high-slip motor design.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 10: Flashcards
+     ============================================================ -->
+<div class="section" id="sec-flashcards">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>10. Flashcards &mdash; Quick Review</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+
+    <p>Click on a card to flip it. Use the navigation buttons to move between cards.</p>
+
+    <div class="flashcard-section">
+      <div class="flashcard-controls">
+        <button class="flashcard-btn" id="fc-prev" onclick="prevCard()">&#9664; Prev</button>
+        <span class="flashcard-counter" id="fc-counter">1 / 15</span>
+        <button class="flashcard-btn" id="fc-next" onclick="nextCard()">Next &#9654;</button>
+      </div>
+
+      <div class="flashcard-viewport">
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="flashcard-face flashcard-front" id="fc-front">
+            <span class="fc-label">Question</span>
+            <div class="fc-text" id="fc-question"></div>
+            <div class="flashcard-hint">Click to reveal answer</div>
+          </div>
+          <div class="flashcard-face flashcard-back" id="fc-back">
+            <span class="fc-label">Answer</span>
+            <div class="fc-text" id="fc-answer"></div>
+            <div class="flashcard-hint">Click to return to question</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     FINAL LECTURE SUMMARY
+     ============================================================ -->
+<div class="section" id="sec-summary">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>Lecture Summary</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <div class="box takeaway">
+      <span class="box-label">Big Picture</span>
+      <p>In this lecture, we built the foundation for induction motor drives:</p>
+      <ol class="content-list" style="padding-left:20px;">
+        <li><strong>IM types:</strong> Squirrel cage (dominant, cheap, rugged) vs. wound rotor (rotor access for control) vs. linear (for linear motion).</li>
+        <li><strong>Special designs:</strong> Low-slip (efficient running), high-slip (good starting, wide voltage control range), deep bar and double cage (best of both worlds via frequency-dependent impedance).</li>
+        <li><strong>Equivalent circuit:</strong> The per-phase model with \(R'_r/s\) captures all electromagnetic relationships. The rotor current and torque are derived from simple circuit analysis.</li>
+        <li><strong>Torque-speed characteristic:</strong> Nonlinear curve with breakdown torque \(T_{mm} \propto V_s^2/(X_s + X'_r)\) independent of rotor resistance. Rotor resistance only shifts \(s_m\).</li>
+        <li><strong>Key relationships:</strong> \(P_{cu,r} = s \cdot P_g\), \(P_m = (1-s) \cdot P_g\) &mdash; efficiency is fundamentally limited by slip.</li>
+        <li><strong>Stator voltage control:</strong> Simplest method (\(T \propto V^2\)), limited range, best with high-slip motors and fan loads. Implemented with thyristor AC voltage controllers.</li>
+      </ol>
+      <p>Next lecture: <strong>Frequency control (V/f)</strong> &mdash; the most powerful and versatile IM speed control method, which changes synchronous speed directly and maintains full torque capability across the speed range.</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content-wrapper -->
+</main>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ===========================================
+// THEME TOGGLE
+// ===========================================
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+  if (theme === 'dark') {
+    icon.textContent = '\u2600'; // sun
+    label.textContent = 'Light';
+  } else {
+    icon.textContent = '\u263E'; // moon
+    label.textContent = 'Dark';
+  }
+}
+
+// Initialize theme
+(function() {
+  var saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeUI(saved);
+})();
+
+// ===========================================
+// SIDEBAR TOGGLE (mobile)
+// ===========================================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// Close sidebar when clicking a link (mobile)
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 900) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+});
+
+// ===========================================
+// COLLAPSIBLE SECTIONS
+// ===========================================
+function toggleSection(header) {
+  var content = header.nextElementSibling;
+  var icon = header.querySelector('.collapse-icon');
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    content.style.maxHeight = content.scrollHeight + 'px';
+    icon.classList.remove('collapsed');
+    setTimeout(function() { content.style.maxHeight = 'none'; }, 500);
+  } else {
+    content.style.maxHeight = content.scrollHeight + 'px';
+    requestAnimationFrame(function() {
+      content.classList.add('collapsed');
+      icon.classList.add('collapsed');
+    });
+  }
+}
+
+// Initialize all sections as expanded
+document.querySelectorAll('.section-content').forEach(function(el) {
+  el.style.maxHeight = 'none';
+});
+
+// ===========================================
+// SOLUTION TOGGLE
+// ===========================================
+function toggleSolution(btn) {
+  var content = btn.nextElementSibling;
+  content.classList.toggle('visible');
+  btn.textContent = content.classList.contains('visible') ? 'Hide Solution' : 'Show Solution';
+  // Re-render MathJax in the revealed content
+  if (content.classList.contains('visible') && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([content]);
+  }
+}
+
+// ===========================================
+// PROGRESS BAR
+// ===========================================
+function updateProgress() {
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('progress-bar').style.width = progress + '%';
+}
+
+// ===========================================
+// ACTIVE TOC HIGHLIGHT
+// ===========================================
+function updateActiveTOC() {
+  var sections = document.querySelectorAll('.section[id], .subsection[id], .hero[id]');
+  var links = document.querySelectorAll('.sidebar nav a');
+  var scrollPos = window.pageYOffset + 120;
+  var activeId = '';
+
+  sections.forEach(function(section) {
+    if (section.offsetTop <= scrollPos) {
+      activeId = section.id;
+    }
+  });
+
+  links.forEach(function(link) {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + activeId) {
+      link.classList.add('active');
+    }
+  });
+}
+
+// Throttle scroll events
+var scrollTicking = false;
+window.addEventListener('scroll', function() {
+  if (!scrollTicking) {
+    requestAnimationFrame(function() {
+      updateProgress();
+      updateActiveTOC();
+      scrollTicking = false;
+    });
+    scrollTicking = true;
+  }
+});
+
+// Initial call
+updateProgress();
+updateActiveTOC();
+
+// ===========================================
+// FLASHCARDS
+// ===========================================
+var flashcards = [
+  {
+    q: "What is the synchronous speed formula?",
+    a: "N<sub>s</sub> = 120f / P (rpm)<br><br>&omega;<sub>s</sub> = 2&pi;f / (P/2) = 4&pi;f / P (rad/s)<br><br>where f = supply frequency, P = number of poles."
+  },
+  {
+    q: "What is the slip formula?",
+    a: "s = (N<sub>s</sub> &minus; N<sub>r</sub>) / N<sub>s</sub><br><br>At standstill: s = 1<br>At synchronous speed: s = 0<br><br>Slip is the fractional difference between synchronous speed and actual rotor speed."
+  },
+  {
+    q: "Write the rotor current formula from the approximate equivalent circuit.",
+    a: "I'<sub>r</sub> = V<sub>s</sub> / &radic;[(R<sub>s</sub> + R'<sub>r</sub>/s)&sup2; + (X<sub>s</sub> + X'<sub>r</sub>)&sup2;]<br><br>This is the key equation from which all torque and power expressions are derived."
+  },
+  {
+    q: "What is the developed torque expression for an induction motor?",
+    a: "T<sub>d</sub> = 3V<sub>s</sub>&sup2; &middot; R'<sub>r</sub> / [&omega;<sub>s</sub> &middot; s &middot; ((R<sub>s</sub> + R'<sub>r</sub>/s)&sup2; + (X<sub>s</sub> + X'<sub>r</sub>)&sup2;)]<br><br>Equivalently: T<sub>d</sub> = P<sub>g</sub> / &omega;<sub>s</sub> where P<sub>g</sub> is the air gap power."
+  },
+  {
+    q: "What is the slip for maximum torque?",
+    a: "s<sub>m</sub> = R'<sub>r</sub> / &radic;[R<sub>s</sub>&sup2; + (X<sub>s</sub> + X'<sub>r</sub>)&sup2;]<br><br>If R<sub>s</sub> neglected:<br>s<sub>m</sub> = R'<sub>r</sub> / (X<sub>s</sub> + X'<sub>r</sub>)<br><br>Note: s<sub>m</sub> is proportional to R'<sub>r</sub>."
+  },
+  {
+    q: "What is the maximum (breakdown) torque formula with R<sub>s</sub> neglected?",
+    a: "T<sub>mm</sub> = 3V<sub>s</sub>&sup2; / [2&omega;<sub>s</sub> &middot; (X<sub>s</sub> + X'<sub>r</sub>)]<br><br><strong>Key insight:</strong> T<sub>mm</sub> is INDEPENDENT of R'<sub>r</sub>! Changing rotor resistance only shifts where the peak occurs, not its value."
+  },
+  {
+    q: "Write the normalized torque formula.",
+    a: "T<sub>d</sub> / T<sub>mm</sub> = 2 &middot; s &middot; s<sub>m</sub> / (s&sup2; + s<sub>m</sub>&sup2;)<br><br>This is a universal curve &mdash; valid for any IM when R<sub>s</sub> is neglected. At s = s<sub>m</sub>, the ratio equals 1."
+  },
+  {
+    q: "How does stator voltage control affect torque?",
+    a: "T &prop; V<sub>s</sub>&sup2;<br><br>If voltage is reduced by factor b (new V = bV<sub>s</sub>), then:<br>T<sub>new</sub> = b&sup2; &middot; T<sub>original</sub><br>T<sub>mm,new</sub> = b&sup2; &middot; T<sub>mm,original</sub><br><br>s<sub>m</sub> stays unchanged."
+  },
+  {
+    q: "For a fan load (T &prop; &omega;&sup2;), how do you find the new speed at reduced voltage?",
+    a: "Set motor torque = load torque at new conditions:<br><br>b&sup2; &middot; T<sub>motor</sub>(s<sub>2</sub>) = k<sub>L</sub> &middot; &omega;<sub>r2</sub>&sup2;<br><br>In the linear region, this gives:<br>b&sup2; &middot; s<sub>2</sub> &middot; (1&minus;s<sub>1</sub>)&sup2; = s<sub>1</sub> &middot; (1&minus;s<sub>2</sub>)&sup2;<br><br>Solve the resulting quadratic for s<sub>2</sub>, then N<sub>2</sub> = N<sub>s</sub>(1&minus;s<sub>2</sub>)."
+  },
+  {
+    q: "What are the relationships between P<sub>g</sub>, P<sub>cu,r</sub>, and P<sub>m</sub>?",
+    a: "P<sub>g</sub> (air gap power) = 3|I'<sub>r</sub>|&sup2; &middot; R'<sub>r</sub>/s<br><br>P<sub>cu,r</sub> = s &middot; P<sub>g</sub> (rotor copper loss)<br><br>P<sub>m</sub> = (1&minus;s) &middot; P<sub>g</sub> (mechanical power)<br><br>Efficiency is fundamentally limited by slip!"
+  },
+  {
+    q: "How do you find the motor current at a given operating point?",
+    a: "1. Find slip: s = (N<sub>s</sub> &minus; N<sub>r</sub>) / N<sub>s</sub><br><br>2. Rotor current: I'<sub>r</sub> = V<sub>s</sub> / &radic;[(R<sub>s</sub> + R'<sub>r</sub>/s)&sup2; + (X<sub>s</sub> + X'<sub>r</sub>)&sup2;]<br><br>3. For stator input current, include the magnetizing branch (add I<sub>m</sub> = V<sub>s</sub>/jX<sub>m</sub> as a phasor)."
+  },
+  {
+    q: "For a Y-connected motor, what voltage goes into the per-phase equivalent circuit?",
+    a: "V<sub>s</sub> = V<sub>line</sub> / &radic;3 (phase voltage)<br><br>For &Delta;-connected: V<sub>s</sub> = V<sub>line</sub><br><br>Always use per-phase voltage in the equivalent circuit, and multiply power/torque by 3 for three-phase totals."
+  },
+  {
+    q: "What is the starting current formula?",
+    a: "I<sub>st</sub> = V<sub>s</sub> / &radic;[(R<sub>s</sub> + R'<sub>r</sub>)&sup2; + (X<sub>s</sub> + X'<sub>r</sub>)&sup2;]<br><br>Set s = 1 in the rotor current formula. At standstill, R'<sub>r</sub>/s = R'<sub>r</sub>, giving minimum impedance and therefore maximum current."
+  },
+  {
+    q: "How does rotor resistance affect the torque-speed curve?",
+    a: "Higher R'<sub>r</sub>:<br>- Increases s<sub>m</sub> (shifts peak to lower speed)<br>- T<sub>mm</sub> stays UNCHANGED (if R<sub>s</sub> neglected)<br>- Increases starting torque<br>- Decreases starting current<br>- Reduces running efficiency (higher slip at rated load)"
+  },
+  {
+    q: "For a stator voltage control problem, what is the step-by-step approach?",
+    a: "1. Find rated slip from rated speed: s<sub>1</sub> = (N<sub>s</sub>&minus;N<sub>r</sub>)/N<sub>s</sub><br>2. Calculate rated torque from motor parameters<br>3. Express load torque at new speed (e.g., T<sub>L</sub> = k&omega;&sup2;)<br>4. Set motor torque at new voltage = load torque: b&sup2;&middot;T<sub>motor</sub>(s<sub>2</sub>) = T<sub>load</sub>(&omega;<sub>2</sub>)<br>5. Solve for new slip s<sub>2</sub> and speed N<sub>2</sub>"
+  }
+];
+
+var currentCard = 0;
+
+function renderCard() {
+  var card = flashcards[currentCard];
+  document.getElementById('fc-question').innerHTML = card.q;
+  document.getElementById('fc-answer').innerHTML = card.a;
+  document.getElementById('fc-counter').textContent = (currentCard + 1) + ' / ' + flashcards.length;
+
+  // Remove flip state
+  document.getElementById('flashcard').classList.remove('flipped');
+
+  // Update button states
+  document.getElementById('fc-prev').disabled = (currentCard === 0);
+  document.getElementById('fc-next').disabled = (currentCard === flashcards.length - 1);
+
+  // Re-render MathJax if available
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('fc-front'), document.getElementById('fc-back')]);
+  }
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function nextCard() {
+  if (currentCard < flashcards.length - 1) {
+    currentCard++;
+    renderCard();
+  }
+}
+
+function prevCard() {
+  if (currentCard > 0) {
+    currentCard--;
+    renderCard();
+  }
+}
+
+// Keyboard navigation for flashcards
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowLeft') { prevCard(); }
+  if (e.key === 'ArrowRight') { nextCard(); }
+  if (e.key === ' ' || e.key === 'Enter') {
+    // Only flip if flashcard section is visible
+    var fcSection = document.getElementById('sec-flashcards');
+    var rect = fcSection.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      e.preventDefault();
+      flipCard();
+    }
+  }
+});
+
+// Initialize first card
+renderCard();
+</script>
+
+</body>
+</html>

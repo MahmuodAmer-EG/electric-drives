@@ -69,6 +69,9 @@
             --ch4-color: #9333ea;
             --ch4-bg: #faf5ff;
             --ch4-light: #f3e8ff;
+            --ch5-color: #0891b2;
+            --ch5-bg: #ecfeff;
+            --ch5-light: #cffafe;
 
             /* Progress */
             --progress-bg: #e5e7eb;
@@ -113,6 +116,9 @@
             --ch4-color: #c084fc;
             --ch4-bg: #1a0a2e;
             --ch4-light: #2e1065;
+            --ch5-color: #22d3ee;
+            --ch5-bg: #0a1a1e;
+            --ch5-light: #164e63;
 
             --progress-bg: #334155;
             --progress-fill: #60a5fa;
@@ -200,7 +206,7 @@
 
         .progress-tracker-bar .fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--ch1-color), var(--ch2-color), var(--ch3-color), var(--ch4-color));
+            background: linear-gradient(90deg, var(--ch1-color), var(--ch2-color), var(--ch3-color), var(--ch4-color), var(--ch5-color));
             transition: width 0.5s ease;
             border-radius: 0 2px 2px 0;
         }
@@ -894,7 +900,7 @@
         }
 
         .reference-body.open {
-            max-height: 800px;
+            max-height: 1600px;
         }
 
         .reference-body-inner {
@@ -1076,6 +1082,10 @@
         .stagger > .fade-in:nth-child(6) { transition-delay: 0.3s; }
         .stagger > .fade-in:nth-child(7) { transition-delay: 0.35s; }
         .stagger > .fade-in:nth-child(8) { transition-delay: 0.4s; }
+        .stagger > .fade-in:nth-child(9) { transition-delay: 0.45s; }
+        .stagger > .fade-in:nth-child(10) { transition-delay: 0.5s; }
+        .stagger > .fade-in:nth-child(11) { transition-delay: 0.55s; }
+        .stagger > .fade-in:nth-child(12) { transition-delay: 0.6s; }
 
         /* Roadmap node animation */
         .roadmap-svg .node-group {
@@ -1091,6 +1101,11 @@
         .roadmap-svg .node-group:nth-child(7) { animation-delay: 0.7s; }
         .roadmap-svg .node-group:nth-child(8) { animation-delay: 0.8s; }
         .roadmap-svg .node-group:nth-child(9) { animation-delay: 0.9s; }
+        .roadmap-svg .node-group:nth-child(10) { animation-delay: 1.0s; }
+        .roadmap-svg .node-group:nth-child(11) { animation-delay: 1.1s; }
+        .roadmap-svg .node-group:nth-child(12) { animation-delay: 1.2s; }
+        .roadmap-svg .node-group:nth-child(13) { animation-delay: 1.3s; }
+        .roadmap-svg .node-group:nth-child(14) { animation-delay: 1.4s; }
 
         @keyframes nodeAppear {
             from { opacity: 0; transform: translateY(8px); }
@@ -1153,11 +1168,11 @@
             <h1>Electric Drives<br><span class="highlight">Interactive Lecture Notes</span></h1>
             <p class="subtitle">Motivation-First Learning &mdash; from real-world problems to the equations that solve them.</p>
             <p class="welcome">
-                Welcome to the Electric Drives course. These 8 interactive lectures take you from
-                the fundamentals of motor-load dynamics all the way to DC drive control. Each lecture
-                starts with a motivating question or real scenario, builds your intuition, then
-                dives into the math. Pick up where you left off, or explore any topic that sparks
-                your curiosity.
+                Welcome to the Electric Drives course. These 12 interactive lectures take you from
+                the fundamentals of motor-load dynamics through DC drive control and into induction
+                motor drives. Each lecture starts with a motivating question or real scenario,
+                builds your intuition, then dives into the math. Pick up where you left off,
+                or explore any topic that sparks your curiosity.
             </p>
 
             <!-- Progress ring -->
@@ -1173,7 +1188,7 @@
                 </div>
                 <div class="progress-info">
                     <div class="label">Your Progress</div>
-                    <div class="count"><span id="progressCount">0</span>/8 lectures visited</div>
+                    <div class="count"><span id="progressCount">0</span>/12 lectures visited</div>
                 </div>
             </div>
         </div>
@@ -1187,11 +1202,11 @@
             <div class="section-header fade-in">
                 <span class="overline">Course Structure</span>
                 <h2>How the Lectures Connect</h2>
-                <p>Follow the path from foundational concepts through dynamics, traction, and into DC motor drives.</p>
+                <p>Follow the path from foundational concepts through dynamics, traction, DC motor drives, and into induction motor drives.</p>
             </div>
 
             <div class="roadmap-wrapper fade-in">
-                <svg class="roadmap-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+                <svg class="roadmap-svg" viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
                             <polygon points="0 0, 8 3, 0 6" class="arrow-marker" fill="#94a3b8"/>
@@ -1200,29 +1215,42 @@
 
                     <!-- Connectors (drawn first, behind nodes) -->
                     <!-- L1 -> Ch2 branch -->
-                    <path class="connector connector-line" d="M220,65 L280,65 Q300,65 300,85 L300,105"
+                    <path class="connector connector-line" d="M220,65 L250,65 Q270,65 270,85 L270,105"
                           stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
                     <!-- L1 -> Ch3 branch -->
-                    <path class="connector connector-line" d="M220,65 L430,65 Q450,65 450,85 L450,105"
+                    <path class="connector connector-line" d="M220,65 L410,65 Q430,65 430,85 L430,105"
                           stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
                     <!-- L1 -> Ch4 branch -->
-                    <path class="connector connector-line" d="M220,65 L680,65 Q700,65 700,85 L700,105"
+                    <path class="connector connector-line" d="M220,65 L580,65 Q600,65 600,85 L600,105"
+                          stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- L1 -> Ch5 branch -->
+                    <path class="connector connector-line" d="M220,65 L780,65 Q800,65 800,85 L800,105"
                           stroke="#94a3b8" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)"/>
 
                     <!-- Ch2: L2 -> L3 -->
-                    <path class="connector connector-line" d="M300,175 L300,195"
+                    <path class="connector connector-line" d="M270,175 L270,195"
                           stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
                     <!-- Ch2: L3 -> L4 -->
-                    <path class="connector connector-line" d="M300,275 L300,295"
+                    <path class="connector connector-line" d="M270,275 L270,295"
                           stroke="#16a34a" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
 
                     <!-- Ch3: L5 -> L6 -->
-                    <path class="connector connector-line" d="M450,175 L450,195"
+                    <path class="connector connector-line" d="M430,175 L430,195"
                           stroke="#d97706" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
 
                     <!-- Ch4: L7 -> L8 -->
-                    <path class="connector connector-line" d="M700,175 L700,195"
+                    <path class="connector connector-line" d="M600,175 L600,195"
                           stroke="#9333ea" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- Ch4: L8 -> L9 -->
+                    <path class="connector connector-line" d="M600,275 L600,295"
+                          stroke="#9333ea" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <!-- Ch4: L9 -> L10 -->
+                    <path class="connector connector-line" d="M600,375 L600,395"
+                          stroke="#9333ea" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+
+                    <!-- Ch5: L11 -> L12 -->
+                    <path class="connector connector-line" d="M800,175 L800,195"
+                          stroke="#0891b2" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
 
                     <!-- ===== NODES ===== -->
 
@@ -1239,17 +1267,17 @@
                     </a>
 
                     <!-- Chapter 2 label -->
-                    <text x="300" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                    <text x="270" y="120" text-anchor="middle" class="chapter-label" font-size="9"
                           font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 2: DYNAMICS</text>
 
                     <!-- L2 -->
                     <a href="lecture2_dynamics_part1.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="210" y="130" width="180" height="46"
+                            <rect class="node-rect" x="180" y="130" width="180" height="46"
                                   fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
-                            <text x="300" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="270" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#16a34a">L2: Torque Equation</text>
-                            <text x="300" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="270" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">Equivalent Parameters</text>
                         </g>
                     </a>
@@ -1257,11 +1285,11 @@
                     <!-- L3 -->
                     <a href="lecture3_fluctuating_loads.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="210" y="210" width="180" height="46"
+                            <rect class="node-rect" x="180" y="210" width="180" height="46"
                                   fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
-                            <text x="300" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="270" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#16a34a">L3: Fluctuating Loads</text>
-                            <text x="300" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="270" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">Flywheel Design</text>
                         </g>
                     </a>
@@ -1269,27 +1297,27 @@
                     <!-- L4 -->
                     <a href="lecture4_hoist_fan_drives.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="210" y="310" width="180" height="46"
+                            <rect class="node-rect" x="180" y="310" width="180" height="46"
                                   fill="#16a34a" opacity="0.12" stroke="#16a34a" stroke-width="1.5"/>
-                            <text x="300" y="330" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="270" y="330" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#16a34a">L4: Hoist &amp; Fan Drives</text>
-                            <text x="300" y="346" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="270" y="346" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">Elevator, Centrifugal Loads</text>
                         </g>
                     </a>
 
                     <!-- Chapter 3 label -->
-                    <text x="450" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                    <text x="430" y="120" text-anchor="middle" class="chapter-label" font-size="9"
                           font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 3: TRACTION</text>
 
                     <!-- L5 -->
                     <a href="lecture5_electric_traction.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="360" y="130" width="180" height="46"
+                            <rect class="node-rect" x="340" y="130" width="180" height="46"
                                   fill="#d97706" opacity="0.12" stroke="#d97706" stroke-width="1.5"/>
-                            <text x="450" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="430" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#d97706">L5: Electric Traction</text>
-                            <text x="450" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="430" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">Tractive Effort &amp; Duty Cycle</text>
                         </g>
                     </a>
@@ -1297,27 +1325,27 @@
                     <!-- L6 -->
                     <a href="lecture6_traction_energy.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="360" y="210" width="180" height="46"
+                            <rect class="node-rect" x="340" y="210" width="180" height="46"
                                   fill="#d97706" opacity="0.12" stroke="#d97706" stroke-width="1.5"/>
-                            <text x="450" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="430" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#d97706">L6: Energy Consumption</text>
-                            <text x="450" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="430" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">SEC &amp; Regen. Braking</text>
                         </g>
                     </a>
 
                     <!-- Chapter 4 label -->
-                    <text x="700" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                    <text x="600" y="120" text-anchor="middle" class="chapter-label" font-size="9"
                           font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 4: DC DRIVES</text>
 
                     <!-- L7 -->
                     <a href="lecture7_dc_drives_single_phase.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="610" y="130" width="180" height="46"
+                            <rect class="node-rect" x="510" y="130" width="180" height="46"
                                   fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
-                            <text x="700" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="600" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#9333ea">L7: Single-Phase Conv.</text>
-                            <text x="700" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="600" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">DC Motor Speed Control</text>
                         </g>
                     </a>
@@ -1325,17 +1353,69 @@
                     <!-- L8 -->
                     <a href="lecture8_dc_drives_3phase_choppers.html">
                         <g class="node-group">
-                            <rect class="node-rect" x="610" y="210" width="180" height="46"
+                            <rect class="node-rect" x="510" y="210" width="180" height="46"
                                   fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
-                            <text x="700" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                            <text x="600" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
                                   fill="#9333ea">L8: 3-Phase &amp; Choppers</text>
-                            <text x="700" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                            <text x="600" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
                                   fill="#64748b">Converter &amp; Chopper Drives</text>
                         </g>
                     </a>
 
+                    <!-- L9 -->
+                    <a href="lecture9_dc_chopper_drives.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="510" y="310" width="180" height="46"
+                                  fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
+                            <text x="600" y="330" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#9333ea">L9: DC Chopper Drives</text>
+                            <text x="600" y="346" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Step-down &amp; Step-up</text>
+                        </g>
+                    </a>
+
+                    <!-- L10 -->
+                    <a href="lecture10_dc_motor_braking.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="510" y="410" width="180" height="46"
+                                  fill="#9333ea" opacity="0.12" stroke="#9333ea" stroke-width="1.5"/>
+                            <text x="600" y="430" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#9333ea">L10: DC Motor Braking</text>
+                            <text x="600" y="446" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Dynamic, Plugging, Regen.</text>
+                        </g>
+                    </a>
+
+                    <!-- Chapter 5 label -->
+                    <text x="800" y="120" text-anchor="middle" class="chapter-label" font-size="9"
+                          font-weight="700" letter-spacing="0.08em" fill="#64748b">CHAPTER 5: IM DRIVES</text>
+
+                    <!-- L11 -->
+                    <a href="lecture11_im_drives_basics.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="710" y="130" width="180" height="46"
+                                  fill="#0891b2" opacity="0.12" stroke="#0891b2" stroke-width="1.5"/>
+                            <text x="800" y="150" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#0891b2">L11: IM Drives Basics</text>
+                            <text x="800" y="166" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">Equiv. Circuit &amp; Torque</text>
+                        </g>
+                    </a>
+
+                    <!-- L12 -->
+                    <a href="lecture12_im_drives_frequency_control.html">
+                        <g class="node-group">
+                            <rect class="node-rect" x="710" y="210" width="180" height="46"
+                                  fill="#0891b2" opacity="0.12" stroke="#0891b2" stroke-width="1.5"/>
+                            <text x="800" y="230" text-anchor="middle" class="node-text" font-size="10" font-weight="600"
+                                  fill="#0891b2">L12: Frequency &amp; Rotor</text>
+                            <text x="800" y="246" text-anchor="middle" class="node-text subtitle-text" font-size="9"
+                                  fill="#64748b">V/F Control &amp; Slip Recovery</text>
+                        </g>
+                    </a>
+
                     <!-- Legend -->
-                    <g transform="translate(30, 390)">
+                    <g transform="translate(30, 490)">
                         <text font-size="9" font-weight="600" fill="#64748b">Click any node to open the lecture</text>
                     </g>
                 </svg>
@@ -1351,7 +1431,7 @@
             <div class="section-header fade-in">
                 <span class="overline">All Lectures</span>
                 <h2>Explore the Full Course</h2>
-                <p>Eight lectures covering dynamics, traction, and DC motor drives &mdash; each designed around real engineering problems.</p>
+                <p>Twelve lectures covering dynamics, traction, DC motor drives, and induction motor drives &mdash; each designed around real engineering problems.</p>
             </div>
 
             <div class="cards-grid stagger" id="cardsGrid">
@@ -1612,6 +1692,140 @@
                     </div>
                 </div>
 
+                <!-- LECTURE 9 -->
+                <div class="lecture-card fade-in" data-lecture="9"
+                     style="--card-accent: var(--ch4-color); --card-bg: var(--ch4-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 9</span>
+                            <span class="badge badge-chapter">Chapter 4</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 20h20"/><path d="M5 20V8l3-3h8l3 3v12"/><path d="M9 20v-6h6v6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>DC Chopper Drives</h3>
+                    <p class="card-desc">Step-down and step-up choppers, motoring and regenerative braking operation, dynamic braking, composite braking, two and four-quadrant chopper drives.</p>
+                    <div class="card-tags">
+                        <span class="tag">Choppers</span>
+                        <span class="tag">Step-down</span>
+                        <span class="tag">Step-up</span>
+                        <span class="tag">Regenerative Braking</span>
+                        <span class="tag">H-Bridge</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~35 min read
+                        </span>
+                        <a href="lecture9_dc_chopper_drives.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 10 -->
+                <div class="lecture-card fade-in" data-lecture="10"
+                     style="--card-accent: var(--ch4-color); --card-bg: var(--ch4-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 10</span>
+                            <span class="badge badge-chapter">Chapter 4</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>DC Motor Braking</h3>
+                    <p class="card-desc">Dynamic braking, counter-current braking (plugging), and regenerative braking for shunt, series, and compound DC motors.</p>
+                    <div class="card-tags">
+                        <span class="tag">Dynamic Braking</span>
+                        <span class="tag">Plugging</span>
+                        <span class="tag">Regenerative</span>
+                        <span class="tag">Shunt</span>
+                        <span class="tag">Series</span>
+                        <span class="tag">Compound</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~30 min read
+                        </span>
+                        <a href="lecture10_dc_motor_braking.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 11 -->
+                <div class="lecture-card fade-in" data-lecture="11"
+                     style="--card-accent: var(--ch5-color); --card-bg: var(--ch5-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 11</span>
+                            <span class="badge badge-chapter">Chapter 5</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"/><path d="M12 1v4"/><path d="M12 19v4"/><path d="M4.22 4.22l2.83 2.83"/><path d="M16.95 16.95l2.83 2.83"/><path d="M1 12h4"/><path d="M19 12h4"/><path d="M4.22 19.78l2.83-2.83"/><path d="M16.95 7.05l2.83-2.83"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>Induction Motor Drives: Basics</h3>
+                    <p class="card-desc">IM types and special designs, per-phase equivalent circuit, torque equations, double-cage and deep-bar motors, stator voltage control.</p>
+                    <div class="card-tags">
+                        <span class="tag">Equivalent Circuit</span>
+                        <span class="tag">Torque</span>
+                        <span class="tag">Double-Cage</span>
+                        <span class="tag">Deep-Bar</span>
+                        <span class="tag">Voltage Control</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~40 min read
+                        </span>
+                        <a href="lecture11_im_drives_basics.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
+                <!-- LECTURE 12 -->
+                <div class="lecture-card fade-in" data-lecture="12"
+                     style="--card-accent: var(--ch5-color); --card-bg: var(--ch5-bg);">
+                    <div class="visited-badge" aria-label="Visited">&#10003;</div>
+                    <div class="card-header">
+                        <div class="card-badges">
+                            <span class="badge badge-lecture">Lecture 12</span>
+                            <span class="badge badge-chapter">Chapter 5</span>
+                        </div>
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3>IM Drives: Frequency &amp; Rotor Control</h3>
+                    <p class="card-desc">V/F scalar control, constant torque and power regions, rotor resistance control, static resistance, slip power recovery (Kramer and Scherbius drives), doubly-fed IM.</p>
+                    <div class="card-tags">
+                        <span class="tag">V/F Control</span>
+                        <span class="tag">Field Weakening</span>
+                        <span class="tag">Rotor Resistance</span>
+                        <span class="tag">Kramer</span>
+                        <span class="tag">Scherbius</span>
+                        <span class="tag">DFIM</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="read-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ~40 min read
+                        </span>
+                        <a href="lecture12_im_drives_frequency_control.html" class="card-btn">Start Learning <span>&rarr;</span></a>
+                    </div>
+                </div>
+
             </div><!-- /cards-grid -->
         </div>
     </section>
@@ -1757,7 +1971,7 @@
                 <span class="chapter-num">Chapter 4</span>
                 <h3>DC Motor Drives</h3>
                 <p class="chapter-desc">
-                    The classic controlled drive: DC motors with power electronic converters. From single-phase SCR bridges to three-phase converters and modern chopper drives, learn to control speed and torque precisely.
+                    The classic controlled drive: DC motors with power electronic converters. From single-phase SCR bridges to three-phase converters, chopper drives, and braking methods, learn to control speed and torque precisely in all four quadrants.
                 </p>
                 <div class="chapter-content">
                     <div class="chapter-learn">
@@ -1767,8 +1981,10 @@
                             <li>Armature voltage control and field weakening</li>
                             <li>Single-phase half-wave and full-wave converter drives</li>
                             <li>Three-phase fully controlled converter drives</li>
-                            <li>Chopper-fed DC drives and duty ratio control</li>
+                            <li>Step-down and step-up chopper drives with H-bridge topology</li>
                             <li>Four-quadrant operation with dual converters</li>
+                            <li>Dynamic, counter-current (plugging), and regenerative braking</li>
+                            <li>Braking of shunt, series, and compound DC motors</li>
                         </ul>
                     </div>
                     <div class="chapter-lectures">
@@ -1781,6 +1997,16 @@
                         <a href="lecture8_dc_drives_3phase_choppers.html" class="chapter-lecture-link">
                             <span class="lec-num">8</span>
                             <span class="lec-title">Three-Phase Converters &amp; Choppers</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture9_dc_chopper_drives.html" class="chapter-lecture-link">
+                            <span class="lec-num">9</span>
+                            <span class="lec-title">DC Chopper Drives</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture10_dc_motor_braking.html" class="chapter-lecture-link">
+                            <span class="lec-num">10</span>
+                            <span class="lec-title">DC Motor Braking</span>
                             <span class="lec-arrow">&rarr;</span>
                         </a>
                     </div>
@@ -1799,6 +2025,73 @@
                         <span class="eq-label">Chopper Output</span>
                         <span class="ref-math">\( V_a = \delta \cdot V_s \)</span>
                     </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Current Ripple</span>
+                        <span class="ref-math">\( \Delta I_a = \frac{V_s \cdot \delta(1-\delta)}{f \cdot L_a} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Dynamic Braking</span>
+                        <span class="ref-math">\( T = \frac{(K\phi)^2 \omega}{R_a + R_b} \)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chapter 5 -->
+            <div class="chapter-block fade-in" style="--chap-color: var(--ch5-color); --chap-bg: var(--ch5-bg);">
+                <span class="chapter-num">Chapter 5</span>
+                <h3>Induction Motor Drives</h3>
+                <p class="chapter-desc">
+                    The workhorse of industry: induction motors driven by modern power electronics. From the per-phase equivalent circuit to V/F scalar control, rotor resistance methods, and slip power recovery schemes including Kramer and Scherbius drives.
+                </p>
+                <div class="chapter-content">
+                    <div class="chapter-learn">
+                        <h4>What You'll Learn</h4>
+                        <ul>
+                            <li>Induction motor types and special designs (double-cage, deep-bar)</li>
+                            <li>Per-phase equivalent circuit and torque-slip characteristics</li>
+                            <li>Stator voltage control for speed variation</li>
+                            <li>V/F scalar control: constant torque and field weakening regions</li>
+                            <li>Rotor resistance control and static resistance injection</li>
+                            <li>Slip power recovery: Kramer and Scherbius drive schemes</li>
+                            <li>Doubly-fed induction motor (DFIM) operation</li>
+                        </ul>
+                    </div>
+                    <div class="chapter-lectures">
+                        <h4>Lectures</h4>
+                        <a href="lecture11_im_drives_basics.html" class="chapter-lecture-link">
+                            <span class="lec-num">11</span>
+                            <span class="lec-title">IM Drives: Basics</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                        <a href="lecture12_im_drives_frequency_control.html" class="chapter-lecture-link">
+                            <span class="lec-num">12</span>
+                            <span class="lec-title">Frequency &amp; Rotor Control</span>
+                            <span class="lec-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="chapter-equations">
+                    <h4>Key Equations</h4>
+                    <div class="equation-item">
+                        <span class="eq-label">Synchronous Speed</span>
+                        <span class="ref-math">\( N_s = \frac{120f}{P} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Slip</span>
+                        <span class="ref-math">\( s = \frac{N_s - N_r}{N_s} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Developed Torque</span>
+                        <span class="ref-math">\( T_d = \frac{3V_s^2 R_r'}{\omega_s \cdot s \left[(R_s + R_r'/s)^2 + (X_s + X_r')^2\right]} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">Slip at Max Torque</span>
+                        <span class="ref-math">\( s_m = \frac{R_r'}{X_s + X_r'} \)</span>
+                    </div>
+                    <div class="equation-item">
+                        <span class="eq-label">V/F Control</span>
+                        <span class="ref-math">\( \frac{E}{f} = \text{constant} \)</span>
+                    </div>
                 </div>
             </div>
 
@@ -1813,7 +2106,7 @@
             <div class="section-header fade-in">
                 <span class="overline">Quick Reference</span>
                 <h2>Key Formulas at a Glance</h2>
-                <p>The essential equations from all eight lectures, organized by topic.</p>
+                <p>The essential equations from all twelve lectures, organized by topic.</p>
             </div>
 
             <div class="reference-card fade-in">
@@ -1874,6 +2167,42 @@
                                 <span class="ref-name">3-Phase Full Conv.</span>
                                 <span class="ref-math">\( V_a = \frac{3V_{m,LL}}{\pi} \cos\alpha \)</span>
                             </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Current Ripple</span>
+                                <span class="ref-math">\( \Delta I_a = \frac{V_s \cdot \delta(1-\delta)}{f \cdot L_a} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Dynamic Braking Torque</span>
+                                <span class="ref-math">\( T = \frac{(K\phi)^2 \omega}{R_a + R_b} \)</span>
+                            </div>
+                        </div>
+
+                        <div class="ref-group">
+                            <h4>Induction Motor Drives (Chapter 5)</h4>
+                            <div class="ref-equation">
+                                <span class="ref-name">Synchronous Speed</span>
+                                <span class="ref-math">\( N_s = \frac{120f}{P} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Slip</span>
+                                <span class="ref-math">\( s = \frac{N_s - N_r}{N_s} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Developed Torque</span>
+                                <span class="ref-math">\( T_d = \frac{3V_s^2 R_r'}{\omega_s \cdot s \left[(R_s + R_r'/s)^2 + (X_s + X_r')^2\right]} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Slip at Max Torque</span>
+                                <span class="ref-math">\( s_m = \frac{R_r'}{X_s + X_r'} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">V/F Control Principle</span>
+                                <span class="ref-math">\( \frac{E}{f} = \text{constant} \)</span>
+                            </div>
+                            <div class="ref-equation">
+                                <span class="ref-name">Static Rotor Resistance</span>
+                                <span class="ref-math">\( R_e = 0.5R(1-k) \)</span>
+                            </div>
                         </div>
 
                     </div>
@@ -1891,8 +2220,8 @@
                 <h3>ELE421 Electric Drives</h3>
                 <p>
                     A comprehensive set of interactive lecture notes covering electrical drive systems,
-                    from fundamental dynamics through traction applications to DC motor drive control.
-                    Designed for undergraduate electrical engineering students.
+                    from fundamental dynamics through traction applications, DC motor drive control,
+                    and induction motor drives. Designed for undergraduate electrical engineering students.
                 </p>
                 <p>
                     Built with the <strong>Motivation-First</strong> teaching approach: every concept begins
@@ -1935,7 +2264,7 @@
         'use strict';
 
         // ===== CONSTANTS =====
-        const TOTAL_LECTURES = 8;
+        const TOTAL_LECTURES = 12;
         const STORAGE_KEY_PROGRESS = 'ele421_visited';
         const STORAGE_KEY_THEME = 'ele421_theme';
         const LECTURE_FILES = [
@@ -1946,7 +2275,11 @@
             'lecture5_electric_traction.html',
             'lecture6_traction_energy.html',
             'lecture7_dc_drives_single_phase.html',
-            'lecture8_dc_drives_3phase_choppers.html'
+            'lecture8_dc_drives_3phase_choppers.html',
+            'lecture9_dc_chopper_drives.html',
+            'lecture10_dc_motor_braking.html',
+            'lecture11_im_drives_basics.html',
+            'lecture12_im_drives_frequency_control.html'
         ];
 
         // ===== PROGRESS TRACKING =====

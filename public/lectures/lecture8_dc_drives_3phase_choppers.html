@@ -633,6 +633,22 @@ strong { color: var(--text-primary); }
   background: var(--accent-hover);
   transform: translateY(-3px);
 }
+
+/* Flashcard Styles */
+.flashcard-deck{text-align:center;padding:10px 0}
+.flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+.flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+.flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+.flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+[data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+.flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+.flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+.flashcard-nav button:hover{opacity:0.85}
+.flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+.flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+.flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
 </style>
 </head>
 <body>
@@ -667,6 +683,7 @@ strong { color: var(--text-primary); }
     <a href="#sec-regen">Regenerative Braking</a>
     <a href="#sec-problems">Practice Problems</a>
     <a href="#sec-summary">Grand Summary</a>
+    <a href="#sec-flashcards">Flashcards</a>
   </nav>
 </aside>
 
@@ -2059,6 +2076,36 @@ strong { color: var(--text-primary); }
   </div>
 </section>
 
+<!-- Flashcards Section -->
+<section class="section" id="sec-flashcards">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+    <span class="collapse-icon">&#9662;</span>
+  </div>
+  <div class="section-content">
+    <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+    <div class="flashcard-deck">
+      <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+      <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <span class="flashcard-category" id="fc-category"></span>
+            <div id="fc-front-text"></div>
+            <div class="flashcard-hint">Click to reveal answer</div>
+          </div>
+          <div class="flashcard-back">
+            <div id="fc-back-text"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-nav">
+        <button onclick="fcPrev()">&#9664; Previous</button>
+        <button onclick="fcNext()">Next &#9654;</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 </div><!-- /content-wrapper -->
 </main>
 
@@ -2175,6 +2222,43 @@ strong { color: var(--text-primary); }
   };
 
 })();
+
+// Flashcard System
+var fcCards = [
+  {q:"What is Va for 3-phase half-wave converter?",a:"\\(V_a = 1.17 V_L \\cos\\alpha\\) \u2014 1 quadrant, up to 40kW. High harmonics (limited use).",cat:"Formula"},
+  {q:"What is Va for 3-phase full converter?",a:"\\(V_a = 2.34 V_L \\cos\\alpha\\) \u2014 2 quadrants (I & IV), up to 1500kW",cat:"Formula"},
+  {q:"What is Va for 3-phase semi-converter?",a:"\\(V_a = 1.17 V_L (1+\\cos\\alpha)\\) \u2014 1 quadrant, up to 115kW",cat:"Formula"},
+  {q:"What is Va for 3-phase dual converter?",a:"\\(V_a = \\pm 2.34 V_L \\cos\\alpha\\) \u2014 4 quadrants, up to 1500kW. \\(\\alpha_1+\\alpha_2=\\pi\\)",cat:"Formula"},
+  {q:"Which converter type is used for what power range?",a:"Half-wave: 0.5kW(1\u03c6)/40kW(3\u03c6)<br>Semi: 15kW(1\u03c6)/115kW(3\u03c6)<br>Full: 15kW(1\u03c6)/1500kW(3\u03c6)<br>Dual: 15kW(1\u03c6)/1500kW(3\u03c6)",cat:"Concept"},
+  {q:"How many quadrants does each converter type support?",a:"Half-wave: 1 quadrant<br>Semi: 1 quadrant<br>Full: 2 quadrants (I,IV)<br>Dual: 4 quadrants",cat:"Concept"},
+  {q:"What is the basic chopper output voltage?",a:"\\(V_a = \\delta V_s\\) where \\(\\delta = T_{on}/T = T_{on} \\times f\\) is the duty ratio",cat:"Formula"},
+  {q:"How do you find speed from chopper duty ratio?",a:"\\(\\omega_m = \\frac{\\delta V_s - I_a R_a}{K\\phi}\\)",cat:"Formula"},
+  {q:"What is the armature current ripple formula?",a:"\\(\\Delta I_a = \\frac{V_s \\delta(1-\\delta)}{f L_a}\\). Maximum at \u03b4=0.5. Higher f or La reduces ripple.",cat:"Formula"},
+  {q:"For regenerative braking with step-up chopper, what is Va?",a:"\\(V_a = (1-\\delta)V_s\\) and \\(E > V_a\\) (motor as generator). Speed: \\(\\omega = (E)/(K\\phi)\\)",cat:"Formula"},
+  {q:"What is the relationship Vm and VL for converter formulas?",a:"\\(V_m = \\sqrt{2} V_{phase}\\) and \\(V_L = \\sqrt{3} V_{phase}\\). So \\(V_m = \\sqrt{2/3} V_L\\)",cat:"Formula"},
+  {q:"For uncontrolled rectifier (\u03b1=0), what is the DC output?",a:"3-phase full bridge: \\(V_{dc} = 2.34 V_L\\). This is the maximum possible DC voltage from the converter.",cat:"Formula"},
+  {q:"How does firing angle \u03b1 affect output voltage direction?",a:"Full converter: Va=2.34VL\u00b7cos\u03b1. For \u03b1<90\u00b0: Va>0. For \u03b1>90\u00b0: Va<0. Va negative enables regenerative braking.",cat:"Concept"},
+  {q:"What is the duty ratio range for a given speed range with chopper?",a:"\\(\\delta_{min} = (K\\phi \\omega_{min} + I_a R_a)/V_s\\)<br>\\(\\delta_{max} = (K\\phi \\omega_{max} + I_a R_a)/V_s\\)",cat:"Formula"},
+  {q:"What advantage does chopper have over phase-controlled rectifier?",a:"Higher switching frequency \u2192 less current ripple \u2192 smoother torque \u2192 better speed regulation. Also: regeneration to low speeds, no reactive power from AC supply.",cat:"Concept"}
+];
+var fcIndex = 0;
+function fcShow(i){
+  var c=document.getElementById('fc-container');
+  if(!c)return;
+  c.classList.remove('flipped');
+  var front=document.getElementById('fc-front-text');
+  var back=document.getElementById('fc-back-text');
+  var cat=document.getElementById('fc-category');
+  var counter=document.getElementById('fc-current');
+  if(front)front.innerHTML=fcCards[i].q;
+  if(back)back.innerHTML=fcCards[i].a;
+  if(cat)cat.textContent=fcCards[i].cat;
+  if(counter)counter.textContent=i+1;
+  if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([front,back]);}
+}
+function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
 </script>
 
 </body>

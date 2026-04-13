@@ -870,6 +870,22 @@
                 padding: 0 20px 20px !important;
             }
         }
+
+        /* Flashcard Styles */
+        .flashcard-deck{text-align:center;padding:10px 0}
+        .flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+        .flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+        .flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+        .flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+        .flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+        .flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+        [data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+        .flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+        .flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+        .flashcard-nav button:hover{opacity:0.85}
+        .flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+        .flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+        .flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
     </style>
 </head>
 
@@ -930,6 +946,7 @@
                 <li><span class="toc-section-label">Practice</span></li>
                 <li class="toc-item"><a class="toc-link sub" href="#problem16">Problem 16</a></li>
                 <li class="toc-item"><a class="toc-link sub" href="#problem17">Problem 17</a></li>
+                <li class="toc-item"><a class="toc-link" href="#sec-flashcards">Flashcards</a></li>
             </ul>
         </nav>
     </aside>
@@ -2260,6 +2277,35 @@
             </div>
         </div>
 
+        <div class="section" id="sec-flashcards">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+            <span class="collapse-icon">&#9662;</span>
+          </div>
+          <div class="section-content">
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+            <div class="flashcard-deck">
+              <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+              <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">
+                    <span class="flashcard-category" id="fc-category"></span>
+                    <div id="fc-front-text"></div>
+                    <div class="flashcard-hint">Click to reveal answer</div>
+                  </div>
+                  <div class="flashcard-back">
+                    <div id="fc-back-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flashcard-nav">
+                <button onclick="fcPrev()">&#9664; Previous</button>
+                <button onclick="fcNext()">Next &#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Footer -->
         <div style="text-align:center; padding: 40px 0 20px; border-top: 1px solid var(--border-color); margin-top: 40px;">
             <p style="font-size: 0.82rem; color: var(--text-muted);">
@@ -2421,6 +2467,42 @@
         updateProgress();
         updateBackToTop();
         updateActiveToc();
+
+        // Flashcard System
+        var fcCards = [
+          {q:"Why is a flywheel used with fluctuating loads?",a:"To store energy during light load and release it during heavy load. Reduces required motor power rating and prevents grid disturbances.",cat:"Concept"},
+          {q:"How does the flywheel reduce motor size?",a:"Without flywheel: motor rated for peak load T_Lh. With flywheel: motor rated for average torque (much smaller). Flywheel supplies the difference.",cat:"Concept"},
+          {q:"What is the energy balance equation for flywheel sizing?",a:"\\(\\frac{1}{2}J(\\omega_{max}^2 - \\omega_{min}^2) = \\int(T_L - T)dt\\) = energy deficit during heavy load period",cat:"Formula"},
+          {q:"For a motor with linear T-\u03c9 characteristic, what defines \u03c9_max and \u03c9_min?",a:"\u03c9_max: speed when motor torque = light load torque (T intersects T_Ll)<br>\u03c9_min: speed when motor torque = heavy load torque (T intersects T_Lh).<br>Actually, \u03c9 at rated motor torque Tr is the mean.",cat:"Concept"},
+          {q:"For constant power drives (take-up rolls), what stays constant?",a:"Linear speed v = \u03c9m \u00d7 r stays constant. As r increases, \u03c9m decreases. P = F\u00d7v = constant. T = F\u00d7r increases.",cat:"Formula"},
+          {q:"What is the motor rating for a take-up roll?",a:"Speed rating: at minimum radius (maximum speed). Torque rating: at maximum radius (maximum torque). Power: P = F\u00d7v (constant).",cat:"Problem-Solving"},
+          {q:"What is the torque characteristic of a compressor?",a:"\\(T \\propto \\omega\\) (torque proportional to speed). Does not need direction reversal.",cat:"Concept"},
+          {q:"In flywheel problems, how do you find the required J?",a:"1) Find rated motor torque Tr. 2) Find \u03c9_max and \u03c9_min from T-\u03c9 curve. 3) Calculate energy deficit. 4) \\(J_{fw} = \\frac{2 \\cdot E_{deficit}}{\\omega_{max}^2 - \\omega_{min}^2}\\)",cat:"Problem-Solving"},
+          {q:"For wound rotor IM with flywheel, how is the T-\u03c9 characteristic?",a:"Approximately linear: \\(T = T_{max} \\cdot (\\omega_s - \\omega)/(\\omega_s - \\omega_r)\\) where \u03c9_r is rated speed, \u03c9_s is synchronous speed",cat:"Formula"},
+          {q:"What is slip in the context of flywheel problems?",a:"\\(s = (\\omega_s - \\omega)/\\omega_s\\). For linear approx: \\(T/T_{rated} = s/s_{rated}\\)",cat:"Formula"},
+          {q:"How do you find motor torque at a given slip?",a:"For linear characteristic: \\(T = \\frac{T_{rated}}{s_{rated}} \\cdot s\\). Maximum motor torque during heavy load occurs at \u03c9_min (highest slip).",cat:"Problem-Solving"},
+          {q:"In flywheel problem, what limits the motor torque?",a:"The motor is rated for an average torque Tr, NOT the peak load torque T_Lh. The flywheel makes up the difference: energy from flywheel = (T_Lh - Tr)\u00d7t_h (approximately).",cat:"Concept"}
+        ];
+        var fcIndex = 0;
+        function fcShow(i){
+          var c=document.getElementById('fc-container');
+          if(!c)return;
+          c.classList.remove('flipped');
+          var front=document.getElementById('fc-front-text');
+          var back=document.getElementById('fc-back-text');
+          var cat=document.getElementById('fc-category');
+          var counter=document.getElementById('fc-current');
+          if(front)front.innerHTML=fcCards[i].q;
+          if(back)back.innerHTML=fcCards[i].a;
+          if(cat)cat.textContent=fcCards[i].cat;
+          if(counter)counter.textContent=i+1;
+          if(window.MathJax&&MathJax.typesetPromise){
+            MathJax.typesetPromise([front,back]);
+          }
+        }
+        function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+        function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+        document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
     </script>
 </body>
 </html>

@@ -947,6 +947,22 @@
         .sidebar-overlay.active {
             display: block;
         }
+
+        /* Flashcard Styles */
+        .flashcard-deck{text-align:center;padding:10px 0}
+        .flashcard-container{perspective:1000px;margin:20px auto;max-width:620px;height:320px;cursor:pointer}
+        .flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+        .flashcard-container.flipped .flashcard-inner{transform:rotateY(180deg)}
+        .flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
+        .flashcard-front{background:var(--bg-secondary);border:2px solid #ef4444;color:var(--text-primary);font-size:1.1rem;line-height:1.6}
+        .flashcard-back{background:#fef2f2;border:2px solid #ef4444;color:#7f1d1d;transform:rotateY(180deg);font-size:0.95rem;line-height:1.6}
+        [data-theme="dark"] .flashcard-back{background:#3b1111;color:#fca5a5}
+        .flashcard-nav{margin-top:16px;display:flex;gap:12px;justify-content:center;align-items:center}
+        .flashcard-nav button{background:var(--accent-blue,#2563eb);color:#fff;border:none;border-radius:6px;padding:8px 22px;cursor:pointer;font-size:0.9rem;transition:opacity 0.2s}
+        .flashcard-nav button:hover{opacity:0.85}
+        .flashcard-counter{font-size:0.85rem;color:var(--text-muted);margin-bottom:10px}
+        .flashcard-category{display:inline-block;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px;border-radius:4px;margin-bottom:12px;background:#ef4444;color:#fff}
+        .flashcard-hint{font-size:0.8rem;color:var(--text-muted);margin-top:8px;font-style:italic}
     </style>
 </head>
 <body>
@@ -990,6 +1006,7 @@
             <li><a href="#sec-advantages"><span class="toc-section-number">8</span>Advantages of Electric Drives</a></li>
             <li><a href="#sec-braking"><span class="toc-section-number">9</span>Motor Braking</a></li>
             <li><a href="#sec-four-quadrant"><span class="toc-section-number">10</span>Four-Quadrant Operation</a></li>
+            <li><a href="#sec-flashcards"><span class="toc-section-number">&#x1F4DD;</span>Flashcards</a></li>
         </ul>
     </aside>
 
@@ -2385,6 +2402,35 @@
         </div>
 
         <!-- Footer -->
+        <div class="section" id="sec-flashcards">
+          <div class="section-header" onclick="toggleSection(this)">
+            <h2>&#x1F4DD; Flashcards for Exam Prep</h2>
+            <span class="collapse-icon">&#9662;</span>
+          </div>
+          <div class="section-content">
+            <p style="text-align:center;color:var(--text-muted);margin-bottom:16px">Click a card to flip it. Use the buttons to navigate.</p>
+            <div class="flashcard-deck">
+              <div class="flashcard-counter">Card <span id="fc-current">1</span> of <span id="fc-total">0</span></div>
+              <div class="flashcard-container" id="fc-container" onclick="this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                  <div class="flashcard-front">
+                    <span class="flashcard-category" id="fc-category"></span>
+                    <div id="fc-front-text"></div>
+                    <div class="flashcard-hint">Click to reveal answer</div>
+                  </div>
+                  <div class="flashcard-back">
+                    <div id="fc-back-text"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flashcard-nav">
+                <button onclick="fcPrev()">&#9664; Previous</button>
+                <button onclick="fcNext()">Next &#9654;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="footer">
             <p>ELE421 &mdash; Electric Drives | Lecture 1: Introduction to Electric Drives</p>
             <p style="margin-top:4px;">Content based on Presentation 1A</p>
@@ -2526,6 +2572,42 @@
         // Initial calls
         updateProgressBar();
         updateActiveToc();
+
+        // Flashcard System
+        var fcCards = [
+          {q:"What are the main components of an electrical drive system?",a:"Source \u2192 Power Converter \u2192 Motor \u2192 Load, with Control Unit and Sensing Unit in feedback loop",cat:"Concept"},
+          {q:"What are the four quadrants of motor operation?",a:"Q1: Forward motoring (+\u03c9,+T)<br>Q2: Forward braking (+\u03c9,-T)<br>Q3: Reverse motoring (-\u03c9,-T)<br>Q4: Reverse braking (-\u03c9,+T)<br>P = T\u00d7\u03c9: positive=motoring, negative=braking",cat:"Concept"},
+          {q:"What are the three types of motor braking?",a:"1) <b>Friction</b>: K.E. \u2192 heat (lost)<br>2) <b>Dynamic</b>: motor as generator, energy in external resistance<br>3) <b>Regenerative</b>: motor as generator, energy returned to supply",cat:"Concept"},
+          {q:"When is a DC motor preferred?",a:"When load needs high starting torque (up to 5\u00d7 rated) and variable speed operation. Disadvantage: expensive, needs maintenance",cat:"Concept"},
+          {q:"What is the main advantage of induction motors?",a:"Cheapest, least maintenance, high starting torque (up to 250% rated). Disadvantage: speed controller costs up to 4\u00d7 motor price",cat:"Concept"},
+          {q:"What types of power converters exist?",a:"AC\u2192DC: Rectifiers (uncontrolled, half, full)<br>AC\u2192AC: Voltage controllers, Cycloconverters<br>DC\u2192DC: Choppers<br>DC\u2192AC: Inverters",cat:"Concept"},
+          {q:"What determines if operation is motoring or braking?",a:"P = T \u00d7 \u03c9. If P > 0 \u2192 motoring (electrical \u2192 mechanical). If P < 0 \u2192 braking (mechanical \u2192 electrical)",cat:"Concept"},
+          {q:"What is a synchronous motor's key advantage and disadvantage?",a:"Advantage: constant speed regardless of load, can operate at leading PF.<br>Disadvantage: lowest starting torque (~20% of rated)",cat:"Concept"},
+          {q:"What is a universal motor?",a:"Works on both AC and DC. Very high speed (up to 10,000 rpm), high starting torque. Used in drills, mixers. Needs maintenance.",cat:"Concept"},
+          {q:"In which quadrants does a single-phase full converter operate?",a:"Quadrants I and IV (+Va/-Va, +Ia only). Allows motoring and regenerative braking in one direction.",cat:"Concept"},
+          {q:"What does a dual converter provide?",a:"Four-quadrant operation: \u00b1Va and \u00b1Ia. Full forward/reverse motoring and braking. Uses two full converters back-to-back with \u03b11+\u03b12=\u03c0",cat:"Concept"},
+          {q:"What are the 7 factors for choosing an electric drive?",a:"1) Steady-state requirements 2) Dynamic requirements 3) Source requirements 4) Cost & maintenance 5) Space 6) Environment 7) Reliability",cat:"Concept"}
+        ];
+        var fcIndex = 0;
+        function fcShow(i){
+          var c=document.getElementById('fc-container');
+          if(!c)return;
+          c.classList.remove('flipped');
+          var front=document.getElementById('fc-front-text');
+          var back=document.getElementById('fc-back-text');
+          var cat=document.getElementById('fc-category');
+          var counter=document.getElementById('fc-current');
+          if(front)front.innerHTML=fcCards[i].q;
+          if(back)back.innerHTML=fcCards[i].a;
+          if(cat)cat.textContent=fcCards[i].cat;
+          if(counter)counter.textContent=i+1;
+          if(window.MathJax&&MathJax.typesetPromise){
+            MathJax.typesetPromise([front,back]);
+          }
+        }
+        function fcNext(){fcIndex=(fcIndex+1)%fcCards.length;fcShow(fcIndex);}
+        function fcPrev(){fcIndex=(fcIndex-1+fcCards.length)%fcCards.length;fcShow(fcIndex);}
+        document.addEventListener('DOMContentLoaded',function(){if(fcCards.length>0){document.getElementById('fc-total').textContent=fcCards.length;fcShow(0);}});
     </script>
 
 </body>
