@@ -11,6 +11,10 @@ const lectures = [
   { id: 6, slug: 'lecture6_traction_energy', title: 'Traction Energy' },
   { id: 7, slug: 'lecture7_dc_drives_single_phase', title: 'DC Drives — Single Phase' },
   { id: 8, slug: 'lecture8_dc_drives_3phase_choppers', title: 'DC Drives — 3-Phase & Choppers' },
+  { id: 9, slug: 'lecture9_dc_chopper_drives', title: 'DC Chopper Drives' },
+  { id: 10, slug: 'lecture10_dc_motor_braking', title: 'DC Motor Braking' },
+  { id: 11, slug: 'lecture11_im_drives_basics', title: 'IM Drives — Basics & Voltage Control' },
+  { id: 12, slug: 'lecture12_im_drives_frequency_control', title: 'IM Drives — Frequency & Rotor Control' },
 ]
 
 export { lectures }

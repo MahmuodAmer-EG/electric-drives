@@ -3,7 +3,13 @@ import { lectures } from '../App'
 import ThemeToggle from '../components/ThemeToggle'
 import './Home.css'
 
-const chapterColors = ['#2563eb', '#16a34a', '#d97706', '#9333ea']
+const chapterMap = {
+  1: '#2563eb',  // Ch1 Introduction - blue
+  2: '#16a34a', 3: '#16a34a', 4: '#16a34a',  // Ch2 Dynamics - green
+  5: '#d97706', 6: '#d97706',  // Ch3 Traction - amber
+  7: '#9333ea', 8: '#9333ea', 9: '#9333ea', 10: '#9333ea',  // Ch4 DC Drives - purple
+  11: '#0891b2', 12: '#0891b2',  // Ch5 IM Drives - teal
+}
 
 export default function Home() {
   return (
@@ -15,15 +21,15 @@ export default function Home() {
           <h1>Electric Drives</h1>
           <p className="hero-subtitle">Interactive Lecture Notes</p>
           <p className="hero-description">
-            Comprehensive lecture series covering electric drive fundamentals,
-            dynamics, traction systems, and DC drives.
+            12 interactive lectures covering electric drive fundamentals,
+            dynamics, traction systems, DC drives, and induction motor drives.
           </p>
         </div>
       </header>
 
       <main className="lectures-grid">
         {lectures.map((lecture, i) => {
-          const color = chapterColors[i % chapterColors.length]
+          const color = chapterMap[lecture.id] || '#2563eb'
           return (
             <Link
               key={lecture.id}
